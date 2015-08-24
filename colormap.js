@@ -1,5 +1,5 @@
 class Colormap {
-    constructor() {
+    constructor(fromLump = null) {
         
     }
     
