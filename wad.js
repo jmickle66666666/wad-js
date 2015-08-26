@@ -1,19 +1,32 @@
 class Wad {
     
     //takes a fileobject as an argument
-    constructor(file) {
-        // get the file and do shit
-        this.data = //put the byte array here
-        this.dictionary = //put the wad dictionary object here
+    constructor() {
+        this.ident = "";
     }
     
-    readData() {
-        headerBuffer = //pull the header info from the array buffer
-        dictionaryBuffer = 
-    }
-    
-    getLumpBuffer(name) {
-        
+    load(file,onload){
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            this.data = reader.result;
+            var i;
+            var headerReader = new DataView(this.data);
+            
+            for (i = 0; i < 4; i++) this.ident += String.fromCharCode(headerReader.getUint8(i));
+            console.log(this.ident);
+            var numlumps = headerReader.getInt32(4, true);
+            var dictpos = headerReader.getInt32(4, true);
+            // the size of the dictionary is 16 * numlumps so slice that shit then create the obj
+            var dictionaryBuffer = this.data.slice(dictpos,dictpos + (numlumps * 16));
+            this.dictionary = new WadDict(dictionaryBuffer);
+            
+            if (onload != null) {
+                onload();
+            }
+        }
+
+        reader.readAsArrayBuffer(file);   
     }
     
 }

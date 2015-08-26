@@ -1,11 +1,13 @@
 <html>
     <head>
         <title>wad js test</title>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
     </head>
     <body>
         <input type="file" id="fileInput">
-        <div id="test"></div>
+        <div id="test">aaa</div>
         
+        <script type="text/javascript" src="wad-tr.js"></script>
         <script>
         
             var fileInput = document.getElementById('fileInput');
@@ -13,19 +15,14 @@
 
             fileInput.addEventListener('change', function(e) {
                 var file = fileInput.files[0];
-                //var textType = /text.*/;
+                var wad = new Wad();
+                
+                wad.load(file, function(e) {
+                    $("#test").html(wad.ident);
+                    console.log(wad.ident);
+                });
 
-                //if (file.type.match(textType)) {
-                    var reader = new FileReader();
-
-                    reader.onload = function(e) {
-                        fileDisplayArea.innerText = reader.result;
-                    }
-
-                    reader.readAsBinaryString(file);	
-                //} else {
-                //    fileDisplayArea.innerText = "File not supported!";
-                //}
+                
             });
         
         </script>
