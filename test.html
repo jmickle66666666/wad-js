@@ -5,9 +5,9 @@
     </head>
     <body>
         <input type="file" id="fileInput">
-        <div id="test">aaa</div>
+        <div id="test"></div>
         
-        <script type="text/javascript" src="wad-tr.js"></script>
+        <script type="text/javascript" src="wad.js"></script>
         <script>
         
             var fileInput = document.getElementById('fileInput');
@@ -15,12 +15,27 @@
 
             fileInput.addEventListener('change', function(e) {
                 var file = fileInput.files[0];
-                var wad = new Wad();
                 
-                wad.load(file, function(e) {
-                    $("#test").html(wad.ident);
-                    console.log(wad.ident);
-                });
+                wad = Object.create(Wad);
+                
+                wad.onLoad = function(e) {
+                    prints = [];
+                    prints.push(wad.ident);
+                    prints.push(wad.numlumps);
+                    prints.push(wad.dictpos);
+                    
+                    for (var l = 0; l < wad.lumps.length; l++) {
+                        prints.push(wad.lumps[l].name);
+                    }
+                    out = "";
+                    for (var i = 0; i < prints.length; i++) {
+                        out += prints[i] + "<br>";
+                    }
+                    
+                    $("#test").html(out);
+                };
+                
+                wad.load(file);
 
                 
             });
