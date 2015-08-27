@@ -24,9 +24,14 @@
                     prints.push(wad.numlumps);
                     prints.push(wad.dictpos);
                     
+                    
+                    prints.push(wad.getLumpAsText("DEHACKED"));
+                    
                     for (var l = 0; l < wad.lumps.length; l++) {
                         prints.push(wad.lumps[l].name);
                     }
+                    
+                    
                     out = "";
                     for (var i = 0; i < prints.length; i++) {
                         out += prints[i] + "<br>";

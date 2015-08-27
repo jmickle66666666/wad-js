@@ -1,5 +1,3 @@
-console.log("wad.js");
-
 var Wad = { 
 
     onLoad : null,
@@ -11,13 +9,11 @@ var Wad = {
 
     load : function (file) {
         var reader = new FileReader();
-        console.log("wad.js: load");
         
         var self = this;
         
         reader.onload = function(e) {
             
-            console.log("wad.js: reader onLoad");
             
             self.data = reader.result;
             var i;
@@ -36,8 +32,8 @@ var Wad = {
             
             for (i = 0; i < self.numlumps; i++) {
                 p = i * 16;
-                var lumpPos = dictionaryReader.getInt32(p);
-                var lumpSize = dictionaryReader.getInt32(p + 4);
+                var lumpPos = dictionaryReader.getInt32(p, true);
+                var lumpSize = dictionaryReader.getInt32(p + 4, true);
                 var lumpName = "";
                 for (j = p + 8; j < p + 16; j++) lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
                 lumpEntry = { 
@@ -50,17 +46,15 @@ var Wad = {
             
             
             if (self.onLoad != null) {
-                console.log("wad.js: wad onLoad");
                 self.onLoad();
             }
-            console.log("wad.js: after wad onLoad");
-            console.log(self.onLoad);
         }
 
         reader.readAsArrayBuffer(file);  
     },
 
     getLump : function (name) {
+        console.log("wad.js: getLump("+name+");");
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 l = this.lumps[i];
@@ -68,6 +62,24 @@ var Wad = {
             }
         }
         return null;
+    },
+    
+    getLumpSize : function (name) {
+        for (var i = 0; i < this.numlumps; i++) {
+            if (this.lumps[i].name == name) {
+                l = this.lumps[i];
+                return l.size;
+            }
+        }
+        return null;
+    },
+    
+    getLumpAsText : function (name) {
+        var dat = this.getLump(name);
+        var dv = new DataView(dat);
+        output = "";
+        for (i = 0; i < dat.byteLength; i++) output += String.fromCharCode(dv.getUint8(i));
+        return output;
     }
 
 };
