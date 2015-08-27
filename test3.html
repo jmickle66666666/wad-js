@@ -64,14 +64,29 @@
                         
                         lumptype = wad.detectLumpType(i);
                         
-                        if (lumptype == TEXT) {
-                            $('#preview').html(wad.getLumpAsText(i));
-                        } else {
-                            if (lumptype != "...") {
-                                $('#preview').html("Unable to preview "+lumptype+" lumps");
-                            } else {
+                        switch (lumptype) {
+                            
+                            case TEXT:
+                                $('#preview').html(wad.getLumpAsText(i));
+                                break;
+                            case "PLAYPAL":
+                                playpal = Object.create(Playpal);
+                                playpal.load(wad.getLump(i));
+                                canvas = playpal.toCanvas();
+                                ctx = canvas.getContext("2d");
+                                ctx.scale(8,8);
+                                //$('#preview').html("");
+                                div = document.getElementById("preview");
+                                div.appendChild(canvas);
+                                //$('#preview').append(canvas);
+                                break;
+                            case "...":
                                 $('#preview').html("Unable to preview this lump, and can't detect it's type");
-                            }
+                                break;
+                            default:
+                                $('#preview').html("Unable to preview "+lumptype+" lumps");
+                                break;
+                        
                         }
                     });
                 };
