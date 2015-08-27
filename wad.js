@@ -1,3 +1,16 @@
+//constants 
+var TEXT = "text";
+var MAP = "map";
+var MUSIC = "music";
+var MIDI = "midi";
+var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS",
+                "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP"];
+var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
+                  "DMXGUS", "DMXGUSC", "WADINFO", "EMENUS", "MUSINFO",
+                  "SNDINFO", "GLDEFS", "KEYCONF", "SCRIPTS", "LANGUAGE",
+                  "DECORATE" ];
+
+                  
 var Wad = { 
 
     onLoad : null,
@@ -59,8 +72,8 @@ var Wad = {
         reader.readAsArrayBuffer(file);  
     },
 
-    getLump : function (name) {
-        console.log("wad.js: getLump("+name+");");
+    getLumpByName : function (name) {
+        console.log("wad.js: getLumpByName("+name+");");
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 l = this.lumps[i];
@@ -70,22 +83,36 @@ var Wad = {
         return null;
     },
     
-    getLumpSize : function (name) {
-        for (var i = 0; i < this.numlumps; i++) {
-            if (this.lumps[i].name == name) {
-                l = this.lumps[i];
-                return l.size;
-            }
-        }
-        return null;
+    getLumpAsText : function (index) {
+        var dat = this.getLump(index);
+        return this.lumpDataToText(dat);
     },
     
-    getLumpAsText : function (name) {
-        var dat = this.getLump(name);
-        var dv = new DataView(dat);
+    lumpDataToText : function (data) {
         output = "";
-        for (i = 0; i < dat.byteLength; i++) output += String.fromCharCode(dv.getUint8(i));
+        var dv = new DataView(data);
+        for (i = 0; i < data.byteLength; i++) output += String.fromCharCode(dv.getUint8(i));
         return output;
+    },
+    
+    getLump: function (index) {
+        l = this.lumps[index];
+        return this.data.slice(l.pos,l.pos+l.size);
+    },
+    
+    detectLumpType : function (index) {
+        var name = this.lumps[index].name;
+        if ($.inArray(name, TEXTLUMPS) >= 0) return TEXT;
+        if ($.inArray(name, MAPLUMPS) >= 0) return MAP;
+        if (/MAP\d\d/.test(name)) return MAP;
+        
+        var lumpData = this.getLump(index);
+        if (/^MThd/.test(this.lumpDataToText(lumpData))) return MIDI;
+        if (/^D_/.test(name)) return MUSIC;
+        
+        return "...";
     }
 
 };
+
+

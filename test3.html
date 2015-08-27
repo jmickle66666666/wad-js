@@ -19,7 +19,7 @@
             
             function makeUL(array) {
                 // Create the list element:
-                var list = document.createElement('ul');
+                var list = document.createElement('ol');
                 list.id = "lumpUL";
 
                 for(var i = 0; i < array.length; i++) {
@@ -48,13 +48,31 @@
                 
                 wad.onLoad = function(e) {
                     for (var i = 0; i < wad.lumps.length; i++) {
-                        self.lumpnames.push(wad.lumps[i].name);
+                        self.lumpnames.push("[" + wad.detectLumpType(i) + "]" + wad.lumps[i].name);
                     }
                     
                     $('#lumpList').html(makeUL(self.lumpnames));
                     
                     $('#lumpUL').delegate('li', 'click', function (e) {
-                        $('#preview').html(wad.getLumpAsText(e.currentTarget.textContent));
+                        var li = e.target,
+                            i = 0;
+
+                        while ( li.previousElementSibling ) {
+                            li = li.previousElementSibling;
+                            i += 1;   
+                        }
+                        
+                        lumptype = wad.detectLumpType(i);
+                        
+                        if (lumptype == TEXT) {
+                            $('#preview').html(wad.getLumpAsText(i));
+                        } else {
+                            if (lumptype != "...") {
+                                $('#preview').html("Unable to preview "+lumptype+" lumps");
+                            } else {
+                                $('#preview').html("Unable to preview this lump, and can't detect it's type");
+                            }
+                        }
                     });
                 };
                 
