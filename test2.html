@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>wad js test</title>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="webix/webix.js"></script>
+        <link rel="stylesheet" href="webix/webix.css" type="text/css" charset="utf-8">
+        
+    </head>
+    <body>
+        <input type="file" id="fileInput">
+        <script type="text/javascript" src="wad.js"></script>
+        <br>
+        <table>
+        <tr>
+        <td valign="top" width=300px>
+        <div id="lumpList"></div>
+        </td>
+        <td valign="top" width=500px>
+        <div id="preview"></div>
+        </td>
+        </tr>
+        <script>
+            
+            var self = this;
+            var lumpnames = ["a","b","c"];
+            var fileInput = document.getElementById('fileInput');
+            var fileDisplayArea = document.getElementById('test');
+            var lumpList = null;
+
+            fileInput.addEventListener('change', function(e) {
+                
+                if (self.lumpList) self.lumpList.destructor();
+                self.lumpnames = [];
+            
+                var file = fileInput.files[0];
+                
+                wad = Object.create(Wad);
+                
+                wad.onLoad = function(e) {
+                    for (var i = 0; i < wad.lumps.length; i++) {
+                        self.lumpnames.push(wad.lumps[i].name);
+                    }
+                    
+                    self.lumpList = webix.ui({
+                        id:"lump list",
+                        container:"lumpList",
+                        view:"list",
+                        data:self.lumpnames,
+                        on:{"onItemClick": function(id){
+                                $("#preview").html(wad.getLumpAsText(id));
+                            }
+                        }
+                    });
+                    
+                    
+                };
+                
+                wad.load(file);
+
+                
+            });
+            
+            
+        
+            
+        
+        </script>
+        
+    </body>
+</html>

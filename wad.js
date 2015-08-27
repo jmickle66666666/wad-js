@@ -30,12 +30,18 @@ var Wad = {
             var dictionaryBuffer = self.data.slice(self.dictpos,self.dictpos + (self.numlumps * 16));
             var dictionaryReader = new DataView(dictionaryBuffer);
             
+            self.lumps = [];
+            
             for (i = 0; i < self.numlumps; i++) {
                 p = i * 16;
                 var lumpPos = dictionaryReader.getInt32(p, true);
                 var lumpSize = dictionaryReader.getInt32(p + 4, true);
                 var lumpName = "";
-                for (j = p + 8; j < p + 16; j++) lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
+                for (j = p + 8; j < p + 16; j++) {
+                    if (dictionaryReader.getUint8(j) != 0) {
+                        lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
+                    }
+                }
                 lumpEntry = { 
                     pos : lumpPos,
                     size : lumpSize,
