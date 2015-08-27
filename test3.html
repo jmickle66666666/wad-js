@@ -72,13 +72,20 @@
                             case "PLAYPAL":
                                 playpal = Object.create(Playpal);
                                 playpal.load(wad.getLump(i));
-                                canvas = playpal.toCanvas();
-                                ctx = canvas.getContext("2d");
-                                ctx.scale(8,8);
-                                //$('#preview').html("");
-                                div = document.getElementById("preview");
-                                div.appendChild(canvas);
-                                //$('#preview').append(canvas);
+                                $("#preview").html("");
+                                document.getElementById("preview").appendChild(playpal.toCanvas());
+                                break;
+                            case "COLORMAP":
+                                colormap = Object.create(Colormap);
+                                colormap.load(wad.getLump(i));
+                                $("#preview").html("");
+                                document.getElementById("preview").appendChild(colormap.toCanvas(wad));
+                                break;
+                            case FLAT:
+                                flat = Object.create(Flat);
+                                flat.load(wad.getLump(i));
+                                $("#preview").html("");
+                                document.getElementById("preview").appendChild(flat.toCanvas(wad));
                                 break;
                             case "...":
                                 $('#preview').html("Unable to preview this lump, and can't detect it's type");

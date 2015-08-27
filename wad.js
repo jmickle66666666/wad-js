@@ -6,8 +6,8 @@ var MIDI = "midi";
 var GRAPHIC = "graphic";
 var FLAT = "flat";
 var MARKER = "marker";
-var GRAPHIC_MARKERS = ["P","PP","P2","P3","S","S2","S3"];
-var FLAT_MARKERS = ["F","FF","F2","F3"];
+var GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_"];
+var FLAT_MARKERS = ["F_","FF_","F1_","F2_","F3_"];
 var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS",
                 "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP"];
 var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
@@ -26,6 +26,7 @@ var Wad = {
     dictpos : -1,
     data : null,
     lumps : [],
+    playpal : null,
 
     load : function (file) {
         var reader = new FileReader();
@@ -70,6 +71,10 @@ var Wad = {
                 self.lumps.push(lumpEntry);
             }
             
+            if (self.lumpExists("PLAYPAL")) {
+                self.playpal = Object.create(Playpal);
+                self.playpal.load(wad.getLumpByName("PLAYPAL"));
+            }
             
             if (self.onLoad != null) {
                 self.onLoad();
@@ -77,6 +82,15 @@ var Wad = {
         }
 
         reader.readAsArrayBuffer(file);  
+    },
+    
+    lumpExists : function (name) {
+        for (var i = 0; i < this.numlumps; i++) {
+            if (this.lumps[i].name == name) {
+                return true;
+            }
+        }
+        return false;
     },
 
     getLumpByName : function (name) {
@@ -115,6 +129,8 @@ var Wad = {
         if ($.inArray(name, DATA_LUMPS) >= 0) return name;
         if (/MAP\d\d/.test(name)) return MAP;
         if (/E\dM\d/.test(name)) return MAP;
+        if (/_START$/.test(name)) return MARKER;
+        if (/_END$/.test(name)) return MARKER;
         
         //data-based detection
         var lumpData = this.getLump(index);
@@ -124,15 +140,14 @@ var Wad = {
         for (var i = index; i>=0; i--) {
             if (/_END$/.test(this.lumps[i].name)) break;
             if (/_START$/.test(this.lumps[i].name)) {
-                pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_"));
-                if ($.inArray(pre, GRAPHIC_MARKERS)) return GRAPHIC;
-                if ($.inArray(pre, FLAT_MARKERS)) return FLAT;
+                pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_")+1);
+                if ($.inArray(pre, GRAPHIC_MARKERS)>= 0) return GRAPHIC;
+                if ($.inArray(pre, FLAT_MARKERS)>= 0) return FLAT;
             }
         }
         
         //shitty name-based detection
-        if (/_START$/.test(name)) return MARKER;
-        if (/_END$/.test(name)) return MARKER;
+        
         if (/^D_/.test(name)) return MUSIC;
         
         return "...";
@@ -155,11 +170,12 @@ var Playpal = {
         } : null;
     },
     
-    palettes : [],
+    palettes : null,
     
     load : function (lumpData) {
         var dv = new DataView(lumpData);
         // 14 palettes to parse
+        this.palettes = [];
         for (var i = 0; i < 14; i++) {
             palette = [];
             for (var j = 0; j < 256; j++) {
@@ -206,4 +222,108 @@ var Playpal = {
         
     }
     
+}
+
+var Colormap = {
+    
+    colormaps : null,
+    
+    load : function (lumpData) {
+        var dv = new DataView(lumpData);
+        this.colormaps = [];
+        for (var i = 0; i < 34; i++) {
+            cm = []
+            for (var j = 0; j < 256; j++) {
+                cm.push(dv.getUint8((i*256)+j));
+            }
+            this.colormaps.push(cm);
+        }
+    },
+    
+    hexToRgb : function (hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    },
+    
+    toCanvas : function (wad) {
+        var scaleSize = 3;
+        var canvas = document.createElement("canvas");
+        canvas.width = 256 * scaleSize;
+        canvas.height = 34 * scaleSize;
+        var context = canvas.getContext("2d");
+        var imageData = context.createImageData(256,34);
+        for (var j = 0; j < 34; j++) {
+            for (var i = 0; i < 256; i++) {
+                col = this.hexToRgb(wad.playpal.palettes[0][this.colormaps[j][i]]);
+                imageData.data[(((j*256)+i)*4)+0] = col.r;
+                imageData.data[(((j*256)+i)*4)+1] = col.g;
+                imageData.data[(((j*256)+i)*4)+2] = col.b;
+                imageData.data[(((j*256)+i)*4)+3] = 255;
+            }
+        }
+        var newCanvas = $("<canvas>")
+            .attr("width", imageData.width)
+            .attr("height", imageData.height)[0];
+        newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+        context.scale(scaleSize, scaleSize);
+        context.mozImageSmoothingEnabled = false;
+        context.msImageSmoothingEnabled = false;
+        context.imageSmoothingEnabled = false;
+        context.drawImage(newCanvas, 0, 0);
+        return canvas;
+    }
+}
+
+var Flat = {
+    
+    data : null,
+    
+    load : function (lumpData) {
+        var dv = new DataView(lumpData);
+        this.data = [];
+        for (var j = 0; j < 4096; j++) {
+            this.data.push(dv.getUint8(j));
+        }
+    },
+    
+    hexToRgb : function (hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    },
+    
+    toCanvas : function (wad) {
+        var scaleSize = 3;
+        var canvas = document.createElement("canvas");
+        canvas.width = 64 * scaleSize;
+        canvas.height = 64 * scaleSize;
+        var context = canvas.getContext("2d");
+        var imageData = context.createImageData(64,64);
+        console.log(this.data.length);   
+        for (var i = 0; i < 4096; i++) {
+            col = this.hexToRgb(wad.playpal.palettes[0][this.data[i]]);
+            //console.log(i + col);
+            imageData.data[(i*4)+0] = col.r;
+            imageData.data[(i*4)+1] = col.g;
+            imageData.data[(i*4)+2] = col.b;
+            imageData.data[(i*4)+3] = 255;
+        }
+        var newCanvas = $("<canvas>")
+            .attr("width", imageData.width)
+            .attr("height", imageData.height)[0];
+        newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+        context.scale(scaleSize, scaleSize);
+        context.mozImageSmoothingEnabled = false;
+        context.msImageSmoothingEnabled = false;
+        context.imageSmoothingEnabled = false;
+        context.drawImage(newCanvas, 0, 0);
+        return canvas;
+    }
 }
