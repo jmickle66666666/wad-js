@@ -115,4 +115,26 @@ var Wad = {
 
 };
 
-
+var Playpal {
+    
+    rgbToHex : function (r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    },
+    
+    palettes : [],
+    
+    load : function (lumpData) {
+        var dv = new DataView(data);
+        // 14 palettes to parse
+        for (var i = 0; i < 14; i++) {
+            palette = [];
+            for (var j = 0; j < 256; j++) {
+                var red = dv.getUint8((i*768)+(j*3)+0);
+                var grn = dv.getUint8((i*768)+(j*3)+1);
+                var blu = dv.getUint8((i*768)+(j*3)+2);
+                palette.push(this.rgbToHex(red,grn,blu));
+            }
+            this.palettes.push(palette);
+        }
+    }
+}
