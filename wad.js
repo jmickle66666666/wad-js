@@ -129,8 +129,8 @@ var Wad = {
         if ($.inArray(name, TEXTLUMPS) >= 0) return TEXT;
         if ($.inArray(name, MAPLUMPS) >= 0) return MAP;
         if ($.inArray(name, DATA_LUMPS) >= 0) return name;
-        if (/MAP\d\d/.test(name)) return MAP;
-        if (/E\dM\d/.test(name)) return MAP;
+        if (/^MAP\d\d/.test(name)) return MAP;
+        if (/^E\dM\d/.test(name)) return MAP;
         if (/_START$/.test(name)) return MARKER;
         if (/_END$/.test(name)) return MARKER;
         
