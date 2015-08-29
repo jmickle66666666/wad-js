@@ -144,8 +144,8 @@ var Wad = {
             if (/_END$/.test(this.lumps[i].name)) break;
             if (/_START$/.test(this.lumps[i].name)) {
                 pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_")+1);
-                if (GRAPHIC_MARKERS.indexOf(name)>= 0) return GRAPHIC;
-                if (FLAT_MARKERS.indexOf(name)>= 0) return FLAT;
+                if (GRAPHIC_MARKERS.indexOf(pre)>= 0) return GRAPHIC;
+                if (FLAT_MARKERS.indexOf(pre)>= 0) return FLAT;
             }
         }
         
@@ -205,8 +205,8 @@ var Playpal = {
             imageData.data[i+3] = 255;
         }
         var newCanvas = document.createElement("CANVAS");
-            .attr("width", imageData.width)
-            .attr("height", imageData.height)[0];
+        newCanvas.width = imageData.width;
+        newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.mozImageSmoothingEnabled = false;
@@ -253,8 +253,8 @@ var Colormap = {
             }
         }
         var newCanvas = document.createElement("CANVAS");
-            .attr("width", imageData.width)
-            .attr("height", imageData.height)[0];
+        newCanvas.width = imageData.width;
+        newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.mozImageSmoothingEnabled = false;
@@ -293,8 +293,8 @@ var Flat = {
             imageData.data[(i*4)+3] = 255;
         }
         var newCanvas = document.createElement("CANVAS");
-            .attr("width", imageData.width)
-            .attr("height", imageData.height)[0];
+        newCanvas.width = imageData.width;
+        newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.mozImageSmoothingEnabled = false;
@@ -397,8 +397,8 @@ var Graphic = {
             }
         }
         var newCanvas = document.createElement("CANVAS");
-            .attr("width", imageData.width)
-            .attr("height", imageData.height)[0];
+        newCanvas.width = imageData.width;
+        newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.mozImageSmoothingEnabled = false;
