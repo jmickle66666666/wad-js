@@ -126,9 +126,9 @@ var Wad = {
         
         //name-based detection
         var name = this.lumps[index].name;
-        if ($.inArray(name, TEXTLUMPS) >= 0) return TEXT;
-        if ($.inArray(name, MAPLUMPS) >= 0) return MAP;
-        if ($.inArray(name, DATA_LUMPS) >= 0) return name;
+        if (TEXTLUMPS.indexOf(name) >= 0) return TEXT;
+        if (MAPLUMPS.indexOf(name) >= 0) return MAP;
+        if (DATA_LUMPS.indexOf(name) >= 0) return name;
         if (/^MAP\d\d/.test(name)) return MAP;
         if (/^E\dM\d/.test(name)) return MAP;
         if (/_START$/.test(name)) return MARKER;
@@ -144,8 +144,8 @@ var Wad = {
             if (/_END$/.test(this.lumps[i].name)) break;
             if (/_START$/.test(this.lumps[i].name)) {
                 pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_")+1);
-                if ($.inArray(pre, GRAPHIC_MARKERS)>= 0) return GRAPHIC;
-                if ($.inArray(pre, FLAT_MARKERS)>= 0) return FLAT;
+                if (GRAPHIC_MARKERS.indexOf(name)>= 0) return GRAPHIC;
+                if (FLAT_MARKERS.indexOf(name)>= 0) return FLAT;
             }
         }
         
@@ -204,7 +204,7 @@ var Playpal = {
             imageData.data[i+2] = col.b;
             imageData.data[i+3] = 255;
         }
-        var newCanvas = $("<canvas>")
+        var newCanvas = document.createElement("CANVAS");
             .attr("width", imageData.width)
             .attr("height", imageData.height)[0];
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
@@ -252,7 +252,7 @@ var Colormap = {
                 imageData.data[(((j*256)+i)*4)+3] = 255;
             }
         }
-        var newCanvas = $("<canvas>")
+        var newCanvas = document.createElement("CANVAS");
             .attr("width", imageData.width)
             .attr("height", imageData.height)[0];
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
@@ -292,7 +292,7 @@ var Flat = {
             imageData.data[(i*4)+2] = col.b;
             imageData.data[(i*4)+3] = 255;
         }
-        var newCanvas = $("<canvas>")
+        var newCanvas = document.createElement("CANVAS");
             .attr("width", imageData.width)
             .attr("height", imageData.height)[0];
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
@@ -396,7 +396,7 @@ var Graphic = {
                 imageData.data[(i*4)+3] = 0;
             }
         }
-        var newCanvas = $("<canvas>")
+        var newCanvas = document.createElement("CANVAS");
             .attr("width", imageData.width)
             .attr("height", imageData.height)[0];
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
