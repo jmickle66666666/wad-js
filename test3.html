@@ -2,7 +2,11 @@
     <head>
         <title>wad js test</title>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-        
+        <style>
+            #preview {
+            position: fixed;
+            }
+        </style>
     </head>
     <body>
         <input type="file" id="fileInput">
@@ -86,6 +90,12 @@
                                 flat.load(wad.getLump(i));
                                 $("#preview").html("");
                                 document.getElementById("preview").appendChild(flat.toCanvas(wad));
+                                break;
+                            case GRAPHIC:
+                                graphic = Object.create(Graphic);
+                                graphic.load(wad.getLump(i));
+                                $("#preview").html("");
+                                document.getElementById("preview").appendChild(graphic.toCanvas(wad));
                                 break;
                             case "...":
                                 $('#preview').html("Unable to preview this lump, and can't detect it's type");
