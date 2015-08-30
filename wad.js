@@ -1,6 +1,7 @@
 //constants 
 var TEXT = "text";
 var MAP = "map";
+var MAPDATA = "mapdata";
 var MUSIC = "music";
 var MIDI = "midi";
 var GRAPHIC = "graphic";
@@ -104,6 +105,15 @@ var Wad = {
         return null;
     },
     
+    getLumpIndexByName : function (name) {
+        for (var i = this.numlumps-1; i >= 0; i--) {
+            if (this.lumps[i].name == name) {
+                return i;
+            }
+        }
+        return null;
+    },
+    
     getLumpAsText : function (index) {
         var dat = this.getLump(index);
         return this.lumpDataToText(dat);
@@ -127,7 +137,7 @@ var Wad = {
         //name-based detection
         var name = this.lumps[index].name;
         if (TEXTLUMPS.indexOf(name) >= 0) return TEXT;
-        if (MAPLUMPS.indexOf(name) >= 0) return MAP;
+        if (MAPLUMPS.indexOf(name) >= 0) return MAPDATA;
         if (DATA_LUMPS.indexOf(name) >= 0) return name;
         if (/^MAP\d\d/.test(name)) return MAP;
         if (/^E\dM\d/.test(name)) return MAP;
@@ -419,4 +429,14 @@ function hexToRgb(hex) {
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
     } : null;
+}
+
+function readName(dv,pos) {
+    output = "";
+    for (j = pos; j < pos + 8; j++) {
+        if (dv.getUint8(j) != 0) {
+            output += String.fromCharCode(dv.getUint8(j));
+        }
+    }
+    return output;
 }

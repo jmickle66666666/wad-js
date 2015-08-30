@@ -6,11 +6,13 @@
             #preview {
             position: fixed;
             }
+            
         </style>
     </head>
     <body>
         <input type="file" id="fileInput">
         <script type="text/javascript" src="wad.js"></script>
+        <script type="text/javascript" src="mapdata.js"></script>
         <br>
         <table><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
         <script>
@@ -96,6 +98,16 @@
                                 graphic.load(wad.getLump(i));
                                 $("#preview").html("");
                                 document.getElementById("preview").appendChild(graphic.toCanvas(wad));
+                                break;
+                            case MAP:
+                                $('#preview').html("this is a map");
+                                map = Object.create(MapData);
+                                map.load(wad,wad.lumps[i].name);
+                                $("#preview").html("");
+                                var height = window.innerHeight
+                                            || document.documentElement.clientHeight
+                                            || document.body.clientHeight;
+                                document.getElementById("preview").appendChild(map.toCanvas(height * 0.9));
                                 break;
                             case "...":
                                 $('#preview').html("Unable to preview this lump, and can't detect it's type");
