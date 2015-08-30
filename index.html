@@ -100,14 +100,40 @@
                                 document.getElementById("preview").appendChild(graphic.toCanvas(wad));
                                 break;
                             case MAP:
-                                $('#preview').html("this is a map");
                                 map = Object.create(MapData);
                                 map.load(wad,wad.lumps[i].name);
                                 $("#preview").html("");
+                                var width = window.innerWidth
+                                            || document.documentElement.clientWidth
+                                            || document.body.clientWidth;
                                 var height = window.innerHeight
                                             || document.documentElement.clientHeight
                                             || document.body.clientHeight;
-                                document.getElementById("preview").appendChild(map.toCanvas(height * 0.9));
+                                document.getElementById("preview").appendChild(map.toCanvas((width - $('#lumpList').width()) * 0.8,height * 0.9));
+                                break;
+                            case MAPDATA:
+                                mapdata = Object.create(MapData);
+                                switch (wad.lumps[i].name) {
+                                    case "VERTEXES":
+                                        mapdata.parseVertexes(wad.getLump(i));
+                                        $("#preview").html("Total vertexes: "+mapdata.vertexes.length.toString());
+                                        break;
+                                    case "LINEDEFS":
+                                        mapdata.parseLinedefs(wad.getLump(i));
+                                        $("#preview").html("Total linedefs: "+mapdata.linedefs.length.toString());
+                                        break;
+                                    case "SIDEDEFS":
+                                        mapdata.parseSidedefs(wad.getLump(i));
+                                        $("#preview").html("Total sidedefs: "+mapdata.sidedefs.length.toString());
+                                        break;
+                                    case "SECTORS":
+                                        mapdata.parseSectors(wad.getLump(i));
+                                        $("#preview").html("Total sectors: "+mapdata.sectors.length.toString());
+                                        break;
+                                    default:
+                                        $("#preview").html("Unable to preview "+wad.lumps[i].name+" lumps");
+                                        break;
+                                }
                                 break;
                             case "...":
                                 $('#preview').html("Unable to preview this lump, and can't detect it's type");

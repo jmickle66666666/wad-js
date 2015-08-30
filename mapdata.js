@@ -26,13 +26,9 @@ var MapData = {
         
         this.wad = wad;
         this.things = [];
-        this.vertexes = [];
-        this.linedefs = [];
-        this.sidedefs = [];
         this.segs = [];
         this.ssectors = [];
         this.nodes = [];
-        this.sectors = [];
         this.reject = null;
         this.blockmap = null;
         
@@ -64,6 +60,7 @@ var MapData = {
     },
     
     parseVertexes : function(lump) {
+        this.vertexes = [];
         var dv = new DataView(lump);
         var len = dv.byteLength / 4;
         for (var i = 0; i < len; i++) {
@@ -75,6 +72,7 @@ var MapData = {
     },
     
     parseLinedefs : function(lump) {
+        this.linedefs = [];
         var dv = new DataView(lump);
         var len = dv.byteLength / 14;
         for (var i = 0; i < len; i++) {
@@ -91,6 +89,7 @@ var MapData = {
     },
     
     parseSidedefs : function(lump) {
+        this.sidedefs = [];
         var dv = new DataView(lump);
         var j;
         var len = dv.byteLength / 30;
@@ -107,6 +106,7 @@ var MapData = {
     },
     
     parseSectors : function(lump) {
+        this.sectors = [];
         var dv = new DataView(lump);
         var len = dv.byteLength / 26;
         for (var i = 0; i < len; i++) {
@@ -122,13 +122,23 @@ var MapData = {
         }
     },
     
-    toCanvas : function(height) {
+    toCanvas : function(width,height) {
         
         var canvas = document.createElement("canvas");
         
-        canvas.height = height + 10;
-        var r = height / (this.bottom - this.top);
-        canvas.width = (r * (this.right - this.left))+10;
+        var mwidth = this.right - this.left;
+        var mheight = this.bottom - this.top;
+        var r;
+        
+        if ((height/width) < (mwidth/mheight)) {
+            canvas.height = height + 10;
+            r = height / mheight;
+            canvas.width = (r * mwidth) + 10;
+        } else {
+            canvas.width = width + 10;
+            r = width / mwidth;
+            canvas.height = (r * mheight) + 10;
+        }
         
         var context = canvas.getContext("2d");
         context.fillStyle = this.wad.playpal.palettes[0][0];
@@ -173,8 +183,8 @@ var MapData = {
             
             //context.translate(0.5,0.5);
             context.beginPath();
-            context.moveTo(Math.floor(x1) + 5.5, Math.floor(canvas.height - y1 - 5)+0.5);
-            context.lineTo(Math.floor(x2)+5.5, Math.floor(canvas.height - y2 - 5)+0.5);
+            context.moveTo(Math.floor(x1) + 5.5, Math.floor(canvas.height - y1 - 5) + 0.5);
+            context.lineTo(Math.floor(x2) + 5.5, Math.floor(canvas.height - y2 - 5) + 0.5);
             context.stroke();
         }
         
