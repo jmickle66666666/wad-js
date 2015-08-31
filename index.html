@@ -130,6 +130,24 @@
                                         mapdata.parseSectors(wad.getLump(i));
                                         $("#preview").html("Total sectors: "+mapdata.sectors.length.toString());
                                         break;
+                                    case "THINGS":
+                                        mapdata.parseThings(wad.getLump(i));
+                                        
+                                        var tht = mapdata.getThingTable();
+                                        var tab = "";
+                                        console.log(mapdata.getDoomThingName(1));
+                                        for (var prop in tht) {
+                                            if (tht.hasOwnProperty(prop)) {
+                                                console.log(prop);
+                                                tab += mapdata.getDoomThingName(parseInt(prop));
+                                                tab += "s: "+tht[prop]+"<br>";
+                                            }
+                                        }
+                                        
+                                        $("#preview").html("Total things: "+mapdata.things.length.toString()+"<p>"+tab);
+                                        
+                                        
+                                        break;
                                     default:
                                         $("#preview").html("Unable to preview "+wad.lumps[i].name+" lumps");
                                         break;
