@@ -28,7 +28,21 @@ var Wad = {
     data : null,
     lumps : [],
     playpal : null,
-
+    
+    loadURL : function (url) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'blob:'+url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function(e) {
+          if (this.status == 200) {
+            var myBlob = this.response;
+            // myBlob is now the blob that the object URL pointed to.
+            console.log(myBlob);
+          }
+        };
+        xhr.send();
+    },
+    
     load : function (file) {
         var reader = new FileReader();
         
