@@ -232,6 +232,14 @@ var MapData = {
             }
         }
         return this.thingTable;
+    },
+    
+    getThingCount : function(type) {
+        var output = 0;
+        for (var i = 0; i < this.things.length; i++) {
+            if (this.things[i].type == type) output += 1;
+        }
+        return output;
     }
     
 }
@@ -304,6 +312,14 @@ var Reject = {
 
 var Blockmap = {
 
+}
+
+var DoomThingGroups = {
+    "Monsters" : [68,64,3003,3005,65,72,16,3002,3004,9,69,3001,67,71,66,58,7,84],
+    "Powerups" : [2023,2026,2014,2024,2022,2045,83,2013,2015,2019,2018,2012,2025,2011],
+    "Weapons" : [2006,2002,2005,2004,2003,2001,82],
+    "Ammunition" : [2007,2048,2046,2049,2047,17,2010,2008,8],
+    "Keys" : [5,40,13,38,6,39]
 }
 
 var DoomThingTable = {
