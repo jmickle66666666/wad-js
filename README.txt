@@ -7,6 +7,8 @@ done:
 -parse/render COLORMAP
 -parse/render flats
 -parse/render graphics
+-parse MAP lumps
+-render map preview, close to vanilla accuracy
 
 todo:
 -everything else
