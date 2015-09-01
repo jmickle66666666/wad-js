@@ -27,9 +27,6 @@ var MapData = {
         var mapLumpIndex = wad.getLumpIndexByName(mapname);
         
         this.wad = wad;
-        this.segs = [];
-        this.ssectors = [];
-        this.nodes = [];
         this.reject = null;
         this.blockmap = null;
         
@@ -37,9 +34,9 @@ var MapData = {
         this.parseLinedefs(wad.getLump(mapLumpIndex + 2));
         this.parseSidedefs(wad.getLump(mapLumpIndex + 3));
         this.parseVertexes(wad.getLump(mapLumpIndex + 4));
-        //this.parseSegs(wad.getLump(mapLumpIndex + 5));
-        //this.parseSsectors(wad.getLump(mapLumpIndex + 6));
-        //this.parseNodes(wad.getLump(mapLumpIndex + 7));
+        this.parseSegs(wad.getLump(mapLumpIndex + 5));
+        this.parseSsectors(wad.getLump(mapLumpIndex + 6));
+        this.parseNodes(wad.getLump(mapLumpIndex + 7));
         this.parseSectors(wad.getLump(mapLumpIndex + 8));
         //this.parseReject(wad.getLump(mapLumpIndex + 9));
         //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
@@ -142,6 +139,65 @@ var MapData = {
         }
     },
     
+    parseSegs : function(lump) {
+        this.segs = [];
+        var entryLen = 12;
+        var dv = new DataView(lump);
+        var len = dv.byteLength / entryLen;
+        for (var i = 0; i < len; i++) {
+            r = Object.create(Seg);
+            r.vx1 = dv.getUint16((i * entryLen) + 0,true);
+            r.vx2 = dv.getUint16((i * entryLen) + 2,true);
+            r.angle = dv.getUint16((i * entryLen) + 4,true);
+            r.linedef = dv.getUint16((i * entryLen) + 6,true);
+            r.direction = dv.getUint16((i * entryLen) + 8,true);
+            r.offset = dv.getUint16((i * entryLen) + 10,true);
+            this.segs.push(r);
+        }
+    },
+    
+    parseSsectors : function(lump) {
+        this.ssectors = [];
+        var entryLen = 4;
+        var dv = new DataView(lump);
+        var len = dv.byteLength / entryLen;
+        for (var i = 0; i < len; i++) {
+            r = Object.create(Subsector);
+            r.segCount = dv.getUint16((i * entryLen) + 0,true);
+            r.first = dv.getUint16((i * entryLen) + 2,true);
+            this.ssectors.push(r);
+        }
+    },
+    
+    parseNodes : function(lump) {
+        this.nodes = [];
+        var entryLen = 28;
+        var dv = new DataView(lump);
+        var len = dv.byteLength / entryLen;
+        for (var i = 0; i < len; i++) {
+            r = Object.create(Node);
+            r.partitionX = dv.getUint16((i * entryLen) + 0,true);
+            r.partitionY = dv.getUint16((i * entryLen) + 2,true);
+            r.changeX = dv.getUint16((i * entryLen) + 4,true);
+            r.changeY = dv.getUint16((i * entryLen) + 6,true);
+            r.boundsRight = {
+                "top":dv.getUint16((i * entryLen) + 8,true),
+                "bottom":dv.getUint16((i * entryLen) + 10,true),
+                "left":dv.getUint16((i * entryLen) + 12,true),
+                "right":dv.getUint16((i * entryLen) + 14,true)
+            };
+            r.boundsLeft = {
+                "top":dv.getUint16((i * entryLen) + 16,true),
+                "bottom":dv.getUint16((i * entryLen) + 18,true),
+                "left":dv.getUint16((i * entryLen) + 20,true),
+                "right":dv.getUint16((i * entryLen) + 22,true)
+            };
+            r.childRight = dv.getUint16((i * entryLen) + 24,true);
+            r.childLeft = dv.getUint16((i * entryLen) + 26,true);
+            this.nodes.push(r);
+        }
+    },
+        
     toCanvas : function(width,height) {
         
         var canvas = document.createElement("canvas");
@@ -285,15 +341,28 @@ var Sidedef = {
 }
 
 var Seg = {
-    
+    vx1 : null,
+    vx2 : null,
+    angle : null,
+    linedef : null,
+    direction : null,
+    offset : null
 }
 
 var Subsector = {
-
+    segCount : null,
+    first : null
 }
 
 var Node = {
-
+    partitionX : null,
+    partitionY : null,
+    changeX : null,
+    changeY : null,
+    boundsRight : null,
+    boundsLeft : null,
+    childRight : null,
+    childLeft : null
 }
 
 var Sector = {
