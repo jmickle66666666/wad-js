@@ -6,34 +6,37 @@ var IsoRender = {
     left : null,
     bottom : null,
     right : null,
+    topHeight : null,
+    bottomHeight : null,
+    rverts : null,
     
-    calculateBoundaries : function() {
+    calculateBoundaries : function(verts) {
         
         map = this.mapdata;
         
-        this.top = map.vertexes[0].y;
-        this.left = map.vertexes[0].x;
-        this.bottom = map.vertexes[0].y;
-        this.right = map.vertexes[0].x;
-        this.topHeight = 0;
-        this.bottomHeight = 0;
+        this.top = verts[0].y;
+        this.left = verts[0].x;
+        this.bottom = verts[0].y;
+        this.right = verts[0].x;
+        this.topHeight = map.sectors[0].zCeil;
+        this.bottomHeight = map.sectors[0].zFloor;
         
         for (var i = 0; i < map.sectors.length; i++){
             if (map.sectors[i].zCeil > this.topHeight) this.topHeight = map.sectors[i].zCeil;
-            if (map.sectors[i].zFloor > this.bottomHeight) this.bottomHeight = map.sectors[i].zFloor;
+            if (map.sectors[i].zFloor < this.bottomHeight) this.bottomHeight = map.sectors[i].zFloor;
         }
         
-        for (var i = 1; i < map.vertexes.length; i++) {
-            if (map.vertexes[i].x < map.left) map.left = map.vertexes[i].x;
-            if (map.vertexes[i].x > map.right) map.right = map.vertexes[i].x;
-            if (map.vertexes[i].y < map.top) map.top = map.vertexes[i].y;
-            if (map.vertexes[i].y > map.bottom) map.bottom = map.vertexes[i].y;
+        for (var i = 1; i < verts.length; i++) {
+            if (verts[i].x < map.left) map.left = verts[i].x;
+            if (verts[i].x > map.right) map.right = verts[i].x;
+            if (verts[i].y < map.top) map.top = verts[i].y;
+            if (verts[i].y > map.bottom) map.bottom = verts[i].y;
         }
     },
     
     rotateVertexes : function(angle) {
         
-        rverts = map.vertexes;
+        var rverts = map.vertexes;
         centerX = (this.mapdata.left + this.mapdata.right)/2;
         centerY = (this.mapdata.top + this.mapdata.bottom)/2;
         
@@ -50,20 +53,28 @@ var IsoRender = {
             rverts[i].y = tmpY;
         }
         
-        return rverts;
+        this.rverts = rverts;
+    },
+    
+    getVx1 : function(line) {
+        return this.rverts[line.vx1];
+    },
+    
+    getVx2 : function(line) {
+        return this.rverts[line.vx2];
     },
     
     toCanvas : function (width,height,angle) {
         
         if (angle < 0) angle = Math.random() * Math.PI;
         
-        var rverts = this.rotateVertexes(angle);
-        this.calculateBoundaries(); //we gotta do this after rotation. for OBVIOUS dang reasons
+        this.rotateVertexes(angle);
+        this.calculateBoundaries(this.rverts); //we gotta do this after rotation. for OBVIOUS dang reasons
         
         var canvas = document.createElement("canvas");
         
-        var mwidth = this.mapdata.right - this.mapdata.left;
-        var mheight = this.mapdata.bottom - this.mapdata.top;
+        var mwidth = this.right - this.left;
+        var mheight = (this.bottom - this.top) + (this.topHeight - this.bottomHeight);
         var r;
         
         if ((height/width) < (mwidth/mheight)) {
@@ -84,16 +95,16 @@ var IsoRender = {
             //draw every linedef
             l = this.mapdata.linedefs[i];
             
-            var x1 = l.getVx1(this.mapdata).x;
-            var y1 = l.getVx1(this.mapdata).y;
-            var x2 = l.getVx2(this.mapdata).x;
-            var y2 = l.getVx2(this.mapdata).y;
+            var x1 = this.getVx1(l).x;
+            var y1 = this.getVx1(l).y;
+            var x2 = this.getVx2(l).x;
+            var y2 = this.getVx2(l).y;
             
             //scale to fit the shit ok
-            x1 -= this.mapdata.left;
-            x2 -= this.mapdata.left;
-            y1 -= this.mapdata.top;
-            y2 -= this.mapdata.top;
+            x1 -= this.left;
+            x2 -= this.left;
+            y1 -= this.top;
+            y2 -= this.top;
             
             x1 *= r;
             x2 *= r;
