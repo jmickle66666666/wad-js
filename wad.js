@@ -17,6 +17,7 @@ var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO",
                   "DECORATE" ];
 var DATA_LUMPS = [ "PLAYPAL", "COLORMAP", "TEXTURE1", "TEXTURE2", "PNAMES",
                     "ENDOOM"];
+var GRAPHIC_LUMPS = [ "TITLEPIC" ];
 
                   
 var Wad = { 
@@ -155,6 +156,7 @@ var Wad = {
         if (TEXTLUMPS.indexOf(name) >= 0) return TEXT;
         if (MAPLUMPS.indexOf(name) >= 0) return MAPDATA;
         if (DATA_LUMPS.indexOf(name) >= 0) return name;
+        if (GRAPHIC_LUMPS.indexOf(name) >= 0) return GRAPHIC;
         if (/^MAP\d\d/.test(name)) return MAP;
         if (/^E\dM\d/.test(name)) return MAP;
         if (/_START$/.test(name)) return MARKER;
