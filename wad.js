@@ -216,6 +216,10 @@ var Endoom = {
     charContext : [],
     
     setTile : function (_ctx,x,y,i,c1,c2) {
+        var _i = (x % 80)+Math.floor(y / 80);
+        this.data[_i].charIndex = i;
+        this.data[_i].backColor = c1;
+        this.data[_i].foreColor = c2;
         _ctx.drawImage(this.getChar(i,c1,c2),x * 8, y * 16);
     },
     
