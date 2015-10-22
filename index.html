@@ -101,6 +101,15 @@
                                 $("#preview").html("");
                                 document.getElementById("preview").appendChild(graphic.toCanvas(wad));
                                 break;
+                            case "ENDOOM":
+                                endoom = Object.create(Endoom);
+                                endoom.onLoad = function() {
+                                    document.getElementById("preview").appendChild(endoom.toCanvas());
+                                };
+                                endoom.load(wad.getLump(i));
+                                $("#preview").html("");
+                                
+                                break;
                             case MAP:
                                 map = Object.create(MapData);
                                 map.load(wad,wad.lumps[i].name);
