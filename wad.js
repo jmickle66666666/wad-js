@@ -261,18 +261,36 @@ var Endoom = {
     
     load : function (lumpData) {
         
-        var dv = new DataView(lumpData);
-        for (var i=0; i < 2000; i++) {
-            var _c = dv.getUint8(i*2);
-            var _s = dv.getUint8(i*2 + 1);
-            
-            var _f = _s & parseInt('00001111',2);
-            var _b = (_s>>4);
-            var _nec = Object.create(EndoomChar);
-            _nec.charIndex = _c;
-            _nec.backColor = _b;
-            _nec.foreColor = _f;
-            this.data.push(_nec);
+        this.data = [];
+        
+        if (lumpData != null) {
+        
+            var dv = new DataView(lumpData);
+            for (var i=0; i < 2000; i++) {
+                var _c = dv.getUint8(i*2);
+                var _s = dv.getUint8(i*2 + 1);
+                
+                var _f = _s & parseInt('00001111',2);
+                var _b = (_s>>4);
+                var _bl = false;
+                if (_b >= 8) {
+                    _bl = true;
+                    _b -= 8;
+                }
+                
+                var _nec = Object.create(EndoomChar);
+                _nec.charIndex = _c;
+                _nec.backColor = _b;
+                _nec.foreColor = _f;
+                _nec.blinking = _bl;
+                this.data.push(_nec);
+            }
+        
+        } else {
+            for (var i=0; i < 2000; i++) {
+                var _nec = Object.create(EndoomChar);
+                this.data.push(_nec);
+            }
         }
         
         charImage = document.createElement("img");
@@ -302,6 +320,25 @@ var Endoom = {
     },
     
     onLoad : null,
+    
+    toCanvasBlinked : function () {
+        endoomDat = this.data;
+                    
+        var canv = document.createElement('canvas');
+        canv.width = 8 * 80;
+        canv.height = 16 * 25;
+        var ctx = canv.getContext('2d');
+        
+        for (var i=0; i < 2000; i++) {
+            var _c = endoomDat[i].charIndex;
+            var _f = endoomDat[i].foreColor;
+            if (endoomDat[i].blinking = true) _f = endoomDat[i].backColor;
+            var _b = endoomDat[i].backColor;
+            this.setTile(ctx,i % 80, Math.floor(i/80),_c,_b,_f);
+        }
+        
+        return canv;
+    },
     
     toCanvas : function () {
         endoomDat = this.data;
