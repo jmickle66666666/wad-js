@@ -186,6 +186,13 @@ var Wad = {
 
 };
 
+var EndoomChar = {
+    charIndex : 0,
+    backColor : 0,
+    foreColor : 0,
+    blinking : false
+};
+
 var Endoom = {
     ansiColDark : [ [0, 0, 0], 
                     [0, 0, 170], 
@@ -250,10 +257,24 @@ var Endoom = {
         ctex.putImageData(imageData,0,0);
     },
     
-    data:null,
+    data : [],
     
     load : function (lumpData) {
-        this.data = lumpData;
+        
+        var dv = new DataView(lumpData);
+        for (var i=0; i < 2000; i++) {
+            var _c = dv.getUint8(i*2);
+            var _s = dv.getUint8(i*2 + 1);
+            
+            var _f = _s & parseInt('00001111',2);
+            var _b = (_s>>4);
+            var _nec = Object.create(EndoomChar);
+            _nec.charIndex = _c;
+            _nec.backColor = _b;
+            _nec.foreColor = _f;
+            this.data.push(_nec);
+        }
+        
         charImage = document.createElement("img");
         charImage.src = 'dos.png';
         charImage.onerror = function() {console.log("Image failed!");};
@@ -290,13 +311,10 @@ var Endoom = {
         canv.height = 16 * 25;
         var ctx = canv.getContext('2d');
         
-        var dv = new DataView(endoomDat);
         for (var i=0; i < 2000; i++) {
-            var _c = dv.getUint8(i*2);
-            var _s = dv.getUint8(i*2 + 1);
-            
-            var _f = _s & parseInt('00001111',2);
-            var _b = (_s>>4);
+            var _c = endoomDat[i].charIndex;
+            var _f = endoomDat[i].foreColor;
+            var _b = endoomDat[i].backColor;
             this.setTile(ctx,i % 80, Math.floor(i/80),_c,_b,_f);
         }
         
