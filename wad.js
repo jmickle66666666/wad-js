@@ -32,19 +32,19 @@ var Wad = {
     
     loadURL : function (url) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'blob:'+url, true);
+        xhr.open('GET', url, true);
         xhr.responseType = 'blob';
+        var self = this;
         xhr.onload = function(e) {
           if (this.status == 200) {
-            var myBlob = this.response;
-            // myBlob is now the blob that the object URL pointed to.
-            console.log(myBlob);
+            var blob = this.response;
+            self.load(blob);
           }
         };
         xhr.send();
     },
     
-    load : function (file) {
+    load : function (blob) {
         var reader = new FileReader();
         
         var self = this;
@@ -99,7 +99,7 @@ var Wad = {
             }
         }
 
-        reader.readAsArrayBuffer(file);  
+        reader.readAsArrayBuffer(blob);  
     },
     
     lumpExists : function (name) {
