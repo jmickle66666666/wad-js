@@ -61,6 +61,18 @@
                 return list;
             }
 
+            function createTextPreview(text) {
+                textEl = document.createElement('div');
+                textEl.style = "overflow: auto;";
+                var height = window.innerHeight
+                            || document.documentElement.clientHeight
+                            || document.body.clientHeight;
+                textEl.style.height = height * 0.9;
+                textnode = document.createTextNode(text);
+                textEl.appendChild(textnode);
+                $('#preview').append(textEl);
+            }
+
             function getIcon(lumpType) {
                 if (lumpType == 'map') return '<img src="icons/map.png">';
                 if (lumpType == 'mapdata') return '<img src="icons/mapdata.png">';
@@ -113,15 +125,7 @@
                             
                             case TEXT:
                                 $('#preview').html("");
-                                textEl = document.createElement('div');
-                                textEl.style = "overflow: auto;";
-                                var height = window.innerHeight
-                                            || document.documentElement.clientHeight
-                                            || document.body.clientHeight;
-                                textEl.style.height = height * 0.9;
-                                textnode = document.createTextNode(wad.getLumpAsText(i));
-                                textEl.appendChild(textnode);
-                                $('#preview').append(textEl);
+                                createTextPreview(wad.getLumpAsText(i));
                                 break;
                             case "PLAYPAL":
                                 playpal = Object.create(Playpal);
