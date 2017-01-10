@@ -75,6 +75,9 @@
 
             fileInput.addEventListener('change', function(e) {
                 
+                $('#preview').hide();
+                $('#lumpTable').hide();
+
                 if (self.lumpList) self.lumpList.destructor();
                 self.lumpnames = [];
             
@@ -110,7 +113,15 @@
                             
                             case TEXT:
                                 $('#preview').html("");
-                                $('#preview').append(document.createTextNode(wad.getLumpAsText(i)));
+                                textEl = document.createElement('div');
+                                textEl.style = "overflow: auto;";
+                                var height = window.innerHeight
+                                            || document.documentElement.clientHeight
+                                            || document.body.clientHeight;
+                                textEl.style.height = height * 0.9;
+                                textnode = document.createTextNode(wad.getLumpAsText(i));
+                                textEl.appendChild(textnode);
+                                $('#preview').append(textEl);
                                 break;
                             case "PLAYPAL":
                                 playpal = Object.create(Playpal);

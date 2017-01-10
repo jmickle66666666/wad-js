@@ -14,7 +14,7 @@ var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS",
 var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
                   "DMXGUS", "DMXGUSC", "WADINFO", "EMENUS", "MUSINFO",
                   "SNDINFO", "GLDEFS", "KEYCONF", "SCRIPTS", "LANGUAGE",
-                  "DECORATE" ];
+                  "DECORATE", "SBARINFO", "MENUDEF" ];
 var DATA_LUMPS = [ "PLAYPAL", "COLORMAP", "TEXTURE1", "TEXTURE2", "PNAMES",
                     "ENDOOM"];
 var GRAPHIC_LUMPS = [ "TITLEPIC" ];

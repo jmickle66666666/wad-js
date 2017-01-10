@@ -45,6 +45,10 @@ li {
     cursor: default;
 }
 
+#textPreview {
+    overflow: auto;
+}
+
 li:hover {
     background-color: #eee;
 }
