@@ -1,5 +1,5 @@
 body {
-    background-color:#DD8;
+    background-color:#999;
 }
 
 #lumpUL {
@@ -13,7 +13,7 @@ li {
     padding : 5px;
     margin : 5px;
     border-width : 2px;
-    background-color: #eea;
+    background-color: #ddd;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

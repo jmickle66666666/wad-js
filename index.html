@@ -3,9 +3,15 @@
         <title>wad js test</title>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <style>
             #preview {
             position: fixed;
+            }
+            body {
+                font-family: 'Roboto', sans-serif;
+            }
+            span {
             }
             
         </style>
@@ -37,7 +43,11 @@
                     var item = document.createElement('li');
 
                     // Set its contents:
-                    item.appendChild(document.createTextNode(array[i]));
+                    var span = document.createElement('span');
+                    span.innerHTML += getIcon(array[i][0]);
+                    var name = document.createTextNode(' '+array[i][1]);
+                    span.appendChild(name);
+                    item.appendChild(span);
 
                     // Add it to the list:
                     list.appendChild(item);
@@ -45,6 +55,14 @@
 
                 // Finally, return the constructed list:
                 return list;
+            }
+
+            function getIcon(lumpType) {
+                if (lumpType == 'map') return '<img src="icons/map.png">';
+                if (lumpType == 'mapdata') return '<img src="icons/mapdata.png">';
+                if (lumpType == 'text') return '<img src="icons/text.png">';
+                if (lumpType == 'PLAYPAL') return '<img src="icons/playpal.png">';
+                else return '<img src="icons/unknown.png">';
             }
 
             fileInput.addEventListener('change', function(e) {
@@ -59,7 +77,7 @@
                 
                 wad.onLoad = function(e) {
                     for (var i = 0; i < wad.lumps.length; i++) {
-                        self.lumpnames.push("[" + wad.detectLumpType(i) + "]" + wad.lumps[i].name);
+                        self.lumpnames.push([wad.detectLumpType(i),wad.lumps[i].name]);
                     }
                     
                     $('#lumpList').html(makeUL(self.lumpnames));
