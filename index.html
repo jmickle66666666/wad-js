@@ -134,6 +134,7 @@
                             case "ENDOOM":
                                 endoom = Object.create(Endoom);
                                 endoom.onLoad = function() {
+                                    $("#preview").html("");
                                     document.getElementById("preview").appendChild(endoom.toCanvas());
                                 };
                                 endoom.load(wad.getLump(i));
