@@ -28,6 +28,8 @@ li {
 }
 
 #preview {
+    font-family: 'Inconsolata', monospace;
+    white-space:pre;
     position: fixed;
     border-style: solid;
     padding : 5px;

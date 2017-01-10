@@ -4,6 +4,7 @@
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
         <style>
             
             body {
@@ -108,7 +109,8 @@
                         switch (lumptype) {
                             
                             case TEXT:
-                                $('#preview').html(wad.getLumpAsText(i));
+                                $('#preview').html("");
+                                $('#preview').append(document.createTextNode(wad.getLumpAsText(i)));
                                 break;
                             case "PLAYPAL":
                                 playpal = Object.create(Playpal);
