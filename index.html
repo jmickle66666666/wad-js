@@ -49,6 +49,8 @@
                     span.appendChild(name);
                     item.appendChild(span);
 
+                    item.id='item';
+
                     // Add it to the list:
                     list.appendChild(item);
                 }
@@ -83,6 +85,9 @@
                     $('#lumpList').html(makeUL(self.lumpnames));
                     
                     $('#lumpUL').delegate('li', 'click', function (e) {
+                        $('#preview').html('');
+                        while (e.target.id != 'item') e.target=e.target.parentNode;
+
                         var li = e.target,
                             i = 0;
 
