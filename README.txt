@@ -12,3 +12,6 @@ done:
 
 todo:
 -everything else
+
+try it out:
+http://jmickle66666666.github.io/wad-js/
