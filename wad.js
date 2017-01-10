@@ -101,6 +101,21 @@ var Wad = {
 
         reader.readAsArrayBuffer(blob);  
     },
+
+    save : function () {
+        var name = prompt("Save as...","output.wad");
+        if (this.data != null) {
+            var toDownload=new Blob([this.data],{type:'octet/stream'});
+            var a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style='display:none;';
+            var url=window.URL.createObjectURL(toDownload);
+            a.href = url;
+            a.download = name;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    },
     
     lumpExists : function (name) {
         for (var i = 0; i < this.numlumps; i++) {

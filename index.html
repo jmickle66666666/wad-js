@@ -11,6 +11,7 @@
         </style>
     </head>
     <body>
+        <button onclick="wad.save();">save</button>
         <input type="file" id="fileInput">
         <script type="text/javascript" src="wad.js"></script>
         <script type="text/javascript" src="mapdata.js"></script>
@@ -23,6 +24,8 @@
             var fileInput = document.getElementById('fileInput');
             var fileDisplayArea = document.getElementById('test');
             var lumpList = null;
+
+            wad = Object.create(Wad);
             
             function makeUL(array) {
                 // Create the list element:
