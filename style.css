@@ -3,12 +3,32 @@ body {
 }
 
 #lumpUL {
-    margin-left: 0;
+    margin-left: -35px;
     padding-right: 0;
     list-style-type: none;
 }
 
+#lumpTable {
+    background-color:#777;
+}
+
 li {
+    border-style: solid;
+    padding : 5px;
+    margin : 5px;
+    border-width : 2px;
+    background-color: #ddd;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+#preview {
+    position: fixed;
     border-style: solid;
     padding : 5px;
     margin : 5px;

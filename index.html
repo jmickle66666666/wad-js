@@ -5,9 +5,7 @@
         <link rel="stylesheet" type="text/css" href="style.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <style>
-            #preview {
-            position: fixed;
-            }
+            
             body {
                 font-family: 'Roboto', sans-serif;
             }
@@ -22,7 +20,7 @@
         <script type="text/javascript" src="wad.js"></script>
         <script type="text/javascript" src="mapdata.js"></script>
         <br>
-        <table><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
+        <table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
         <script>
             
             var self = this;
@@ -30,6 +28,9 @@
             var fileInput = document.getElementById('fileInput');
             var fileDisplayArea = document.getElementById('test');
             var lumpList = null;
+
+            $('#preview').hide();
+            $('#lumpTable').hide();
 
             wad = Object.create(Wad);
             
@@ -82,10 +83,12 @@
                         self.lumpnames.push([wad.detectLumpType(i),wad.lumps[i].name]);
                     }
                     
+                    $('#lumpTable').show();
                     $('#lumpList').html(makeUL(self.lumpnames));
                     
                     $('#lumpUL').delegate('li', 'click', function (e) {
                         $('#preview').html('');
+                        $('#preview').show();
                         while (e.target.id != 'item') e.target=e.target.parentNode;
 
                         var li = e.target,
@@ -146,7 +149,7 @@
                                 var height = window.innerHeight
                                             || document.documentElement.clientHeight
                                             || document.body.clientHeight;
-                                document.getElementById("preview").appendChild(map.toCanvas((width - $('#lumpList').width()) * 0.8,height * 0.9));
+                                document.getElementById("preview").appendChild(map.toCanvas((width - $('#lumpList').width()) * 0.8,height * 0.8));
                                 break;
                             case MAPDATA:
                                 mapdata = Object.create(MapData);
