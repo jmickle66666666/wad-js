@@ -127,7 +127,6 @@ var Wad = {
     },
 
     getLumpByName : function (name) {
-        console.log("wad.js: getLumpByName("+name+");");
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 l = this.lumps[i];
