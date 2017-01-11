@@ -36,7 +36,7 @@
             $('#lumpTable').hide();
             $('#loading').hide();
 
-            wad = Object.create(Wad);
+            var wad = Object.create(Wad);
             
             var updateLoading = function(e) {
                 var prg = e.loaded/e.total;
@@ -74,7 +74,7 @@
             }
 
             function createTextPreview(text) {
-                textEl = document.createElement('div');
+                var textEl = document.createElement('div');
                 textEl.style = "overflow: auto;";
                 var height = window.innerHeight
                             || document.documentElement.clientHeight
@@ -85,6 +85,30 @@
                 $('#preview').append(textEl);
             }
 
+            function createAudioPreview(data) {
+                // Create information panel
+                var textEl = document.createElement('div');
+                textnode = document.createTextNode('Artist - Title');
+                textEl.appendChild(textnode);
+
+                // Create audio player
+                var blob = new Blob([data]);
+                audioEl = new Audio(URL.createObjectURL(blob));
+                audioEl.controls = true;
+                console.log(audioEl);
+
+                // Add data to preview
+                $('#preview').append(textEl);
+                $('#preview').append(audioEl);
+            }
+
+            function createImagePreview(data) {
+                var blob = new Blob([data]);
+                imageEl = new Image();
+                imageEl.src = URL.createObjectURL(blob);
+                $('#preview').append(imageEl);
+            }
+
             function getIcon(lumpType) {
                 if (lumpType == 'map') return '<img src="icons/map.png">';
                 if (lumpType == 'mapdata') return '<img src="icons/mapdata.png">';
@@ -93,7 +117,10 @@
                 if (lumpType == 'ENDOOM') return '<img src="icons/endoom.png">';
                 if (lumpType == 'COLORMAP') return '<img src="icons/colormap.png">';
                 if (lumpType == 'music') return '<img src="icons/music.png">';
-                if (lumpType == 'midi') return '<img src="icons/music.png">';
+                if (lumpType == 'midi') return '<img src="icons/midi.png">';
+                if (lumpType == 'mp3') return '<img src="icons/mp3.png">';
+                if (lumpType == 'graphic') return '<img src="icons/graphic.png">';
+                if (lumpType == 'png') return '<img src="icons/png.png">';
                 else return '<img src="icons/unknown.png">';
             }
 
@@ -138,6 +165,15 @@
                         
                         switch (lumptype) {
                             
+                            case PNG:
+                                $('#preview').html("");
+                                createImagePreview(wad.getLump(i));
+                                break;
+                            case MP3:
+                            case MUSIC:
+                                $('#preview').html("");
+                                createAudioPreview(wad.getLump(i));
+                                break;
                             case TEXT:
                                 $('#preview').html("");
                                 createTextPreview(wad.getLumpAsText(i));
@@ -231,7 +267,14 @@
                                 }
                                 break;
                             case "...":
-                                $('#preview').html("Unable to preview this lump, and can't detect it's type");
+                                $('#preview').html("Unable to preview this lump, and can't detect it's type<br>");
+                                var but = document.createElement('button');
+                                but.onclick = function viewAsText() {
+                                    $('#preview').html("");
+                                    createTextPreview(self.wad.getLumpAsText(i));
+                                };
+                                but.innerHTML="View as text";
+                                $('#preview').append(but);
                                 break;
                             default:
                                 $('#preview').html("Unable to preview "+lumptype+" lumps");

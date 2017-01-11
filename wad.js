@@ -4,10 +4,12 @@ var MAP = "map";
 var MAPDATA = "mapdata";
 var MUSIC = "music";
 var MIDI = "midi";
+var MP3 = "mp3";
+var PNG = "png";
 var GRAPHIC = "graphic";
 var FLAT = "flat";
 var MARKER = "marker";
-var GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_"];
+var GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_","SS_"];
 var FLAT_MARKERS = ["F_","FF_","F1_","F2_","F3_"];
 var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS",
                 "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP"];
@@ -167,7 +169,23 @@ var Wad = {
     
     detectLumpType : function (index) {
         //TODO: get patches from pnames
-        
+
+        function headerCheck(dataView, header) {
+            var chrs = header.split("");
+            for (var i = 0; i < header.length; i++) {
+                if (header.charCodeAt(i) != dataView.getUint8(i)) return false;
+            }
+            return true;
+        }
+
+        //data-based detection
+        if (this.lumps[index].size != 0) {
+            var dv = new DataView(this.data, this.lumps[index].pos);
+            if (headerCheck(dv, 'MThd')) return MIDI;
+            if (headerCheck(dv, 'ID3')) return MP3;
+            if (headerCheck(dv, String.fromCharCode(137)+'PNG')) return PNG;
+        }
+
         //name-based detection
         var name = this.lumps[index].name;
         if (TEXTLUMPS.indexOf(name) >= 0) return TEXT;
@@ -184,18 +202,9 @@ var Wad = {
         //if (lumpData.byteLength == 0) return MARKER;
         //if (/^MThd/.test(this.lumpDataToText(lumpData))) return MIDI;
 
-        function headerCheck(data, position, header) {
-            var dv = new DataView(data, position);
-            var chrs = header.split("");
-            for (var i = 0; i < header.length; i++) {
-                if (header.charCodeAt(i) != dv.getUint8(i)) return false;
-            }
-            return true;
-        }
+        
 
-        //data-based detection
         if (this.lumps[index].size == 0) return MARKER;
-        if (headerCheck(this.data, this.lumps[index].pos, 'MThd')) return MIDI;
 
         //between markers
         for (var i = index; i>=0; i--) {
@@ -208,7 +217,6 @@ var Wad = {
         }
         
         //shitty name-based detection
-        
         if (/^D_/.test(name)) return MUSIC;
         
         return "...";
