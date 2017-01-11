@@ -22,6 +22,7 @@ var GRAPHIC_LUMPS = [ "TITLEPIC" ];
                   
 var Wad = { 
 
+    onProgress : null,
     onLoad : null,
     ident : "",
     numlumps : -1,
@@ -49,6 +50,10 @@ var Wad = {
         
         var self = this;
         
+        if (self.onProgress != null) {
+            reader.onprogress = self.onProgress;
+        }
+
         reader.onload = function(e) {
             
             
@@ -87,11 +92,9 @@ var Wad = {
                 self.lumps.push(lumpEntry);
             }
             
+            self.playpal = Object.create(Playpal);
             if (self.lumpExists("PLAYPAL")) {
-                self.playpal = Object.create(Playpal);
                 self.playpal.load(wad.getLumpByName("PLAYPAL"));
-            } else {
-                self.playpal = Object.create(Playpal);
             }
             
             if (self.onLoad != null) {
@@ -177,10 +180,23 @@ var Wad = {
         if (/_END$/.test(name)) return MARKER;
         
         //data-based detection
-        var lumpData = this.getLump(index);
-        if (lumpData.byteLength == 0) return MARKER;
-        if (/^MThd/.test(this.lumpDataToText(lumpData))) return MIDI;
-        
+        //var lumpData = this.getLump(index);
+        //if (lumpData.byteLength == 0) return MARKER;
+        //if (/^MThd/.test(this.lumpDataToText(lumpData))) return MIDI;
+
+        function headerCheck(data, position, header) {
+            var dv = new DataView(data, position);
+            var chrs = header.split("");
+            for (var i = 0; i < header.length; i++) {
+                if (header.charCodeAt(i) != dv.getUint8(i)) return false;
+            }
+            return true;
+        }
+
+        //data-based detection
+        if (this.lumps[index].size == 0) return MARKER;
+        if (headerCheck(this.data, this.lumps[index].pos, 'MThd')) return MIDI;
+
         //between markers
         for (var i = index; i>=0; i--) {
             if (/_END$/.test(this.lumps[i].name)) break;

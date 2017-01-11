@@ -22,6 +22,7 @@
         <script type="text/javascript" src="mapdata.js"></script>
         <br>
         <table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
+        <p id="loading">loading...</p>
         <script>
             
             var self = this;
@@ -29,12 +30,23 @@
             var fileInput = document.getElementById('fileInput');
             var fileDisplayArea = document.getElementById('test');
             var lumpList = null;
+            var loadingInterval;
 
             $('#preview').hide();
             $('#lumpTable').hide();
+            $('#loading').hide();
 
             wad = Object.create(Wad);
             
+            var updateLoading = function(e) {
+                var prg = e.loaded/e.total;
+                var size = 20;
+                var loadingbar = '[';
+                for (var i = 0; i < size * prg; i++) loadingbar += '.';
+                for (i = size * prg; i < 20; i++) loadingbar += '&nbsp;';
+                document.getElementById('loading').innerHTML = loadingbar + ']';
+            };
+
             function makeUL(array) {
                 // Create the list element:
                 var list = document.createElement('ol');
@@ -89,6 +101,7 @@
                 
                 $('#preview').hide();
                 $('#lumpTable').hide();
+                $('#loading').show();
 
                 if (self.lumpList) self.lumpList.destructor();
                 self.lumpnames = [];
@@ -97,6 +110,7 @@
                 console.log(file);
                 
                 wad = Object.create(Wad);
+                wad.onProgress = updateLoading;
                 
                 wad.onLoad = function(e) {
                     for (var i = 0; i < wad.lumps.length; i++) {
@@ -104,6 +118,7 @@
                     }
                     
                     $('#lumpTable').show();
+                    $('#loading').hide();
                     $('#lumpList').html(makeUL(self.lumpnames));
                     
                     $('#lumpUL').delegate('li', 'click', function (e) {
