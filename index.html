@@ -185,7 +185,7 @@
                         lumptype = wad.detectLumpType(i);
                         
                         switch (lumptype) {
-                            
+
                             case PNG:
                                 $('#preview').html("");
                                 createImagePreview(wad.getLump(i));
@@ -203,13 +203,13 @@
                                 $('#preview').html("");
                                 createTextPreview(wad.getLumpAsText(i));
                                 break;
-                            case "PLAYPAL":
+                            case PLAYPAL:
                                 playpal = Object.create(Playpal);
                                 playpal.load(wad.getLump(i));
                                 $("#preview").html("");
                                 document.getElementById("preview").appendChild(playpal.toCanvas());
                                 break;
-                            case "COLORMAP":
+                            case COLORMAP:
                                 colormap = Object.create(Colormap);
                                 colormap.load(wad.getLump(i));
                                 $("#preview").html("");
@@ -227,7 +227,7 @@
                                 $("#preview").html("");
                                 document.getElementById("preview").appendChild(graphic.toCanvas(wad));
                                 break;
-                            case "ENDOOM":
+                            case ENDOOM:
                                 endoom = Object.create(Endoom);
                                 endoom.onLoad = function() {
                                     $("#preview").html("");
