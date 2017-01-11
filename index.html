@@ -127,17 +127,22 @@
             }
 
             function getIcon(lumpType) {
-                if (lumpType == 'map') return '<img src="icons/map.png">';
-                if (lumpType == 'mapdata') return '<img src="icons/mapdata.png">';
-                if (lumpType == 'text') return '<img src="icons/text.png">';
-                if (lumpType == 'PLAYPAL') return '<img src="icons/playpal.png">';
-                if (lumpType == 'ENDOOM') return '<img src="icons/endoom.png">';
-                if (lumpType == 'COLORMAP') return '<img src="icons/colormap.png">';
-                if (lumpType == 'music') return '<img src="icons/music.png">';
-                if (lumpType == 'midi') return '<img src="icons/midi.png">';
-                if (lumpType == 'mp3') return '<img src="icons/mp3.png">';
-                if (lumpType == 'graphic') return '<img src="icons/graphic.png">';
-                if (lumpType == 'png') return '<img src="icons/png.png">';
+                if (lumpType == MAP) return '<img src="icons/map.png">';
+                if (lumpType == MAPDATA) return '<img src="icons/mapdata.png">';
+                if (lumpType == TEXT) return '<img src="icons/text.png">';
+                if (lumpType == PLAYPAL) return '<img src="icons/playpal.png">';
+                if (lumpType == ENDOOM) return '<img src="icons/endoom.png">';
+                if (lumpType == COLORMAP) return '<img src="icons/colormap.png">';
+                if (lumpType == MUSIC) return '<img src="icons/music.png">';
+                if (lumpType == MIDI) return '<img src="icons/midi.png">';
+                if (lumpType == MP3) return '<img src="icons/mp3.png">';
+                if (lumpType == GRAPHIC) return '<img src="icons/graphic.png">';
+                if (lumpType == FLAT) return '<img src="icons/flat.png">';
+                if (lumpType == PNG) return '<img src="icons/png.png">';
+                if (lumpType == MUS) return '<img src="icons/mus.png">';
+                if (lumpType == MARKER) return '<img src="icons/marker.png">';
+                if (lumpType == PNAMES) return '<img src="icons/pnames.png">';
+                if (TEXTUREx.indexOf(lumpType) >= 0) return '<img src="icons/texturex.png">';
                 else return '<img src="icons/unknown.png">';
             }
 
