@@ -5,6 +5,7 @@
         <link rel="stylesheet" type="text/css" href="style.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <style>
             
             body {
@@ -20,11 +21,11 @@
         <input type="file" id="fileInput">
         <script type="text/javascript" src="wad.js"></script>
         <script type="text/javascript" src="mapdata.js"></script>
+        <script type='text/javascript' src='http://www.midijs.net/lib/midi.js'></script>
         <br>
         <table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
         <p id="loading">loading...</p>
         <script>
-            
             var self = this;
             var lumpnames = ["a","b","c"];
             var fileInput = document.getElementById('fileInput');
@@ -109,6 +110,22 @@
                 $('#preview').append(imageEl);
             }
 
+            function createMIDIPreview(data) {
+                var midiURL = URL.createObjectURL(new Blob([data]));
+                var play = function() { MIDIjs.play(midiURL); }
+                var stop = function() { MIDIjs.stop(); }
+
+                var playButton = document.createElement('button');
+                playButton.innerHTML='<i class="material-icons">play_arrow</i>';
+                playButton.onclick = play;
+                $('#preview').append(playButton);
+
+                var stopButton = document.createElement('button');
+                stopButton.innerHTML='<i class="material-icons">stop</i>';
+                stopButton.onclick = stop;
+                $('#preview').append(stopButton);
+            }
+
             function getIcon(lumpType) {
                 if (lumpType == 'map') return '<img src="icons/map.png">';
                 if (lumpType == 'mapdata') return '<img src="icons/mapdata.png">';
@@ -173,6 +190,10 @@
                             case MUSIC:
                                 $('#preview').html("");
                                 createAudioPreview(wad.getLump(i));
+                                break;
+                            case MIDI:
+                                $('#preview').html("");
+                                createMIDIPreview(wad.getLump(i));
                                 break;
                             case TEXT:
                                 $('#preview').html("");
