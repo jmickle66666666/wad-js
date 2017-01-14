@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>wad js test</title>
-        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
@@ -123,11 +123,21 @@
                 var blob = new Blob([data]);
                 audioEl = new Audio(URL.createObjectURL(blob));
                 audioEl.controls = true;
-                console.log(audioEl);
+                audioEl.loop = true;
+
+                var loopCheckbox = document.createElement('input');
+                loopCheckbox.type = 'checkbox';
+                var label = document.createElement('span');
+                label.innerHTML = 'loop';
+                label.for = loopCheckbox;
+                loopCheckbox.onclick = function () { audioEl.loop = loopCheckbox.checked; }
 
                 // Add data to preview
                 $('#preview').append(textEl);
                 $('#preview').append(audioEl);
+                $('#preview').append(document.createElement('br'));
+                $('#preview').append(loopCheckbox);
+                $('#preview').append(label);
             }
 
             function createImagePreview(data) {
