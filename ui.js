@@ -47,11 +47,10 @@ fileInput.addEventListener('change', function(e) {
 
 var updateLoading = function(e) {
 	progress++;
-	if (progress % 129 == 0)
-		++bar;
+	bar = (35 * progress) / (wad.numlumps);
 	var loadingbar = '[';
 	for (var i = 0; i < bar; i++) loadingbar += '.';
-	for (i = bar; i < 20; i++) loadingbar += '&nbsp;';
+	for (i = bar; i < 35; i++) loadingbar += '&nbsp;';
 	document.getElementById('loading').innerHTML = loadingbar + ']';
 };
 
