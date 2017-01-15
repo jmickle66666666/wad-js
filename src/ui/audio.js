@@ -10,6 +10,14 @@ function createAudioPreview(data) {
     audioEl.controls = true;
     console.log(audioEl);
 
+    // Create loop button
+    var loopCheckbox = document.createElement('input');
+    loopCheckbox.type = 'checkbox';
+    var label = document.createElement('span');
+    label.innerHTML = 'loop';
+    label.for = loopCheckbox;
+    loopCheckbox.onclick = function () { audioEl.loop = loopCheckbox.checked; }
+
     // Add data to preview
     $('#preview').append(textEl);
     $('#preview').append(audioEl);
