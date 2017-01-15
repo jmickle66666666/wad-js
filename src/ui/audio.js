@@ -21,4 +21,7 @@ function createAudioPreview(data) {
     // Add data to preview
     $('#preview').append(textEl);
     $('#preview').append(audioEl);
+    $('#preview').append(document.createElement('br'));
+    $('#preview').append(loopCheckbox);
+    $('#preview').append(label);
 }
