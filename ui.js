@@ -13,6 +13,8 @@ $('#loading').hide();
 var wad = Object.create(Wad);
 
 function initWad() {
+	self.errormsg = null;
+	$(errors).html("");
 	$('#preview').hide();
 	$('#lumpTable').hide();
 	$('#loading').show();
@@ -69,6 +71,8 @@ function getIcon(lumpType) {
 
 function wadOnLoad(e) {
 
+	$('#loading').hide();
+
 	if (self.errormsg != null) {
 		$(errors).html(self.errormsg);
 	} else {
@@ -78,7 +82,6 @@ function wadOnLoad(e) {
 		}
 
 		$('#lumpTable').show();
-		$('#loading').hide();
 		$('#lumpList').html(makeUL(self.lumpnames));
 
 		$('#lumpUL').delegate('li', 'click', function (e) {
