@@ -68,6 +68,9 @@ li {
     -ms-user-select: none;
     user-select: none;
     cursor: default;
+    
+    max-height: 90%;
+    overflow: scroll;
 }
 
 #textPreview {
