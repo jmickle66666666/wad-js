@@ -5,8 +5,8 @@ module.exports = function(grunt) {
 		uglify: {
 			build: {
 				files: {
-					'dist/wad.min.js': ['src/wad.js', 'src/mapdata.js'],
-					'dist/ui.min.js': ['src/ui/lump_list.js', 'src/ui/audio.js', 'src/ui/text.js', 'src/ui/image.js', 'src/ui/midi.js', 'src/ui.js']
+					'dist/wad.min.js': ['src/wad.js', 'src/wad/mapdata.js'],
+					'dist/ui.min.js': ['src/panels/lump_list.js', 'src/panels/audio.js', 'src/panels/text.js', 'src/panels/image.js', 'src/panels/midi.js', 'src/ui.js']
 				}
 			}
 		}

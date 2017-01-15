@@ -191,10 +191,8 @@ function wadOnLoad(e) {
 
 							var tht = mapdata.getThingTable();
 							var tab = "";
-							console.log(mapdata.getDoomThingName(1));
 							for (var prop in tht) {
 								if (tht.hasOwnProperty(prop)) {
-									console.log(prop);
 									tab += mapdata.getDoomThingName(parseInt(prop));
 									tab += "s: "+tht[prop]+"<br>";
 								}
