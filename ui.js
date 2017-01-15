@@ -10,6 +10,9 @@ $('#preview').hide();
 $('#lumpTable').hide();
 $('#loading').hide();
 
+var progress = 0;
+var bar = 0;
+
 var wad = Object.create(Wad);
 
 function initWad() {
@@ -18,6 +21,8 @@ function initWad() {
 	$('#preview').hide();
 	$('#lumpTable').hide();
 	$('#loading').show();
+	progress = 0;
+	bar = 0;
 
 	if (self.lumpList) self.lumpList.destructor();
 	self.lumpnames = [];
@@ -41,11 +46,12 @@ fileInput.addEventListener('change', function(e) {
 });
 
 var updateLoading = function(e) {
-	var prg = e.loaded/e.total;
-	var size = 20;
+	progress++;
+	if (progress % 129 == 0)
+		++bar;
 	var loadingbar = '[';
-	for (var i = 0; i < size * prg; i++) loadingbar += '.';
-	for (i = size * prg; i < 20; i++) loadingbar += '&nbsp;';
+	for (var i = 0; i < bar; i++) loadingbar += '.';
+	for (i = bar; i < 20; i++) loadingbar += '&nbsp;';
 	document.getElementById('loading').innerHTML = loadingbar + ']';
 };
 

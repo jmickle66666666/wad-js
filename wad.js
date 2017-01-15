@@ -58,67 +58,77 @@ var Wad = {
     },
     
     load : function (blob) {
-        var reader = new FileReader();
-        
         var self = this;
-        
-        if (self.onProgress != null) {
-            reader.onprogress = self.onProgress;
-        }
 
-        reader.onload = function(e) {
-            
-            
-            self.data = reader.result;
-            var i;
-            
-            // header reading
-            var headerReader = new DataView(self.data);
-            for (i = 0; i < 4; i++) self.ident += String.fromCharCode(headerReader.getUint8(i));
-	    if (self.ident != "IWAD") {
+    	self.lumps = [];
+
+	var offset = 0;
+	var chunkSize = -1;
+
+        var reader = new FileReader();
+	reader.readAsArrayBuffer(blob);
+	reader.onprogress = self.onProgress;
+
+	reader.onload = function(e) {
+		self.data = e.target.result;
+
+		// header reading
+		var headerReader = new DataView(e.target.result);
+		for (var i = 0; i < 4; i++) self.ident += String.fromCharCode(headerReader.getUint8(i));
+		if (self.ident != "IWAD" && self.ident != "PWAD") {
 		    self.error("Not a valid WAD file.");
-	    } else {
+	            self.onLoad();
+		} else {
 		    self.numlumps = headerReader.getInt32(4, true);
 		    self.dictpos = headerReader.getInt32(8, true);
-		    
-		    // dictionary reading
-		    
-		    // the size of the dictionary is 16 * numlumps so slice that shit then create the obj
-		    var dictionaryBuffer = self.data.slice(self.dictpos,self.dictpos + (self.numlumps * 16));
-		    var dictionaryReader = new DataView(dictionaryBuffer);
-		    
-		    self.lumps = [];
-		    
-		    for (i = 0; i < self.numlumps; i++) {
-			p = i * 16;
-			var lumpPos = dictionaryReader.getInt32(p, true);
-			var lumpSize = dictionaryReader.getInt32(p + 4, true);
-			var lumpName = "";
-			for (j = p + 8; j < p + 16; j++) {
-			    if (dictionaryReader.getUint8(j) != 0) {
-				lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
-			    }
-			}
-			lumpEntry = { 
-			    pos : lumpPos,
-			    size : lumpSize,
-			    name : lumpName
-			}
-			self.lumps.push(lumpEntry);
-		    }
-		    
-		    self.playpal = Object.create(Playpal);
-		    if (self.lumpExists("PLAYPAL")) {
-			self.playpal.load(wad.getLumpByName("PLAYPAL"));
-		    }
-		    
-	    }
-    	    if (self.onLoad != null) { 
-		    self.onLoad(); 
-	    }
-        }
+		    offset = self.dictpos;
+		    chunkSize = 16;
 
-       	reader.readAsArrayBuffer(blob);  
+		    chunkReaderBlock(self.dictpos, chunkSize, blob);
+		}
+	}
+
+	var nextChunk = function(e) {
+	   offset += e.target.result.byteLength;
+
+	   var dataReader = new DataView(e.target.result);
+
+	   var lumpPos = dataReader.getInt32(0, true);
+	   var lumpSize = dataReader.getInt32(4, true);
+	   var lumpName = "";
+	   for (j = 8; j < 16; j++) {
+	       if (dataReader.getUint8(j) != 0) {
+	           lumpName += String.fromCharCode(dataReader.getUint8(j));
+	       }
+	   }
+
+	   lumpEntry = { 
+	       pos : lumpPos,
+	       size : lumpSize,
+	       name : lumpName
+	   }
+	   self.lumps.push(lumpEntry);
+	  
+           if (offset >= blob.size) {
+		self.playpal = Object.create(Playpal);
+		if (self.lumpExists("PLAYPAL")) {
+			self.playpal.load(wad.getLumpByName("PLAYPAL"));
+		}
+		self.onLoad();
+	   	return;
+	   }
+
+	   chunkReaderBlock(offset, chunkSize, blob)
+	}
+
+	chunkReaderBlock = function(_offset, chunkSize, data) {
+	    var r = new FileReader();
+	    var b = data.slice(_offset, _offset + chunkSize);
+	    r.onload = nextChunk; 
+	    r.onprogress = self.onProgress;
+	    r.readAsArrayBuffer(b);
+	}
+        
     },
 
     save : function () {
