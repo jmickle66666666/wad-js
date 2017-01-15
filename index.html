@@ -3,38 +3,38 @@
     <head>
         <meta charset="utf-8">
         <title>wad js test</title>
-        <link rel="stylesheet" type="text/css" href="style.css">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <style>
-            
-            body {
-                font-family: 'Roboto', sans-serif;
-            }
-            span {
-            }
-            
-        </style>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-	<p id="errors"></p>
-        <input type="file" id="fileInput">
-        <input type="url" id="urlInput">
-        <button id="urlLoad" onClick="loadURL();">Load URL</button>
+	<div class="container">
+		<div class="row">
+			<form class="form-inline">
+				<div class="form-group">
+					<input type="file" id="fileInput">
+				</div>
+
+				<div class="form-group">
+					<input class="form-control" type="url" id="urlInput">
+					<button class="btn btn-default" id="urlLoad" onClick="loadURL();">Load URL</button>
+				</div>
+			</form>
+			<p class="text-danger" id="errors"></p>
+
+			<table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></div></td></tr></table>
+			<p id="loading">loading...</p>
+		</div>
+	</div>
 
         <script type="text/javascript" src="wad.js"></script>
         <script type="text/javascript" src="mapdata.js"></script>
         <script type='text/javascript' src='lib/midi.js'></script>
-        <br>
-        <table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></div></td></tr></table>
-        <p id="loading">loading...</p>
-	
+
 	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script type="text/javascript" src="ui/create_el.js"></script>
 	<script type="text/javascript" src="ui.js"></script>
-
-
-        
     </body>
 </html>
