@@ -3,10 +3,26 @@ body {
     background-color:#999;
 }
 
+.container .row {
+    margin-left: 200px;
+}
+
 #lumpUL {
     margin-left: -35px;
     padding-right: 0;
     list-style-type: none;
+
+    /* copied from sphinx_rtd_theme */
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    min-height: 100%;
+    background: #343131;
+    z-index: 200;
 }
 
 #lumpTable {
