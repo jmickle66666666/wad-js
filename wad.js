@@ -82,7 +82,7 @@ var Wad = {
 		    self.numlumps = headerReader.getInt32(4, true);
 		    self.dictpos = headerReader.getInt32(8, true);
 		    offset = self.dictpos;
-		    chunkSize = 16;
+		    chunkSize = 64;
 
 		    chunkReaderBlock(self.dictpos, chunkSize, blob);
 		}
@@ -93,21 +93,24 @@ var Wad = {
 
 	   var dataReader = new DataView(e.target.result);
 
-	   var lumpPos = dataReader.getInt32(0, true);
-	   var lumpSize = dataReader.getInt32(4, true);
-	   var lumpName = "";
-	   for (j = 8; j < 16; j++) {
-	       if (dataReader.getUint8(j) != 0) {
-	           lumpName += String.fromCharCode(dataReader.getUint8(j));
-	       }
-	   }
+	   for (var i = 0; i < dataReader.byteLength / 16; i++) {
+		   var p = i * 16;
+		   var lumpPos = dataReader.getInt32(p, true);
+		   var lumpSize = dataReader.getInt32(p + 4, true);
+		   var lumpName = "";
+		   for (j = p + 8; j < p + 16; j++) {
+		       if (dataReader.getUint8(j) != 0) {
+			   lumpName += String.fromCharCode(dataReader.getUint8(j));
+		       }
+		   }
 
-	   lumpEntry = { 
-	       pos : lumpPos,
-	       size : lumpSize,
-	       name : lumpName
+		   lumpEntry = { 
+		       pos : lumpPos,
+		       size : lumpSize,
+		       name : lumpName
+		   }
+		   self.lumps.push(lumpEntry);
 	   }
-	   self.lumps.push(lumpEntry);
 	  
            if (offset >= blob.size) {
 		self.playpal = Object.create(Playpal);
