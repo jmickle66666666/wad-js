@@ -24,6 +24,10 @@ Current features include:
 * Export Graphics and Flats to Canvas
 * Render Maps to Canvas
 
+## Development
+ 
+Follow the instructions [here](http://gruntjs.com/getting-started) on how to install and use Grunt. 
+
 ## How to???
 
 ### Load WAD file from desktop
