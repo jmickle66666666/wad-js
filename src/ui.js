@@ -87,20 +87,14 @@ function wadOnLoad(e) {
 		$('#lumpTable').show();
 		$('#lumpList').html(makeUL(self.lumpnames));
 
-		$('#lumpUL').delegate('li', 'click', function (e) {
+		$('#lumpUL li.item').on('click', function (e) {
 			$('#preview').html('');
 			$('#preview').show();
-			while (e.target.id != 'item') e.target=e.target.parentNode;
 
-			var li = e.target,
-				i = 0;
+			var li = $(this);
+			var i = li.attr("class").split(' ')[2];
 
-			while ( li.previousElementSibling ) {
-				li = li.previousElementSibling;
-				i += 1;   
-			}
-
-			lumptype = wad.detectLumpType(i);
+			lumptype = li.attr("class").split(' ')[1];
 
 			switch (lumptype) {
 
