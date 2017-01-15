@@ -3,23 +3,29 @@ function makeUL(array) {
 	var list = document.createElement('ol');
 	list.id = "lumpUL";
 
-	var item = document.createElement('li');
-	var dropdown = document.createElement('div');
-	dropdown.className = 'dropdown';
+	var lumptypes = [ "png", "mp3", "music", "midi",
+		"text", "flat", "graphic", "map", "mapdata"
+		];
 
-	var button = document.createElement('button');
-	button.type = 'button';
-	button.dataset.toggle = 'dropdown';
-	button.innerHTML = getIcon(MAPDATA);
-	button.innerHTML += " MAPDATA";
-	dropdown.appendChild(button);
+	for (var i = 0; i < lumptypes.length; ++i) {
+		var item = document.createElement('li');
+		var dropdown = document.createElement('div');
+		dropdown.className = 'dropdown';
 
-        var dropdownMenu = document.createElement('ul');	
-	dropdownMenu.className = 'dropdown-menu';
-	dropdownMenu.id = 'graphicsToggle';
-	dropdown.appendChild(dropdownMenu);
-	item.appendChild(dropdown);
-	list.appendChild(item);
+		var button = document.createElement('button');
+		button.type = 'button';
+		button.dataset.toggle = 'dropdown';
+		button.innerHTML = getIcon(lumptypes[i]);
+		button.innerHTML += " " + lumptypes[i];
+		dropdown.appendChild(button);
+
+		var dropdownMenu = document.createElement('ul');	
+		dropdownMenu.className = 'dropdown-menu';
+		dropdownMenu.id = lumptypes[i] + 'Toggle';
+		dropdown.appendChild(dropdownMenu);
+		item.appendChild(dropdown);
+		list.appendChild(item);
+	}
 
 	for(var i = 0; i < array.length; i++) {
 		item = document.createElement('li');
@@ -31,9 +37,9 @@ function makeUL(array) {
 		item.className='item';
 		item.className += " " + array[i][0] + " " + i;
 		
-		if (array[i][0] == "mapdata") 
+		if (lumptypes.indexOf(array[i][0]) !== -1) 
 		{
-			dropdownMenu.appendChild(item);
+			list.querySelector('#' + array[i][0] + "Toggle").appendChild(item);
 		} else {
 			list.appendChild(item);
 		}
