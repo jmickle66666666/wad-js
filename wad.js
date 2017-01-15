@@ -37,6 +37,11 @@ var Wad = {
     data : null,
     lumps : [],
     playpal : null,
+    errormsg: null,
+
+    error : function (msg) {
+	    self.errormsg = msg;
+    },
     
     loadURL : function (url) {
         var xhr = new XMLHttpRequest();
@@ -70,46 +75,50 @@ var Wad = {
             // header reading
             var headerReader = new DataView(self.data);
             for (i = 0; i < 4; i++) self.ident += String.fromCharCode(headerReader.getUint8(i));
-            self.numlumps = headerReader.getInt32(4, true);
-            self.dictpos = headerReader.getInt32(8, true);
-            
-            // dictionary reading
-            
-            // the size of the dictionary is 16 * numlumps so slice that shit then create the obj
-            var dictionaryBuffer = self.data.slice(self.dictpos,self.dictpos + (self.numlumps * 16));
-            var dictionaryReader = new DataView(dictionaryBuffer);
-            
-            self.lumps = [];
-            
-            for (i = 0; i < self.numlumps; i++) {
-                p = i * 16;
-                var lumpPos = dictionaryReader.getInt32(p, true);
-                var lumpSize = dictionaryReader.getInt32(p + 4, true);
-                var lumpName = "";
-                for (j = p + 8; j < p + 16; j++) {
-                    if (dictionaryReader.getUint8(j) != 0) {
-                        lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
-                    }
-                }
-                lumpEntry = { 
-                    pos : lumpPos,
-                    size : lumpSize,
-                    name : lumpName
-                }
-                self.lumps.push(lumpEntry);
-            }
-            
-            self.playpal = Object.create(Playpal);
-            if (self.lumpExists("PLAYPAL")) {
-                self.playpal.load(wad.getLumpByName("PLAYPAL"));
-            }
-            
-            if (self.onLoad != null) {
-                self.onLoad();
-            }
+	    if (self.ident != "IWAD") {
+		    self.error("Not a valid WAD file.");
+	    } else {
+		    self.numlumps = headerReader.getInt32(4, true);
+		    self.dictpos = headerReader.getInt32(8, true);
+		    
+		    // dictionary reading
+		    
+		    // the size of the dictionary is 16 * numlumps so slice that shit then create the obj
+		    var dictionaryBuffer = self.data.slice(self.dictpos,self.dictpos + (self.numlumps * 16));
+		    var dictionaryReader = new DataView(dictionaryBuffer);
+		    
+		    self.lumps = [];
+		    
+		    for (i = 0; i < self.numlumps; i++) {
+			p = i * 16;
+			var lumpPos = dictionaryReader.getInt32(p, true);
+			var lumpSize = dictionaryReader.getInt32(p + 4, true);
+			var lumpName = "";
+			for (j = p + 8; j < p + 16; j++) {
+			    if (dictionaryReader.getUint8(j) != 0) {
+				lumpName += String.fromCharCode(dictionaryReader.getUint8(j));
+			    }
+			}
+			lumpEntry = { 
+			    pos : lumpPos,
+			    size : lumpSize,
+			    name : lumpName
+			}
+			self.lumps.push(lumpEntry);
+		    }
+		    
+		    self.playpal = Object.create(Playpal);
+		    if (self.lumpExists("PLAYPAL")) {
+			self.playpal.load(wad.getLumpByName("PLAYPAL"));
+		    }
+		    
+	    }
+    	    if (self.onLoad != null) { 
+		    self.onLoad(); 
+	    }
         }
 
-        reader.readAsArrayBuffer(blob);  
+       	reader.readAsArrayBuffer(blob);  
     },
 
     save : function () {

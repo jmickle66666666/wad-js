@@ -18,18 +18,22 @@
         </style>
     </head>
     <body>
+	<p id="errors"></p>
         <input type="file" id="fileInput">
         <input type="url" id="urlInput">
         <button id="urlLoad" onClick="loadURL();">Load URL</button>
+
         <script type="text/javascript" src="wad.js"></script>
         <script type="text/javascript" src="mapdata.js"></script>
         <script type='text/javascript' src='lib/midi.js'></script>
         <br>
         <table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></div></td></tr></table>
         <p id="loading">loading...</p>
+	
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="ui.js"></script>
 
-        <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
-	      <script type="text/javascript" src="ui.js"></script>
+
         
     </body>
 </html>
