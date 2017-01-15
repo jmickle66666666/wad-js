@@ -11,7 +11,6 @@ $('#lumpTable').hide();
 $('#loading').hide();
 
 var progress = 0;
-var bar = 0;
 
 var wad = Object.create(Wad);
 
@@ -22,7 +21,6 @@ function initWad() {
 	$('#lumpTable').hide();
 	$('#loading').show();
 	progress = 0;
-	bar = 0;
 
 	if (self.lumpList) self.lumpList.destructor();
 	self.lumpnames = [];
@@ -46,8 +44,8 @@ fileInput.addEventListener('change', function(e) {
 });
 
 var updateLoading = function(e) {
-	progress += 4;
-	bar = (35 * progress) / (wad.numlumps);
+	progress += 8;
+	var bar = (35 * progress) / (wad.numlumps);
 	var loadingbar = '[';
 	for (var i = 0; i < bar; i++) loadingbar += '.';
 	for (i = bar; i < 35; i++) loadingbar += '&nbsp;';

@@ -82,7 +82,7 @@ var Wad = {
 		    self.numlumps = headerReader.getInt32(4, true);
 		    self.dictpos = headerReader.getInt32(8, true);
 		    offset = self.dictpos;
-		    chunkSize = 64;
+		    chunkSize = 128;
 
 		    chunkReaderBlock(self.dictpos, chunkSize, blob);
 		}
