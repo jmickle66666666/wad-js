@@ -106,20 +106,20 @@ function wadOnLoad(e) {
 
 				case PNG:
 					$('#preview').html("");
-					createImagePreview(wad.getLump(i));
+					$('#preview').append(createImagePreview(wad.getLump(i)));
 					break;
 				case MP3:
 				case MUSIC:
 					$('#preview').html("");
-					createAudioPreview(wad.getLump(i));
+					$('#preview').append(createAudioPreview(wad.getLump(i)));
 					break;
 				case MIDI:
 					$('#preview').html("");
-					createMIDIPreview(wad.getLump(i));
+					$('#preview').append(createMIDIPreview(wad.getLump(i)));
 					break;
 				case TEXT:
 					$('#preview').html("");
-					createTextPreview(wad.getLumpAsText(i));
+					$('#preview').append(createTextPreview(wad.getLumpAsText(i)));
 					break;
 				case PLAYPAL:
 					playpal = Object.create(Playpal);

@@ -1,4 +1,9 @@
+// Data: Raw data to create preview from
+// return: HTML element containing preview
 function createAudioPreview(data) {
+    // Create parent element
+    var element = document.createElement('div');
+
     // Create information panel
     var textEl = document.createElement('div');
     textnode = document.createTextNode('Artist - Title');
@@ -19,9 +24,11 @@ function createAudioPreview(data) {
     loopCheckbox.onclick = function () { audioEl.loop = loopCheckbox.checked; }
 
     // Add data to preview
-    $('#preview').append(textEl);
-    $('#preview').append(audioEl);
-    $('#preview').append(document.createElement('br'));
-    $('#preview').append(loopCheckbox);
-    $('#preview').append(label);
+    element.append(textEl);
+    element.append(audioEl);
+    element.append(document.createElement('br'));
+    element.append(loopCheckbox);
+    element.append(label);
+
+    return element;
 }
