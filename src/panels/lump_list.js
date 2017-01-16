@@ -15,7 +15,6 @@ function makeUL(array) {
 		var button = document.createElement('button');
 		button.type = 'button';
 		button.dataset.toggle = 'dropdown';
-		button.className = "btn btn-default btn-primary";
 		button.innerHTML = getIcon(lumptypes[i]);
 		button.innerHTML += " " + lumptypes[i];
 		dropdown.appendChild(button);
@@ -44,11 +43,6 @@ function makeUL(array) {
 		} else {
 			list.appendChild(item);
 		}
-	}
-
-	for (var i = 0; i < lumptypes.length; i++) {
-		list.querySelector('#' + lumptypes[i] + "Toggle").previousSibling.innerHTML
-			+= "(" + list.querySelector('#' + lumptypes[i] + "Toggle").childElementCount + ")";
 	}
 
 	// Finally, return the constructed list:
