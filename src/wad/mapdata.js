@@ -37,30 +37,54 @@ var MapData = {
         this.wad = wad;
         this.reject = null;
         this.blockmap = null;
+        this.nodesExist;
 
         // Detect the format of the map first
         if (wad.lumps[mapLumpIndex + 1].name == "TEXTMAP") this.format = "UDMF";
-        else if (wad.lumps[mapLumpIndex + 11].name == "BEHAVIOR") this.format = "Hexen";
-        else this.format = "Doom";
+        else {
+            // Get a list of the map lumps associated with this map
+            var pos = 1;
+            mapdatalumps = [];
+            nextLump = wad.lumps[mapLumpIndex + pos].name;
+            while (MAPLUMPS.indexOf(nextLump) > -1) {
+                mapdatalumps.push(nextLump);
+                pos += 1;
+                if (wad.lumps.length == pos + mapLumpIndex) break;
+                nextLump = wad.lumps[mapLumpIndex + pos].name;
+            }
+
+            if (mapdatalumps.indexOf("BEHAVIOR") > -1) this.format = "Hexen";
+            else this.format = "Doom";
+
+            function getMapLump(lumpName) {
+                return wad.getLump(mapLumpIndex + mapdatalumps.indexOf(lumpName) + 1);
+            }
+        }
 
         if (this.format == "Doom") {
-            this.parseThings(wad.getLump(mapLumpIndex + 1));
-            this.parseLinedefs(wad.getLump(mapLumpIndex + 2));
-        }
-        if (this.format == "Hexen") {
-            this.parseHexenThings(wad.getLump(mapLumpIndex + 1));
-            this.parseHexenLinedefs(wad.getLump(mapLumpIndex + 2));
-        }
-        if (this.format == "Doom" || this.format == "Hexen") {
-            this.parseSidedefs(wad.getLump(mapLumpIndex + 3));
-            this.parseVertexes(wad.getLump(mapLumpIndex + 4));
-            this.parseSegs(wad.getLump(mapLumpIndex + 5));
-            this.parseSsectors(wad.getLump(mapLumpIndex + 6));
-            this.parseNodes(wad.getLump(mapLumpIndex + 7));
-            this.parseSectors(wad.getLump(mapLumpIndex + 8));
+            this.parseThings(getMapLump("THINGS"));
+            this.parseLinedefs(getMapLump("LINEDEFS"));
+            this.parseSidedefs(getMapLump("SIDEDEFS"));
+            this.parseVertexes(getMapLump("VERTEXES"));
+            this.parseSegs(getMapLump("SEGS"));
+            this.parseSsectors(getMapLump("SSECTORS"));
+            this.parseNodes(getMapLump("NODES"));
+            this.parseSectors(getMapLump("SECTORS"));
             //this.parseReject(wad.getLump(mapLumpIndex + 9));
             //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
-            
+            this.calculateBoundaries();
+        }
+        if (this.format == "Hexen") {
+            this.parseHexenThings(getMapLump("THINGS"));
+            this.parseHexenLinedefs(getMapLump("LINEDEFS"));
+            this.parseSidedefs(getMapLump("SIDEDEFS"));
+            this.parseVertexes(getMapLump("VERTEXES"));
+            this.parseSegs(getMapLump("SEGS"));
+            this.parseSsectors(getMapLump("SSECTORS"));
+            this.parseNodes(getMapLump("NODES"));
+            this.parseSectors(getMapLump("SECTORS"));
+            //this.parseReject(wad.getLump(mapLumpIndex + 9));
+            //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
             this.calculateBoundaries();
         }
 
