@@ -44,8 +44,8 @@ fileInput.addEventListener('change', function(e) {
 });
 
 var updateLoading = function(e) {
-	progress += 8;
-	var bar = (35 * progress) / (wad.numlumps);
+	progress++;
+	var bar = (35 * progress) / ((wad.numlumps * 16) / 128);
 	var loadingbar = '[';
 	for (var i = 0; i < bar; i++) loadingbar += '.';
 	for (i = bar; i < 35; i++) loadingbar += '&nbsp;';
