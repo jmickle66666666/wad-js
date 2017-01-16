@@ -46,6 +46,12 @@ var MapData = {
         if (this.format == "Doom") {
             this.parseThings(wad.getLump(mapLumpIndex + 1));
             this.parseLinedefs(wad.getLump(mapLumpIndex + 2));
+        }
+        if (this.format == "Hexen") {
+            this.parseHexenThings(wad.getLump(mapLumpIndex + 1));
+            this.parseHexenLinedefs(wad.getLump(mapLumpIndex + 2));
+        }
+        if (this.format == "Doom" || this.format == "Hexen") {
             this.parseSidedefs(wad.getLump(mapLumpIndex + 3));
             this.parseVertexes(wad.getLump(mapLumpIndex + 4));
             this.parseSegs(wad.getLump(mapLumpIndex + 5));
@@ -221,11 +227,53 @@ var MapData = {
             this.nodes.push(r);
         }
     },
+
+    parseHexenThings : function(lump) {
+        this.things = [];
+        var entryLen = 20;
+        var dv = new DataView(lump);
+        var len = dv.byteLength / entryLen;
+        for (var i = 0; i < len; i++) {
+            r = Object.create(HexenThing);
+            r.tid = dv.getInt16((i * entryLen) + 0, true);
+            r.x = dv.getInt16((i * entryLen) + 2, true);
+            r.y = dv.getInt16((i * entryLen) + 4, true);
+            r.z = dv.getInt16((i * entryLen) + 6, true);
+            r.angle = dv.getInt16((i * entryLen) + 8, true);
+            r.type = dv.getInt16((i * entryLen) + 10, true);
+            r.flags = dv.getInt16((i * entryLen) + 12, true);
+            r.special = dv.getInt8((i * entryLen) + 14);
+            for (var j = 0; j < 5; j++) {
+                r.args[j] = dv.getInt8((i * entryLen) + 15 + j);
+            }
+            this.things.push(r);
+        }
+    },
+
+    parseHexenLinedefs : function(lump) {
+        this.linedefs = [];
+        var entryLen = 16;
+        var dv = new DataView(lump);
+        var len = dv.byteLength / entryLen;
+        for (var i = 0; i < len; i++) {
+            r = Object.create(HexenLinedef);
+            r.vx1 = dv.getUint16((i * entryLen) + 0,true);
+            r.vx2 = dv.getUint16((i * entryLen) + 2,true);
+            r.flags = dv.getUint16((i * entryLen) + 4,true);
+            r.action = dv.getUint8((i * entryLen) + 6);
+            for (var j = 0; j < 5; j++) {
+                r.args[j] = dv.getInt8((i * entryLen) + 7 + j);
+            }
+            r.right = dv.getUint16((i * entryLen) + 12,true);
+            r.left = dv.getUint16((i * entryLen) + 14,true);
+            this.linedefs.push(r);
+        }
+    },
         
     toCanvas : function(width,height) {
           
         // Early-out if it is not a Doom format map.
-        if (this.format != "Doom") {
+        if (this.format == "UDMF") {
            var output = document.createElement("div");
            output.innerHTML = "Unable to render "+this.format+" format maps.";
            return output;
@@ -412,6 +460,36 @@ var Reject = {
 
 var Blockmap = {
 
+}
+
+var HexenThing = {
+    tid : null,
+    x : null,
+    y : null,
+    z : null,
+    angle : null,
+    type : null,
+    flags : null,
+    special : null,
+    args : []
+}
+
+var HexenLinedef = {
+    vx1 : null,
+    vx2 : null,
+    flags : null,
+    action : null,
+    args : [],
+    right : null,
+    left : null,
+    
+    getVx1 : function(mapdata) {
+        return mapdata.vertexes[this.vx1];
+    },
+    
+    getVx2 : function(mapdata) {
+        return mapdata.vertexes[this.vx2];
+    }
 }
 
 var DoomThingGroups = {
