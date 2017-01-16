@@ -18,7 +18,7 @@ var TEXTUREx = ["TEXTURE1","TEXTURE2"];
 var GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_","SS_"];
 var FLAT_MARKERS = ["F_","FF_","F1_","F2_","F3_"];
 var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS",
-                "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP"];
+                "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP","BEHAVIOR"];
 var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
                   "DMXGUS", "DMXGUSC", "WADINFO", "EMENUS", "MUSINFO",
                   "SNDINFO", "GLDEFS", "KEYCONF", "SCRIPTS", "LANGUAGE",
