@@ -20,6 +20,7 @@ var MapData = {
 
     name : null,
     music : null,
+    format : null,
     
     //boundaries
     
@@ -36,19 +37,26 @@ var MapData = {
         this.wad = wad;
         this.reject = null;
         this.blockmap = null;
-        
-        this.parseThings(wad.getLump(mapLumpIndex + 1));
-        this.parseLinedefs(wad.getLump(mapLumpIndex + 2));
-        this.parseSidedefs(wad.getLump(mapLumpIndex + 3));
-        this.parseVertexes(wad.getLump(mapLumpIndex + 4));
-        this.parseSegs(wad.getLump(mapLumpIndex + 5));
-        this.parseSsectors(wad.getLump(mapLumpIndex + 6));
-        this.parseNodes(wad.getLump(mapLumpIndex + 7));
-        this.parseSectors(wad.getLump(mapLumpIndex + 8));
-        //this.parseReject(wad.getLump(mapLumpIndex + 9));
-        //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
-        
-        this.calculateBoundaries();
+
+        // Detect the format of the map first
+        if (wad.lumps[mapLumpIndex + 1].name == "TEXTMAP") this.format = "UDMF";
+        else if (wad.lumps[mapLumpIndex + 11].name == "BEHAVIOR") this.format = "Hexen";
+        else this.format = "Doom";
+
+        if (this.format == "Doom") {
+            this.parseThings(wad.getLump(mapLumpIndex + 1));
+            this.parseLinedefs(wad.getLump(mapLumpIndex + 2));
+            this.parseSidedefs(wad.getLump(mapLumpIndex + 3));
+            this.parseVertexes(wad.getLump(mapLumpIndex + 4));
+            this.parseSegs(wad.getLump(mapLumpIndex + 5));
+            this.parseSsectors(wad.getLump(mapLumpIndex + 6));
+            this.parseNodes(wad.getLump(mapLumpIndex + 7));
+            this.parseSectors(wad.getLump(mapLumpIndex + 8));
+            //this.parseReject(wad.getLump(mapLumpIndex + 9));
+            //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
+            
+            this.calculateBoundaries();
+        }
 
         this.name = mapname;
 
@@ -215,7 +223,14 @@ var MapData = {
     },
         
     toCanvas : function(width,height) {
-        
+          
+        // Early-out if it is not a Doom format map.
+        if (this.format != "Doom") {
+           var output = document.createElement("div");
+           output.innerHTML = "Unable to render "+this.format+" format maps.";
+           return output;
+        }
+
         var canvas = document.createElement("canvas");
         
         var mwidth = this.right - this.left;
