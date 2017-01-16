@@ -84,6 +84,7 @@ var Wad = {
     	   }
     	  
            if (offset >= blob.size) {
+		self.onProgress();
     		self.onLoad();
     		self.playpal = Object.create(Playpal);
     		if (self.lumpExists("PLAYPAL")) {
