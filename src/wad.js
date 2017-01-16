@@ -39,7 +39,6 @@ var Wad = {
         var reader = new FileReader();
     	reader.readAsArrayBuffer(blob);
     	reader.onprogress = self.onProgress;
-	var reads = 0;
 
     	reader.onload = function(e) {
     		self.data = e.target.result;
@@ -61,7 +60,6 @@ var Wad = {
     	}
 
     	var nextChunk = function(e) {
-	   ++reads;
     	   offset += e.target.result.byteLength;
 
     	   var dataReader = new DataView(e.target.result);
@@ -86,7 +84,6 @@ var Wad = {
     	   }
     	  
            if (offset >= blob.size) {
-		console.log(reads);
     		self.onLoad();
     		self.playpal = Object.create(Playpal);
     		if (self.lumpExists("PLAYPAL")) {
