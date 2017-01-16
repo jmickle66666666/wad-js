@@ -1,5 +1,7 @@
 var MapData = {
     
+    // internal data
+
     things : null,
     vertexes : null,
     linedefs : null,
@@ -13,6 +15,11 @@ var MapData = {
     wad : null,
     
     thingTable : null,
+
+    // map information
+
+    name : null,
+    music : null,
     
     //boundaries
     
@@ -42,6 +49,15 @@ var MapData = {
         //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
         
         this.calculateBoundaries();
+
+        this.name = mapname;
+
+        // When MAPINFO parsing is done there can be more accurate checks
+        if (/^E\dM\d/.test(mapname)) {
+            if (wad.lumpExists("MUS_"+mapname)) this.music = "MUS_"+mapname; // Heretic
+            if (wad.lumpExists("D_"+mapname)) this.music = "D_"+mapname; // Doom 1
+        }
+        if (Doom2DefaultMusic[mapname]!= null) this.music = Doom2DefaultMusic[mapname];
     },
     
     calculateBoundaries : function() {
@@ -503,4 +519,39 @@ var DoomThingTable = {
   "short red torch":57,
   "floor lamp":2028,
   "barrel":2035
+}
+
+var Doom2DefaultMusic = {
+    "MAP01":"D_RUNNIN",
+    "MAP02":"D_STALKS",
+    "MAP03":"D_COUNTD",
+    "MAP04":"D_BETWEE",
+    "MAP05":"D_DOOM",
+    "MAP06":"D_THE_DA",
+    "MAP07":"D_SHAWN",
+    "MAP08":"D_DDTBLU",
+    "MAP09":"D_IN_CIT",
+    "MAP10":"D_DEAD",
+    "MAP11":"D_STLKS2",
+    "MAP12":"D_THE_DA2",
+    "MAP13":"D_DOOM2",
+    "MAP14":"D_DDTBL2",
+    "MAP15":"D_RUNNI2",
+    "MAP16":"D_DEAD2",
+    "MAP17":"D_STLKS3",
+    "MAP18":"D_ROMERO",
+    "MAP19":"D_SHAWN2",
+    "MAP20":"D_MESSAG",
+    "MAP21":"D_COUNT2",
+    "MAP22":"D_DDTBL3",
+    "MAP23":"D_AMPIE",
+    "MAP24":"D_THEDA3",
+    "MAP25":"D_ADRIAN",
+    "MAP26":"D_MESSG2",
+    "MAP27":"D_ROMER2",
+    "MAP28":"D_TENSE",
+    "MAP29":"D_SHAWN3",
+    "MAP30":"D_OPENIN",
+    "MAP31":"D_EVIL",
+    "MAP32":"D_ULTIMA"
 }
