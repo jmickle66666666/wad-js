@@ -78,8 +78,3 @@ li {
 li:hover {
     background-color: #eee;
 }
-
-.dropdown-menu {
-	position: static;
-	float: none;
-}
