@@ -47,3 +47,5 @@ webix/
 *.swp
 
 node_modules/
+dist/
+sourceMap.map

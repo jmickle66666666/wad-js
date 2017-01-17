@@ -83,12 +83,13 @@ var Wad = {
     		   self.lumps.push(lumpEntry);
     	   }
     	  
-               if (offset >= blob.size) {
+           if (offset >= blob.size) {
+		self.onProgress();
+    		self.onLoad();
     		self.playpal = Object.create(Playpal);
     		if (self.lumpExists("PLAYPAL")) {
     			self.playpal.load(wad.getLumpByName("PLAYPAL"));
     		}
-    		self.onLoad();
     	   	return;
     	   }
 

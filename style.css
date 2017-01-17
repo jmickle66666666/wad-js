@@ -71,7 +71,8 @@ li {
 }
 
 #textPreview {
-    overflow: auto;
+    height: 400px;
+    overflow-y: scroll;
 }
 
 li:hover {
