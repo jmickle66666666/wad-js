@@ -25,3 +25,12 @@ var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO",
                   "DECORATE", "SBARINFO", "MENUDEF" ];
 var DATA_LUMPS = [ "PLAYPAL", "COLORMAP", "TEXTURE1", "TEXTURE2", "PNAMES",
                     "ENDOOM"];
+
+var DEFAULT_EXTENSION = "lmp";
+var EXTENSIONS = {
+    "text" : "txt",
+    "mp3" : "mp3",
+    "mus" : "mus",
+    "midi" : "mid",
+    "png" : "png"
+};
