@@ -120,6 +120,19 @@ var Wad = {
             window.URL.revokeObjectURL(url);
         }
     },
+
+    saveLump : function(index) {
+        var name = this.lumps[index].name + '.lmp';
+        var toDownload=new Blob([this.getLump(index)],{type:'octet/stream'});
+        var a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style='display:none;';
+        var url=window.URL.createObjectURL(toDownload);
+        a.href = url;
+        a.download = name;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    },
     
     lumpExists : function (name) {
         for (var i = 0; i < this.numlumps; i++) {

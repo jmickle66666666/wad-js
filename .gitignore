@@ -47,3 +47,4 @@ webix/
 *.swp
 
 node_modules/
+dist/
