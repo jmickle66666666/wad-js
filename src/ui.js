@@ -113,6 +113,10 @@ function wadOnLoad(e) {
 					$('#preview').html("");
 					$('#preview').append(createAudioPreview(wad.getLump(i)));
 					break;
+				case MUS:
+					$('#preview').html("");
+					$('#preview').append(createMIDIPreview(mus2midi(wad.getLump(i))));
+					break;
 				case MIDI:
 					$('#preview').html("");
 					$('#preview').append(createMIDIPreview(wad.getLump(i)));
