@@ -10,6 +10,7 @@ module.exports = function(grunt) {
 				files: {
 				'dist/wad.min.js':
 					[
+						'dist/parser.bundle.js',
 						'src/wad/constants.js',
 						'src/wad.js',
 						'src/wad/mapdata.js',
