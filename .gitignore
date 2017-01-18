@@ -48,5 +48,5 @@ webix/
 
 node_modules/
 dist/
-sourceMap.map
-*.bundle.js
+dist/*.bundle.js
+dist/*.map
