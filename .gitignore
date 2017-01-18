@@ -49,3 +49,4 @@ webix/
 node_modules/
 dist/
 sourceMap.map
+*.bundle.js
