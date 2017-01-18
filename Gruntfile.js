@@ -44,11 +44,22 @@ module.exports = function(grunt) {
 					'dist/parser.bundle.js': ['src/wad/parser.js']
 				}
 			}
+		},
+		extract_sourcemap: {
+			build: {
+				options: {
+					removeSourcesContent: false
+				},
+				files: {
+					'dist': ['dist/parser.bundle.js']
+				}
+			}
 		}
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks('grunt-extract-sourcemap');
 
-	grunt.registerTask('default', ['browserify', 'uglify']);
+	grunt.registerTask('default', ['browserify', 'extract_sourcemap', 'uglify']);
 }
