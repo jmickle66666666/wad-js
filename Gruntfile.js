@@ -5,12 +5,11 @@ module.exports = function(grunt) {
 		uglify: {
 			build: {
 				options: {
-					sourceMap: true,
-					sourceMapName: 'sourceMap.map'
+					sourceMap: true
 				},
 				files: {
 				'dist/wad.min.js':
-					['dist/parser.bundle.js',
+					[
 						'src/wad/constants.js',
 						'src/wad.js',
 						'src/wad/mapdata.js',
