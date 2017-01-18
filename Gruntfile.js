@@ -41,7 +41,7 @@ module.exports = function(grunt) {
 					},
 				},
 				files: {
-					'src/wad/parser.js': ['dist/parser.bundle.js']
+					'dist/parser.bundle.js': ['src/wad/parser.js']
 				}
 			}
 		}
