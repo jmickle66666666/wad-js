@@ -26,7 +26,8 @@ Current features include:
 
 ## Development
  
-Follow the instructions [here](http://gruntjs.com/getting-started) on how to install and use Grunt. 
+Follow the instructions [here](http://gruntjs.com/getting-started) on how to install and use Grunt.
+
 Install Browserify using npm with `npm install -g browserify`
 
 ## How to???
