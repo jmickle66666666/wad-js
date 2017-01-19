@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 						'src/wad/graphic.js',
 						'src/wad/util.js',
 						'src/wad/mus2midi.js'
-					]
+					],
 					'dist/ui.min.js': [
 						'src/panels/wad_overview.js',
 						'src/panels/lump_list.js',
