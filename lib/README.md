@@ -1,5 +1,4 @@
-Changing the patch files
-^^^^^^^^^^^^^^^^^^^^^^^^
+# Changing the patch files
 
 The Javascript files are obtained from [midijs.net](http://www.midijs.net/) and the pat files are obtained from [babelsberg-js](https://github.com/babelsberg/babelsberg-js/tree/master/midijs/pat). The pat files are the one that are hard-coded into midi.js by default, however you can change this. 
 
