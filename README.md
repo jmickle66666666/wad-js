@@ -30,7 +30,11 @@ Follow the instructions [here](http://gruntjs.com/getting-started) on how to ins
 
 Install Browserify using npm with `npm install -g browserify`
 
-## How to???
+## Why?
+
+Libraries for reading and manipulating doom wads exist in many languages, but not Javascript (until now). Exposing this access to the web can make for a much wider variety of interesting possibilities. Please make a cool web tool with this!
+
+## How?
 
 ### Load WAD file from desktop
 
