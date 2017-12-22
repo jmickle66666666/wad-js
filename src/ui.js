@@ -26,7 +26,12 @@ function GetUrlValue(VarSearch){
 }
 
 if (GetUrlValue("wad") != null) {
+	console.log(GetUrlValue("wad"));
 	wad.loadURL(GetUrlValue("wad"));
+}
+
+if (GetUrlValue("idgames") != null) {
+	console.log(fetch("https://legacy.doomworld.com/idgames//api/api.php?action=ping&out=json"));
 }
 
 function initWad() {
