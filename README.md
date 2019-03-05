@@ -25,20 +25,28 @@ Current features include:
 
 ## Development
 
-### Install
-
-Install [Grunt](http://gruntjs.com/getting-started).
+Install dependencies.
 
 ```
-npm install -g grunt-cli
+npm install
 
 ```
 
-Install [Browserify](http://browserify.org/).
+Run the development server on `localhost:8080`.
 
 ```
-npm install -g browserify
-````
+npm start
+```
+
+Build the app for production.
+
+```
+npm build
+```
+
+
+
+## Legacy info
 
 ### Build
 

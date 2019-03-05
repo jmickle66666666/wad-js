@@ -6,7 +6,7 @@
   "README": "Readme.md",
   "scripts": {
     "start": "webpack-dev-server app --mode development",
-    "build:webpack": "webpack app --mode production",
+    "build": "webpack app --mode production",
     "build:grunt": "grunt"
   },
   "devDependencies": {
