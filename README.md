@@ -42,7 +42,7 @@ npm install -g browserify
 
 ### Build
 
-Simply type `grunt` or use `npm start`.
+Simply type `grunt` or use `npm run build:grunt`.
 
 ## How does it work?
 
