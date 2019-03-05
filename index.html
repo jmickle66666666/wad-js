@@ -1,188 +1,39 @@
+<!DOCTYPE html>
 <html>
     <head>
-        <title>wad js test</title>
-        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <meta charset="utf-8">
+        <title>wadJS</title>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
-        <style>
-            #preview {
-            position: fixed;
-            }
-            
-        </style>
     </head>
     <body>
-        <input type="file" id="fileInput">
-        <script type="text/javascript" src="wad.js"></script>
-        <script type="text/javascript" src="mapdata.js"></script>
-        <br>
-        <table><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></td></tr></table>
-        <script>
-            
-            var self = this;
-            var lumpnames = ["a","b","c"];
-            var fileInput = document.getElementById('fileInput');
-            var fileDisplayArea = document.getElementById('test');
-            var lumpList = null;
-            
-            function makeUL(array) {
-                // Create the list element:
-                var list = document.createElement('ol');
-                list.id = "lumpUL";
+	<div class="container">
+		<div class="row">
+			<form class="form-inline">
+				<div class="form-group">
+					<input type="file" id="fileInput">
+				</div>
 
-                for(var i = 0; i < array.length; i++) {
-                    // Create the list item:
-                    var item = document.createElement('li');
+				<div class="form-group">
+					<input class="form-control" type="url" id="urlInput">
+					<button class="btn btn-default" id="urlLoad" onClick="loadURL();">Load URL</button>
+				</div>
+			</form>
+			<p class="text-danger" id="errors"></p>
 
-                    // Set its contents:
-                    item.appendChild(document.createTextNode(array[i]));
+			<table id="lumpTable"><tr><td valign="top"><div id="lumpList"></div></td><td valign="top"><div id="preview"></div></td></tr></table>
+			<p id="loading">loading...</p>
+		</div>
+	</div>
 
-                    // Add it to the list:
-                    list.appendChild(item);
-                }
 
-                // Finally, return the constructed list:
-                return list;
-            }
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="lib/midi.js"></script>
 
-            fileInput.addEventListener('change', function(e) {
-                
-                if (self.lumpList) self.lumpList.destructor();
-                self.lumpnames = [];
-            
-                var file = fileInput.files[0];
-                console.log(file);
-                
-                wad = Object.create(Wad);
-                
-                wad.onLoad = function(e) {
-                    for (var i = 0; i < wad.lumps.length; i++) {
-                        self.lumpnames.push("[" + wad.detectLumpType(i) + "]" + wad.lumps[i].name);
-                    }
-                    
-                    $('#lumpList').html(makeUL(self.lumpnames));
-                    
-                    $('#lumpUL').delegate('li', 'click', function (e) {
-                        var li = e.target,
-                            i = 0;
-
-                        while ( li.previousElementSibling ) {
-                            li = li.previousElementSibling;
-                            i += 1;   
-                        }
-                        
-                        lumptype = wad.detectLumpType(i);
-                        
-                        switch (lumptype) {
-                            
-                            case TEXT:
-                                $('#preview').html(wad.getLumpAsText(i));
-                                break;
-                            case "PLAYPAL":
-                                playpal = Object.create(Playpal);
-                                playpal.load(wad.getLump(i));
-                                $("#preview").html("");
-                                document.getElementById("preview").appendChild(playpal.toCanvas());
-                                break;
-                            case "COLORMAP":
-                                colormap = Object.create(Colormap);
-                                colormap.load(wad.getLump(i));
-                                $("#preview").html("");
-                                document.getElementById("preview").appendChild(colormap.toCanvas(wad));
-                                break;
-                            case FLAT:
-                                flat = Object.create(Flat);
-                                flat.load(wad.getLump(i));
-                                $("#preview").html("");
-                                document.getElementById("preview").appendChild(flat.toCanvas(wad));
-                                break;
-                            case GRAPHIC:
-                                graphic = Object.create(Graphic);
-                                graphic.load(wad.getLump(i));
-                                $("#preview").html("");
-                                document.getElementById("preview").appendChild(graphic.toCanvas(wad));
-                                break;
-                            case "ENDOOM":
-                                endoom = Object.create(Endoom);
-                                endoom.onLoad = function() {
-                                    document.getElementById("preview").appendChild(endoom.toCanvas());
-                                };
-                                endoom.load(wad.getLump(i));
-                                $("#preview").html("");
-                                
-                                break;
-                            case MAP:
-                                map = Object.create(MapData);
-                                map.load(wad,wad.lumps[i].name);
-                                $("#preview").html("");
-                                var width = window.innerWidth
-                                            || document.documentElement.clientWidth
-                                            || document.body.clientWidth;
-                                var height = window.innerHeight
-                                            || document.documentElement.clientHeight
-                                            || document.body.clientHeight;
-                                document.getElementById("preview").appendChild(map.toCanvas((width - $('#lumpList').width()) * 0.8,height * 0.9));
-                                break;
-                            case MAPDATA:
-                                mapdata = Object.create(MapData);
-                                switch (wad.lumps[i].name) {
-                                    case "VERTEXES":
-                                        mapdata.parseVertexes(wad.getLump(i));
-                                        $("#preview").html("Total vertexes: "+mapdata.vertexes.length.toString());
-                                        break;
-                                    case "LINEDEFS":
-                                        mapdata.parseLinedefs(wad.getLump(i));
-                                        $("#preview").html("Total linedefs: "+mapdata.linedefs.length.toString());
-                                        break;
-                                    case "SIDEDEFS":
-                                        mapdata.parseSidedefs(wad.getLump(i));
-                                        $("#preview").html("Total sidedefs: "+mapdata.sidedefs.length.toString());
-                                        break;
-                                    case "SECTORS":
-                                        mapdata.parseSectors(wad.getLump(i));
-                                        $("#preview").html("Total sectors: "+mapdata.sectors.length.toString());
-                                        break;
-                                    case "THINGS":
-                                        mapdata.parseThings(wad.getLump(i));
-                                        
-                                        var tht = mapdata.getThingTable();
-                                        var tab = "";
-                                        console.log(mapdata.getDoomThingName(1));
-                                        for (var prop in tht) {
-                                            if (tht.hasOwnProperty(prop)) {
-                                                console.log(prop);
-                                                tab += mapdata.getDoomThingName(parseInt(prop));
-                                                tab += "s: "+tht[prop]+"<br>";
-                                            }
-                                        }
-                                        
-                                        $("#preview").html("Total things: "+mapdata.things.length.toString()+"<p>"+tab);
-                                        
-                                        
-                                        break;
-                                    default:
-                                        $("#preview").html("Unable to preview "+wad.lumps[i].name+" lumps");
-                                        break;
-                                }
-                                break;
-                            case "...":
-                                $('#preview').html("Unable to preview this lump, and can't detect it's type");
-                                break;
-                            default:
-                                $('#preview').html("Unable to preview "+lumptype+" lumps");
-                                break;
-                        
-                        }
-                    });
-                };
-                
-                wad.load(file);
-            });
-            
-            
-        
-            
-        
-        </script>
-        
+        <script type="text/javascript" src="dist/wad.min.js"></script>
+	<script type="text/javascript" src="dist/ui.min.js"></script>
     </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "name": "wadjs",
+  "version": "1.0.0",
+  "repository": "https://github.com/yvesgurcan/wadjs",
+  "author": "jmickle66666666",
+  "README": "Readme.md",
+  "scripts": {
+    "build": "grunt"
+  },
+  "devDependencies": {
+    "browserify": "^13.3.0",
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-extract-sourcemap": "^0.1.19",
+    "strscan": "^1.0.1",
+    "tree-model": "^1.0.6"
+  }
+}

@@ -1,11 +1,32 @@
 body {
-    background-color:#DD8;
+    font-family: 'Roboto', sans-serif;
+    background-color:#999;
+}
+
+.container .row {
+    margin-left: 200px;
 }
 
 #lumpUL {
-    margin-left: 0;
+    margin-left: -35px;
     padding-right: 0;
     list-style-type: none;
+
+    /* copied from sphinx_rtd_theme */
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    min-height: 100%;
+    background: #343131;
+    z-index: 200;
+}
+
+#lumpTable {
+    background-color:#777;
 }
 
 li {
@@ -13,7 +34,7 @@ li {
     padding : 5px;
     margin : 5px;
     border-width : 2px;
-    background-color: #eea;
+    background-color: #ddd;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -21,6 +42,37 @@ li {
     -ms-user-select: none;
     user-select: none;
     cursor: default;
+}
+
+#loading {
+    font-family: 'Inconsolata', monospace;
+    position: fixed;
+    border-style: solid;
+    padding : 5px;
+    border-width : 2px;
+    background-color: #ddd;
+}
+
+#preview {
+    font-family: 'Inconsolata', monospace;
+    white-space:pre;
+    position: fixed;
+    border-style: solid;
+    padding : 5px;
+    border-width : 2px;
+    background-color: #ddd;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+#textPreview {
+    height: 400px;
+    overflow-y: scroll;
 }
 
 li:hover {
