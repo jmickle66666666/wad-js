@@ -1,6 +1,9 @@
-# Web Tool <https://jmickle66666666.github.io/wad-js/>
-### Front-end tool for editing wads on the web.
-Load a wad from your device, or by URL and view many different types of lumps.
+# wadJS
+
+Edit Doom wad files in your browser.
+
+Libraries for reading and manipulating doom wads exist in many languages, but not Javascript (until now). Exposing this access to the web can make for a much wider variety of interesting possibilities. Please make a cool web tool with this!
+
 
 Preview support includes:
 * Text files
@@ -9,10 +12,6 @@ Preview support includes:
 * Graphics (Doom Image Format, Flats, PNGs)
 * ENDOOM, PLAYPAL and COLORMAP files
 * THINGS (displays thing count of Doom and Doom 2 types)
-
-# WAD.js
-### Javascript Library for manipulating Doom WAD format files
-Read Doom WADs and access data from many different common lump types easily. 
 
 Current features include:
 * Loading WADs from local directories or URLs
@@ -25,18 +24,29 @@ Current features include:
 * Render Maps to Canvas
 
 ## Development
- 
-Follow the instructions [here](http://gruntjs.com/getting-started) on how to install and use Grunt.
 
-Install Browserify using npm with `npm install -g browserify`
+### Install
 
-## Why?
+Install [Grunt](http://gruntjs.com/getting-started).
 
-Libraries for reading and manipulating doom wads exist in many languages, but not Javascript (until now). Exposing this access to the web can make for a much wider variety of interesting possibilities. Please make a cool web tool with this!
+```
+npm install -g grunt-cli
 
-## How?
+```
 
-### Load WAD file from desktop
+Install [Browserify](http://browserify.org/).
+
+```
+npm install -g browserify
+````
+
+### Build
+
+Simply type `grunt` or use `npm start`.
+
+## How does it work?
+
+### Loading a WAD file from your device
 
 In your HTML, any standard file input such as:
 `<input type="file" id="fileInput"/>`
@@ -57,7 +67,7 @@ fileInput.addEventListener('change', function(e) {
 }
 ```
 
-### Load WAD file from URL
+### Loading a WAD file from a URL
 
 Create a WAD object and load the URL
 ```
@@ -96,7 +106,7 @@ Just returns the index of the first lump matching the given name, instead of the
 `wad.getLumpAsText(index)` 
 Return the lump data as a string instead of byte data.
 
-## Lump interfaces
+### Lump interfaces
 
 ### Graphics
 
@@ -142,3 +152,7 @@ Create a new Colormap object
 Load lump data into colormap object
 `colormap.toCanvas();`
 Render the colormap to a canvas object and return it
+
+# Credit
+
+Forked from <https://github.com/jmickle66666666/wad-js>.
