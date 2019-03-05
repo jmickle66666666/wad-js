@@ -1,9 +1,16 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 
 // import style from "./Uploader.css";
 
 export default class Uploader extends Component {
+    handleInput = (event) => {
+        console.log(event)
+    }
     render () {
-        return <div>sss</div>;
+        return (
+            <Fragment>
+                <input type="file" onInput={this.handleInput} />
+            </Fragment>
+        );
     }
 }

@@ -1,16 +1,15 @@
 import React, { Component, Fragment } from "react";
 
-import style from "./App.css";
+import style from "./AppTitle.css";
 
-import AppTitle from './AppTitle'
 import Uploader from './Uploader'
 
-export default class App extends Component {
+export default class AppTitle extends Component {
     render () {
         return (
             <Fragment>
-                <AppTitle />
-                <Uploader />
+                <h1>WadJS</h1>
+                <div>version {VERSION}</div>
             </Fragment>
         );
     }

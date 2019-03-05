@@ -1,35 +1,44 @@
 {
-  "name": "wadjs",
-  "version": "1.0.0",
-  "repository": "https://github.com/yvesgurcan/wadjs",
-  "author": "jmickle66666666",
-  "README": "Readme.md",
-  "scripts": {
-    "start": "webpack-dev-server app --mode development",
-    "build": "webpack app --mode production",
-    "build:grunt": "grunt"
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "browserify": "^13.3.0",
-    "css-loader": "^2.1.0",
-    "grunt": "^1.0.1",
-    "grunt-browserify": "^5.0.0",
-    "grunt-contrib-uglify": "^4.0.0",
-    "grunt-extract-sourcemap": "^0.1.19",
-    "html-webpack-plugin": "^3.2.0",
-    "strscan": "^1.0.1",
-    "style-loader": "^0.23.1",
-    "tree-model": "^1.0.6",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
-  },
-  "dependencies": {
-    "react": "^16.8.3",
-    "react-dom": "^16.8.3"
-  }
+    "name": "wadjs",
+    "version": "0.1.0",
+    "repository": "https://github.com/yvesgurcan/wadjs",
+    "author": {
+        "name": "jmickle66666666"
+    },
+    "contributors": [
+        {
+            "name": "Yves Gurcan",
+            "email": "gurcan.yves@gmail.com"
+        }
+    ],
+    "scripts": {
+        "start": "webpack-dev-server app --mode development",
+        "build": "webpack app --mode production",
+        "build:grunt": "grunt"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.3.4",
+        "@babel/plugin-proposal-class-properties": "^7.3.4",
+        "@babel/plugin-transform-arrow-functions": "^7.2.0",
+        "@babel/preset-env": "^7.3.4",
+        "@babel/preset-react": "^7.0.0",
+        "babel-loader": "^8.0.5",
+        "browserify": "^13.3.0",
+        "css-loader": "^2.1.0",
+        "grunt": "^1.0.1",
+        "grunt-browserify": "^5.0.0",
+        "grunt-contrib-uglify": "^4.0.0",
+        "grunt-extract-sourcemap": "^0.1.19",
+        "html-webpack-plugin": "^3.2.0",
+        "strscan": "^1.0.1",
+        "style-loader": "^0.23.1",
+        "tree-model": "^1.0.6",
+        "webpack": "^4.29.6",
+        "webpack-cli": "^3.2.3",
+        "webpack-dev-server": "^3.2.1"
+    },
+    "dependencies": {
+        "react": "^16.8.3",
+        "react-dom": "^16.8.3"
+    }
 }

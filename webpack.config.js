@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 const isProduction = (argv) => argv.mode === 'production' ? true : false;
@@ -34,7 +35,10 @@ module.exports = (env, argv) => ({
     plugins: [
         new HtmlWebPackPlugin({
             template: "app/templates/index.html",
-            filename: isProduction(argv) ? '../index.html' : "index.html"
+            filename: isProduction(argv) ? "../index.html" : "index.html"
+        }),
+        new webpack.DefinePlugin({
+            VERSION: JSON.stringify(require("./package.json").version)
         })
     ]
 });
