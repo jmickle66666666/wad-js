@@ -1,17 +1,15 @@
-import React, { Component, Fragment } from "react";
+import React from 'react';
 
-import style from "./App.css";
+import style from './App.scss';
 
-import AppTitle from './AppTitle'
-import Uploader from './Uploader'
+import Header from './Header';
+import AppTitle from './AppTitle';
+import Uploader from './Uploader';
 
-export default class App extends Component {
-    render () {
-        return (
-            <Fragment>
-                <AppTitle />
-                <Uploader />
-            </Fragment>
-        );
-    }
-}
+export default () => (
+    <div className={style.app}>
+        <Header />
+        <AppTitle />
+        <Uploader />
+    </div>
+);

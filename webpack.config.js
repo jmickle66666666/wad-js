@@ -1,7 +1,8 @@
-const webpack = require("webpack");
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const webpack = require('webpack');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
+const info = require('./package.json');
 
-const isProduction = (argv) => argv.mode === 'production' ? true : false;
+const isProduction = argv => argv.mode === 'production';
 
 module.exports = (env, argv) => ({
     module: {
@@ -10,35 +11,46 @@ module.exports = (env, argv) => ({
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
-                   loader: "babel-loader"
-                }
+                    loader: 'babel-loader',
+                },
             },
             {
-                test: /\.css$/,
+                test: /\.scss$/,
                 use: [
                     {
-                        loader: "style-loader"
+                        loader: 'style-loader',
                     },
                     {
-                        loader: "css-loader",
+                        loader: 'css-loader',
                         options: {
                             modules: true,
                             importLoaders: 1,
-                            localIdentName: "[local]_[hash:base64]",
-                            sourceMap: true
-                        }
-                    }
-                ]
-            }
-        ]
+                            localIdentName: '[local]_[hash:base64]',
+                            sourceMap: true,
+                        },
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            modules: true,
+                            importLoaders: 1,
+                            localIdentName: '[local]_[hash:base64]',
+                            sourceMap: true,
+                        },
+                    },
+                ],
+            },
+        ],
     },
     plugins: [
         new HtmlWebPackPlugin({
-            template: "app/templates/index.html",
-            filename: isProduction(argv) ? "../index.html" : "index.html"
+            template: 'app/templates/index.html',
+            filename: isProduction(argv) ? '../index.html' : 'index.html',
         }),
         new webpack.DefinePlugin({
-            VERSION: JSON.stringify(require("./package.json").version)
-        })
-    ]
+            VERSION: JSON.stringify(info.version),
+            ISSUES: JSON.stringify(info.bugs.url),
+            REPO: JSON.stringify(info.homepage),
+        }),
+    ],
 });

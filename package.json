@@ -1,7 +1,6 @@
 {
     "name": "wadjs",
     "version": "0.1.0",
-    "repository": "https://github.com/yvesgurcan/wadjs",
     "author": {
         "name": "jmickle66666666"
     },
@@ -11,10 +10,15 @@
             "email": "gurcan.yves@gmail.com"
         }
     ],
+    "homepage": "https://github.com/yvesgurcan/wadjs",
+    "bugs": {
+        "url": "https://github.com/yvesgurcan/wadjs/issues"
+    },
     "scripts": {
         "start": "webpack-dev-server app --mode development",
         "build": "webpack app --mode production",
-        "build:grunt": "grunt"
+        "build:grunt": "grunt",
+        "lint": "eslint app"
     },
     "devDependencies": {
         "@babel/core": "^7.3.4",
@@ -22,14 +26,23 @@
         "@babel/plugin-transform-arrow-functions": "^7.2.0",
         "@babel/preset-env": "^7.3.4",
         "@babel/preset-react": "^7.0.0",
+        "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.5",
         "browserify": "^13.3.0",
         "css-loader": "^2.1.0",
+        "eslint": "^5.15.1",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-jsx-a11y": "^6.2.1",
+        "eslint-plugin-react": "^7.12.4",
         "grunt": "^1.0.1",
         "grunt-browserify": "^5.0.0",
         "grunt-contrib-uglify": "^4.0.0",
         "grunt-extract-sourcemap": "^0.1.19",
         "html-webpack-plugin": "^3.2.0",
+        "node-sass": "^4.11.0",
+        "prettier": "^1.16.4",
+        "sass-loader": "^7.1.0",
         "strscan": "^1.0.1",
         "style-loader": "^0.23.1",
         "tree-model": "^1.0.6",

@@ -1,0 +1,12 @@
+.header {
+    display: flex;
+    justify-content: flex-end;
+    & > div:not(:first-child) {
+        margin-left: 7px;
+        
+        &::before {
+            content: "•";
+            margin-right: 7px;
+        }
+    }
+}
