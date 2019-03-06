@@ -1,17 +1,23 @@
-import React, { Component, Fragment } from 'react';
+import React from 'react';
 
-// import style from "./Uploader.css";
+import style from './Uploader.scss';
 
-export default class Uploader extends Component {
-    handleInput = (event) => {
-        console.log(event);
-    }
-
-    render() {
-        return (
-            <Fragment>
-                <input type="file" onInput={this.handleInput} />
-            </Fragment>
-        );
-    }
-}
+export default ({ handleWadUpload, wad: { progress, name, error } }) => (
+    <div className={style.uploader}>
+        <h2>Uploader</h2>
+        <input type="file" onInput={handleWadUpload} />
+        {progress && (
+            <div className={style.loaded}>
+                {progress}
+                % loaded
+            </div>
+        )}
+        {error && (
+            <div className={style.error}>
+                Error:
+                {' '}
+                {error}
+            </div>
+        )}
+    </div>
+);
