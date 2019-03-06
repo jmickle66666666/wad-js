@@ -1,18 +1,21 @@
 .uploader {
-    padding: 20px;
+    padding: 40px;
     background: rgb(240, 240, 240);
-    max-width: 300px;
+    max-width: 400px;
     margin: auto;
     text-align: center;
+}
+
+h2 {
+    margin: 0;
+}
+
+input {
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .loaded {
     margin-top: 10px;
     margin-bottom: 10px;
-}
-
-.error {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color: darkred;
 }

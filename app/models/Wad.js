@@ -11,7 +11,7 @@ export default class Wad {
 
         reader.onerror = (error) => {
             console.error(`An error occurred while uploading '${this.name}'.`, error);
-            this.error = error;
+            this.errors.push(error);
 
             this.callback(this);
         };
@@ -20,7 +20,7 @@ export default class Wad {
             if (data.lengthComputable) {
                 const progress = data.loaded / data.total * 100;
                 this.progress = Math.ceil(progress);
-                this.error = null;
+                this.errors = [];
 
                 this.callback(this);
             }
@@ -39,7 +39,7 @@ export default class Wad {
             if (!this.isValidType(wadType)) {
                 this.progress = 100;
                 const error = `'${this.name}' is not a valid WAD file.`;
-                this.error = error;
+                this.errors.push(error);
                 console.error(error);
 
                 this.callback(this);
