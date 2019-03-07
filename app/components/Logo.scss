@@ -1,0 +1,36 @@
+.logo {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+img {
+    position: absolute;
+    z-index: 1;
+    height: 250px;
+    max-width: 100%;
+    margin-bottom: 160px;
+}
+
+h1 {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    z-index: 2;
+    font-family: Doom;
+}
+
+.wad {
+    color: rgb(230, 230, 230);
+}
+
+.js {
+    color: rgb(160, 0, 0);
+}

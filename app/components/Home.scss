@@ -1,8 +1,35 @@
-.app a {
-    text-decoration: none;
+@font-face {
+    font-family: 'Doom';
+    src: url('../assets/doom.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    background: black;
+}
+
+h2 {
+    margin: 5px;
 }
 
 .app {
     color: rgb(45, 45, 45);
     font-family: 'Roboto', sans-serif;
+}
+
+.app a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.main {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.top {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 100px;
+    flex-wrap: wrap;
 }

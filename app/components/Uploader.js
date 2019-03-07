@@ -5,8 +5,8 @@ import style from './Uploader.scss';
 import ErrorMessage from './ErrorMessage';
 
 export default ({ handleWadUpload, wad }) => (
-    <div className={style.uploaderOuter}>
-        <h2>Uploader</h2>
+    <div id="uploader" className={style.uploaderOuter}>
+        <h2 className={style.uploaderTitle}>Uploader</h2>
         <div className={style.uploaderInner}>
             <input type="file" onInput={handleWadUpload} />
             {wad.uploadedPercentage && (

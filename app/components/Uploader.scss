@@ -1,11 +1,12 @@
 .uploaderOuter {
-    background: rgb(220, 220, 220);
+    background: rgb(210, 210, 210);
     max-width: 500px;
-    margin: auto;
     text-align: center;
     box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid rgb(150, 150, 150);
+    flex: 1;
+    margin: 25px;
 }
 
 .uploaderInner {
@@ -18,8 +19,7 @@
     border-radius: 0 0 10px 10px;
 }
 
-h2 {
-    margin: 5px;
+.uploaderTitle {
     text-align: left;
 }
 

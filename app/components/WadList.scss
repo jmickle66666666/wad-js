@@ -1,3 +1,11 @@
-.wadList {
+.wadListOuter {
+    margin: 25px;
+}
+
+.wadListTitle {
+    color: rgb(240, 240, 240);
+}
+
+.wadListInner {
     display: flex;
 }

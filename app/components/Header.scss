@@ -1,4 +1,17 @@
-.header {
+.headerOuter {
+    position: fixed;
+    background: rgba(50, 50, 50, 0.9);
+    width: 100%;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 0 0 15px 15px;
+    box-sizing: border-box;
+    z-index: 999;
+}
+
+.headerInner {
+    color: white;
     display: flex;
     justify-content: flex-end;
     & > div:not(:first-child) {
