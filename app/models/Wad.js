@@ -1,28 +1,26 @@
-export default class Wad {
-    constructor(file, callback) {
-        this.raw = file;
-        this.name = file.name;
-        this.callback = callback;
-        this.read();
-    }
+import moment from 'moment';
 
-    initReader = () => {
+export default class Wad {
+    initReader = (callback) => {
         const reader = new FileReader();
 
         reader.onerror = (error) => {
-            console.error(`An error occurred while uploading '${this.name}'.`, error);
             this.errors.push(error);
+            callback(this);
+        };
 
-            this.callback(this);
+        reader.onloadstart = () => {
+            this.errors = [];
         };
 
         reader.onprogress = (data) => {
-            if (data.lengthComputable) {
-                const progress = data.loaded / data.total * 100;
-                this.progress = Math.ceil(progress);
-                this.errors = [];
+            if (this.size === undefined) {
+                this.size = data.total;
+            }
 
-                this.callback(this);
+            if (data.lengthComputable) {
+                this.bytesLoaded = data.loaded;
+                callback(this);
             }
         };
 
@@ -30,30 +28,30 @@ export default class Wad {
             const { result } = event.target;
             const data = new DataView(result);
 
+            this.bytesLoaded = this.size;
+            this.uploadEndAt = moment().utc().format();
+
             const {
                 wadType,
-                lumpCount,
-                directoryPosition,
+                headerLumpCount,
+                indexAddress,
             } = this.readHeader(data);
 
             if (!this.isValidType(wadType)) {
-                this.progress = 100;
                 const error = `'${this.name}' is not a valid WAD file.`;
                 this.errors.push(error);
-                console.error(error);
-
-                this.callback(this);
+                callback(this);
 
                 return false;
             }
 
             this.wadType = wadType;
-            this.lumpCount = lumpCount;
-            this.directoryPosition = directoryPosition;
-            this.offset = directoryPosition;
-            this.progress = 100;
+            this.headerLumpCount = headerLumpCount;
+            this.indexLumpCount = 0;
+            this.indexAddress = indexAddress;
+            this.indexOffset = indexAddress;
 
-            this.callback(this);
+            callback(this);
 
             return true;
         };
@@ -71,6 +69,19 @@ export default class Wad {
         return false;
     }
 
+    get uploadedPercentage() {
+        const progress = this.bytesLoaded / this.size * 100;
+        return Math.ceil(progress);
+    }
+
+    get uploaded() {
+        return this.errors.length === 0 && this.uploadedPercentage >= 100;
+    }
+
+    get processed() {
+        return this.headerLumpCount === this.indexLumpCount;
+    }
+
     readHeader = (data) => {
         const wadTypeData = [];
 
@@ -79,20 +90,50 @@ export default class Wad {
         }
 
         const wadType = wadTypeData.join('');
-        const lumpCount = data.getInt32(4, true);
-        const directoryPosition = data.getInt32(8, true);
+        const headerLumpCount = data.getInt32(4, true);
+        const indexAddress = data.getInt32(8, true);
 
         return {
             wadType,
-            lumpCount,
-            directoryPosition,
+            headerLumpCount,
+            indexAddress,
         };
     }
 
-    read = () => {
-        const reader = this.initReader();
-        this.reader = reader;
+    readFile = (file, callback) => {
+        this.file = file;
+        this.name = file.name;
+        this.uploadStartAt = moment().utc().format();
 
-        reader.readAsArrayBuffer(this.raw);
+        const reader = this.initReader(callback);
+        reader.readAsArrayBuffer(file);
+    }
+
+    restore = (wad) => {
+        const {
+            name,
+            wadType,
+            headerLumpCount,
+            indexLumpCount,
+            indexAddress,
+            indexOffset,
+            bytesLoaded,
+            size,
+            errors,
+            uploadStartAt,
+            uploadEndAt,
+        } = wad;
+
+        this.name = name;
+        this.wadType = wadType;
+        this.headerLumpCount = headerLumpCount;
+        this.indexLumpCount = indexLumpCount;
+        this.indexAddress = indexAddress;
+        this.indexOffset = indexOffset;
+        this.bytesLoaded = bytesLoaded;
+        this.size = size;
+        this.errors = errors;
+        this.uploadStartAt = uploadStartAt;
+        this.uploadEndAt = uploadEndAt;
     }
 }
