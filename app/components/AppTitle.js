@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react';
+import React from 'react';
+
+import style from './Logo.scss';
 
 export default () => (
-    <Fragment>
+    <div className={style.logo}>
         <h1>WadJS</h1>
-    </Fragment>
+    </div>
 );
