@@ -4,11 +4,20 @@ import style from './WadList.scss';
 
 import WadItem from './WadItem';
 
-export default ({ wad }) => (
+export default ({ wads, deleteWad, selectWad }) => (
     <div className={style.wadListOuter}>
-        <h2 className={style.wadListTitle}>Your WADs</h2>
+        <h2 className={style.wadListTitle}>Uploaded WADs</h2>
         <div className={style.wadListInner}>
-            {wad.uploaded && <WadItem wad={wad} />}
+            {
+                Object.keys(wads).map(wadId => (
+                    <WadItem
+                        key={wadId}
+                        wad={wads[wadId]}
+                        deleteWad={deleteWad}
+                        selectWad={selectWad}
+                    />
+                ))
+            }
         </div>
     </div>
 );

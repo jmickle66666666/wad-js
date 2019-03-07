@@ -1,4 +1,9 @@
-.wad {
+.wadOuter {
+    margin: auto;
+    width: 275px;
+}
+
+.wadInner {
     display: flex;
     cursor: pointer; 
     justify-content: space-between;
@@ -6,11 +11,12 @@
     padding: 15px;
     margin: 20px;
     background: rgb(240, 240, 240);
-    width: 275px;
     box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid rgb(150, 150, 150);
-    margin: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 265px;
 }
 
 .deleteWad {
@@ -19,4 +25,9 @@
 
 .active {
     background: rgb(210, 210, 210);
+}
+
+.timestamp {
+    color: rgb(150, 150, 150);
+    font-size: 14px;
 }

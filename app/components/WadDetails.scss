@@ -1,15 +1,15 @@
-.uploaderOuter {
+.wadDetailsOuter {
     background: rgb(210, 210, 210);
-    max-width: 500px;
     text-align: center;
     box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid rgb(150, 150, 150);
     flex: 1;
     margin: 25px;
+    align-self: flex-start;
 }
 
-.uploaderInner {
+.wadDetailsInner {
     padding-left: 40px;
     padding-right: 40px;
     padding-bottom: 40px;
@@ -19,16 +19,6 @@
     border-radius: 0 0 10px 10px;
 }
 
-.uploaderTitle {
+.wadDetailsTitle {
     text-align: left;
-}
-
-input {
-    padding-top: 20px;
-    padding-bottom: 20px;
-}
-
-.loaded {
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
