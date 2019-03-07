@@ -40,6 +40,20 @@ module.exports = (env, argv) => ({
                     },
                 ],
             },
+            {
+                test: /\.png$/,
+                use: 'url-loader?mimetype=image/png',
+            },
+            {
+                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: '[name].[ext]',
+                        outputPath: 'fonts/',
+                    },
+                }],
+            },
         ],
     },
     plugins: [

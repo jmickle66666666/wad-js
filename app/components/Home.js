@@ -7,7 +7,7 @@ import LocalStorageManager from '../lib/LocalStorageManager';
 import Wad from '../models/Wad';
 
 import Header from './Header';
-import AppTitle from './AppTitle';
+import Logo from './Logo';
 import Uploader from './Uploader';
 import WadList from './WadList';
 
@@ -56,12 +56,16 @@ export default class App extends Component {
         return (
             <div className={style.app}>
                 <Header />
-                <AppTitle />
-                <Uploader
-                    wad={wad}
-                    handleWadUpload={this.handleWadUpload}
-                />
-                <WadList wad={wad} />
+                <div className={style.main}>
+                    <Logo />
+                    <div className={style.top}>
+                        <Uploader
+                            wad={wad}
+                            handleWadUpload={this.handleWadUpload}
+                        />
+                        <WadList wad={wad} />
+                    </div>
+                </div>
             </div>
         );
     }
