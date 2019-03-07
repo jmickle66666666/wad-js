@@ -1,7 +1,7 @@
 import React from 'react';
 
-export default (props) => (
-        <div>
-            lumps
-        </div>
-    );
+export default props => (
+    <div>
+        lumps
+    </div>
+);
