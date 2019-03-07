@@ -3,6 +3,7 @@ import moment from 'moment';
 export default class Wad {
     initReader = (callback) => {
         const reader = new FileReader();
+        this.errors = [];
 
         reader.onerror = (error) => {
             this.errors.push(error);
@@ -101,9 +102,11 @@ export default class Wad {
     }
 
     readFile = (file, callback) => {
-        this.file = file;
         this.name = file.name;
-        this.uploadStartAt = moment().utc().format();
+
+        const timestamp = moment().utc();
+        this.uploadStartAt = timestamp.format();
+        this.id = `${file.name}_${timestamp.unix()}`;
 
         const reader = this.initReader(callback);
         reader.readAsArrayBuffer(file);
@@ -122,6 +125,7 @@ export default class Wad {
             errors,
             uploadStartAt,
             uploadEndAt,
+            id,
         } = wad;
 
         this.name = name;
@@ -135,5 +139,6 @@ export default class Wad {
         this.errors = errors;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
+        this.id = id;
     }
 }
