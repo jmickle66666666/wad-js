@@ -1,18 +1,34 @@
-.uploader {
-    padding: 20px;
-    background: rgb(240, 240, 240);
-    max-width: 300px;
+.uploaderOuter {
+    background: rgb(220, 220, 220);
+    max-width: 500px;
     margin: auto;
     text-align: center;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgb(150, 150, 150);
+}
+
+.uploaderInner {
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 40px;
+    background: rgb(240, 240, 240);
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 0 0 10px 10px;
+}
+
+h2 {
+    margin: 5px;
+    text-align: left;
+}
+
+input {
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .loaded {
     margin-top: 10px;
     margin-bottom: 10px;
-}
-
-.error {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color: darkred;
 }

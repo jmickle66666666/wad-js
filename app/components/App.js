@@ -1,38 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { HashRouter, Route } from 'react-router-dom';
 
-import style from './App.scss';
+import Home from './Home';
+import WadDetails from './WadDetails';
 
-import Wad from '../models/Wad';
-
-import Header from './Header';
-import AppTitle from './AppTitle';
-import Uploader from './Uploader';
-
-export default class App extends Component {
-    state = { wad: {} }
-
-    updateWad = (wad) => {
-        this.setState(() => ({ wad }));
-    }
-
-    handleWadUpload = (event) => {
-        const wad = new Wad(
-            event.target.files[0],
-            this.updateWad,
-        );
-    }
-
-    render() {
-        const { wad } = this.state;
-        return (
-            <div className={style.app}>
-                <Header />
-                <AppTitle />
-                <Uploader
-                  wad={wad}
-                  handleWadUpload={this.handleWadUpload}
-                />
-            </div>
-        );
-    }
-}
+export default () => (
+    <HashRouter>
+        <div>
+            <Route path="/" component={Home} />
+            <Route path="/wad/:name" component={WadDetails} />
+        </div>
+    </HashRouter>
+);
