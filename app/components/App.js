@@ -18,10 +18,15 @@ export default class App extends Component {
     constructor() {
         super();
         const wads = this.getSavedWads();
+
         this.state = {
             wads,
             selectedWad: {},
         };
+    }
+
+    componentDidMount() {
+        this.preUploadFreedoom();
     }
 
     getSavedWads() {
@@ -54,6 +59,14 @@ export default class App extends Component {
         }
 
         return wads;
+    }
+
+    preUploadFreedoom = () => {
+        const wad = new Wad();
+        wad.readRemoteFile(
+            '/public/freedoom1.wad',
+            this.addWad,
+        );
     }
 
     addWad = (wad) => {

@@ -18,10 +18,18 @@ export default class WadUploader extends Component {
         }
     }
 
-    handleWadUpload = (event) => {
+    handleLocalWadUpload = (event) => {
         const wad = new Wad();
-        wad.readFile(
+        wad.readLocalFile(
             event.target.files[0],
+            this.updateWad,
+        );
+    }
+
+    handleRemoteWadUpload = () => {
+        const wad = new Wad();
+        wad.readRemoteFile(
+            '/public/freedoom1.wad',
             this.updateWad,
         );
     }
@@ -34,7 +42,7 @@ export default class WadUploader extends Component {
                 <div className={style.uploaderOuter}>
                     <h2 className={style.uploaderTitle}>Uploader</h2>
                     <div className={style.uploaderInner}>
-                        <input type="file" onInput={this.handleWadUpload} />
+                        <input type="file" onInput={this.handleLocalWadUpload} />
                         {wad.uploadedPercentage && (
                             <div className={style.loaded}>
                                 {wad.uploadedPercentage}

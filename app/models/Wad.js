@@ -1,6 +1,37 @@
 import moment from 'moment';
 
 export default class Wad {
+    processBlob = (blob, callback) => {
+        const data = new DataView(blob);
+
+        this.bytesLoaded = this.size;
+        this.uploadEndAt = moment().utc().format();
+
+        const {
+            wadType,
+            headerLumpCount,
+            indexAddress,
+        } = this.readHeader(data);
+
+        if (!this.isValidType(wadType)) {
+            const error = `'${this.name}' is not a valid WAD file.`;
+            this.errors.push(error);
+            callback(this);
+
+            return false;
+        }
+
+        this.wadType = wadType;
+        this.headerLumpCount = headerLumpCount;
+        this.indexLumpCount = 0;
+        this.indexAddress = indexAddress;
+        this.indexOffset = indexAddress;
+
+        callback(this);
+
+        return true;
+    }
+
     initReader = (callback) => {
         const reader = new FileReader();
         this.errors = [];
@@ -27,34 +58,8 @@ export default class Wad {
 
         reader.onload = (event) => {
             const { result } = event.target;
-            const data = new DataView(result);
 
-            this.bytesLoaded = this.size;
-            this.uploadEndAt = moment().utc().format();
-
-            const {
-                wadType,
-                headerLumpCount,
-                indexAddress,
-            } = this.readHeader(data);
-
-            if (!this.isValidType(wadType)) {
-                const error = `'${this.name}' is not a valid WAD file.`;
-                this.errors.push(error);
-                callback(this);
-
-                return false;
-            }
-
-            this.wadType = wadType;
-            this.headerLumpCount = headerLumpCount;
-            this.indexLumpCount = 0;
-            this.indexAddress = indexAddress;
-            this.indexOffset = indexAddress;
-
-            callback(this);
-
-            return true;
+            this.processBlob(result, callback);
         };
 
         return reader;
@@ -101,7 +106,7 @@ export default class Wad {
         };
     }
 
-    readFile = (file, callback) => {
+    readLocalFile = (file, callback) => {
         this.name = file.name;
 
         const timestamp = moment().utc();
@@ -110,6 +115,15 @@ export default class Wad {
 
         const reader = this.initReader(callback);
         reader.readAsArrayBuffer(file);
+    }
+
+    readRemoteFile = (url, callback) => {
+        // needs ID and name, etc.
+        fetch(url)
+            .then(response => response.arrayBuffer())
+            .then((result) => {
+                this.processBlob(result, callback);
+            });
     }
 
     restore = (wad) => {
