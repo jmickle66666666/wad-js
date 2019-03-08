@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import style from './WadDetails.scss';
 
+import WadMetadata from './WadMetadata';
+
 export default ({ selectedWad: wad }) => (
-    <div className={style.wadDetailsOuter}>
+    <Fragment>
         <h2 className={style.wadDetailsTitle}>
             {wad.name}
         </h2>
-        <div className={style.wadDetailsInner} />
-    </div>
+        <WadMetadata wad={style.wad} />
+    </Fragment>
 );

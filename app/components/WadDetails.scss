@@ -1,24 +1,4 @@
-.wadDetailsOuter {
-    background: rgb(210, 210, 210);
-    text-align: center;
-    box-sizing: border-box;
-    border-radius: 10px;
-    border: 1px solid rgb(150, 150, 150);
-    flex: 1;
-    margin: 25px;
-    align-self: flex-start;
-}
-
-.wadDetailsInner {
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-bottom: 40px;
-    background: rgb(240, 240, 240);
-    text-align: center;
-    box-sizing: border-box;
-    border-radius: 0 0 10px 10px;
-}
-
 .wadDetailsTitle {
-    text-align: left;
+    color: rgb(240, 240, 240);
+    text-align: center;
 }

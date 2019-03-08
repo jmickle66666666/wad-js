@@ -8,8 +8,11 @@ body {
     background: black;
 }
 
-h2 {
+h2, h3 {
+    font-size: 24px;
     margin: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .app {
