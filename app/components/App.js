@@ -26,7 +26,10 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        this.preUploadFreedoom();
+        const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
+        if (!freedoomPreloaded) {
+            this.preUploadFreedoom();
+        }
     }
 
     getSavedWads() {
@@ -77,6 +80,9 @@ export default class App extends Component {
             this.addFreedoom,
             true,
         );
+
+        // dev: comment out when feature is ready
+        // localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {

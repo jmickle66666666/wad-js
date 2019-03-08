@@ -62,6 +62,7 @@ module.exports = (env, argv) => ({
             filename: isProduction(argv) ? '../index.html' : 'index.html',
         }),
         new webpack.DefinePlugin({
+            PROJECT: JSON.stringify(info.name),
             VERSION: JSON.stringify(info.version),
             ISSUES: JSON.stringify(info.bugs.url),
             REPO: JSON.stringify(info.homepage),
