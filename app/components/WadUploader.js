@@ -116,7 +116,12 @@ export default class WadUploader extends Component {
                     <div className={style.uploaderInner}>
                         <label htmlFor="localInput" className={style.uploaderInput}>
                             <div className={style.uploaderLabel}>From device:</div>
-                            <input id="localInput" type="file" onInput={this.handleLocalWadUpload} />
+                            <input
+                                id="localInput"
+                                type="file"
+                                onInput={this.handleLocalWadUpload}
+                                accept=".wad,.zip,.pk3"
+                            />
                         </label>
                         <label htmlFor="remoteUrl" className={style.uploaderInput}>
                             <div className={style.uploaderLabel}>From URL:</div>
@@ -126,18 +131,19 @@ export default class WadUploader extends Component {
                                         id="remoteWadUrl"
                                         value={remoteWadUrl}
                                         placeholder="https://"
-                                        onInput={this.saveRemoteWadMetadata}
+                                        onChange={this.saveRemoteWadMetadata}
                                     />
                                     <input
                                         id="remoteWadFilename"
                                         value={remoteWadFilename}
                                         placeholder="doom.wad"
-                                        onInput={this.saveRemoteWadMetadata}
+                                        onChange={this.saveRemoteWadMetadata}
                                     />
                                 </div>
                                 <button onClick={this.handleRemoteWadUpload}>Upload from URL</button>
                             </div>
                         </label>
+                        <div>Supported formats: .wad, .zip, .pk3</div>
                         {wad.uploadedPercentage && (
                             <div className={style.loaded}>
                                 {wad.uploadedPercentage}
