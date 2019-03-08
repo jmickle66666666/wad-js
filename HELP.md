@@ -1,4 +1,4 @@
-## WAD Uploader
+## Uploader
 
 Use the WAD Uploader to add files you want to inspect with wadJS. Supported file formats are `.wad`, `.zip`, and `.pk3`.
 
