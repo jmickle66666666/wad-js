@@ -4,18 +4,29 @@ import style from './WadUploader.scss';
 
 import Wad from '../models/Wad';
 
+import Help from './Help';
 import ErrorMessage from './ErrorMessage';
 
 export default class WadUploader extends Component {
     state = {
-        wad: { errors: [] },
+        wads: {},
+        remoteWadErrors: [],
         remoteWadUrl: '',
         remoteWadFilename: '',
         untouchedFilename: true,
     }
 
     updateWad = (wad) => {
-        this.setState(() => ({ wad }));
+        this.setState((prevState) => {
+            const updatedWads = {
+                ...prevState.wads,
+                [wad.id]: wad,
+            };
+
+            return {
+                wads: updatedWads,
+            };
+        });
 
         if (wad.errors.length === 0 && wad.bytesLoaded === wad.size) {
             const { addWad } = this.props;
@@ -24,11 +35,20 @@ export default class WadUploader extends Component {
     }
 
     handleLocalWadUpload = (event) => {
-        const wad = new Wad();
-        wad.readLocalFile(
-            event.target.files[0],
-            this.updateWad,
-        );
+        const wads = event.target.files;
+
+        this.setState(() => ({
+            wads: {},
+            remoteWadErrors: [],
+        }));
+
+        for (let i = 0; i < wads.length; i++) {
+            const wad = new Wad();
+            wad.readLocalFile(
+                wads[i],
+                this.updateWad,
+            );
+        }
     }
 
     handleRemoteWadUpload = () => {
@@ -39,30 +59,25 @@ export default class WadUploader extends Component {
         const wad = new Wad();
 
         this.setState(() => ({
-            wad: {
-                errors: [],
-            },
+            wads: {},
+            remoteWadErrors: [],
         }));
 
         if (!remoteWadUrl) {
             this.setState(prevState => ({
-                wad: {
-                    errors: [
-                        ...prevState.wad.errors,
-                        'WAD URL can not be empty.',
-                    ],
-                },
+                remoteWadErrors: [
+                    ...prevState.remoteWadErrors,
+                    'WAD URL can not be empty.',
+                ],
             }));
         }
 
         if (!remoteWadFilename) {
             this.setState(prevState => ({
-                wad: {
-                    errors: [
-                        ...prevState.wad.errors,
-                        'WAD filename can not be empty.',
-                    ],
-                },
+                remoteWadErrors: [
+                    ...prevState.remoteWadErrors,
+                    'WAD filename can not be empty.',
+                ],
             }));
         }
 
@@ -104,7 +119,8 @@ export default class WadUploader extends Component {
 
     render() {
         const {
-            wad,
+            wads,
+            remoteWadErrors,
             remoteWadUrl,
             remoteWadFilename,
         } = this.state;
@@ -112,7 +128,9 @@ export default class WadUploader extends Component {
             <Fragment>
                 <span id="uploader" />
                 <div className={style.uploaderOuter}>
-                    <h2 className={style.uploaderTitle}>Uploader</h2>
+                    <Help id="uploader" title="how to use the uploader">
+                        <h2 className={style.uploaderTitle}>Uploader</h2>
+                    </Help>
                     <div className={style.uploaderInner}>
                         <label htmlFor="localInput" className={style.uploaderInput}>
                             <div className={style.uploaderLabel}>From device:</div>
@@ -121,6 +139,7 @@ export default class WadUploader extends Component {
                                 type="file"
                                 onInput={this.handleLocalWadUpload}
                                 accept=".wad,.zip,.pk3"
+                                multiple
                             />
                         </label>
                         <label htmlFor="remoteUrl" className={style.uploaderInput}>
@@ -140,26 +159,39 @@ export default class WadUploader extends Component {
                                         onChange={this.saveRemoteWadMetadata}
                                     />
                                 </div>
-                                <button onClick={this.handleRemoteWadUpload}>Upload from URL</button>
+                                <button type="button" onClick={this.handleRemoteWadUpload}>Upload from URL</button>
                             </div>
                         </label>
                         <div>Supported formats: .wad, .zip, .pk3</div>
-                        {wad.uploadedPercentage && (
-                            <div className={style.loaded}>
-                                {wad.uploadedPercentage}
-                                % loaded
-                            </div>
-                        )}
-                        {wad.uploaded && (
-                            <div className={style.processed}>
-                                {wad.indexLumpCount}
-                                /
-                                {wad.headerLumpCount}
-                                {' '}
-                                lumps processed
-                            </div>
-                        )}
-                        {wad.errors && wad.errors.map(error => <ErrorMessage key={error} message={error} />)}
+                        {Object.keys(wads).length > 0 && Object.keys(wads).map((wadKey) => {
+                            const wad = wads[wadKey];
+                            return (
+                                <div key={wad.id} className={style.uploaderFeedback}>
+                                    <div>{wad.name}</div>
+                                    {
+                                        wad.uploadedPercentage && (
+                                            <div className={style.loaded}>
+                                                {wad.uploadedPercentage}
+                                                % loaded
+                                            </div>
+                                        )
+                                    }
+                                    {
+                                        wad.uploaded && (
+                                            <div className={style.processed}>
+                                                {wad.indexLumpCount}
+                                                /
+                                                {wad.headerLumpCount}
+                                                {' '}
+                                                lumps processed
+                                            </div>
+                                        )
+                                    }
+                                    {wad.errors && wad.errors.map(error => <ErrorMessage key={error} message={error} />)}
+                                </div>
+                            );
+                        })}
+                        {remoteWadErrors && remoteWadErrors.map(error => <ErrorMessage key={error} message={error} />)}
                     </div>
                 </div>
             </Fragment>
