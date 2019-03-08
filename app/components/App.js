@@ -62,11 +62,30 @@ export default class App extends Component {
     }
 
     preUploadFreedoom = () => {
-        const wad = new Wad();
-        wad.readRemoteFile(
+        const freedoom1 = new Wad();
+        freedoom1.readRemoteFile(
             '/public/freedoom1.wad',
-            this.addWad,
+            'freedoom1.wad',
+            this.addFreedoom,
+            true,
         );
+
+        const freedoom2 = new Wad();
+        freedoom2.readRemoteFile(
+            '/public/freedoom2.wad',
+            'freedoom2.wad',
+            this.addFreedoom,
+            true,
+        );
+    }
+
+    addFreedoom = (wad) => {
+        if (wad.errors.length > 0) {
+            console.error(`An error occurred while uploading '${wad.name}'.`, wad.errors);
+            return;
+        }
+
+        this.addWad(wad);
     }
 
     addWad = (wad) => {
@@ -129,7 +148,7 @@ export default class App extends Component {
                     <Logo />
                     <div className={style.top}>
                         <WadUploader addWad={this.addWad} />
-                        {Object.keys(wads).length && (
+                        {Object.keys(wads).length > 0 && (
                             <WadList
                                 wads={wads}
                                 deleteWad={this.deleteWad}

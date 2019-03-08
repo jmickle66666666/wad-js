@@ -1,7 +1,6 @@
 .uploaderOuter {
     background: rgb(210, 210, 210);
     max-width: 500px;
-    text-align: center;
     box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid rgb(150, 150, 150);
@@ -25,9 +24,25 @@
     text-align: left;
 }
 
-input {
-    padding-top: 20px;
-    padding-bottom: 20px;
+.uploaderLabel {
+    margin-right: 10px;
+}
+
+.uploaderInput {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.remoteInputOuter {
+    flex: 1;
+}
+
+.remoteInputInner {
+    display: flex;
+    flex-direction: column;
 }
 
 .loaded {

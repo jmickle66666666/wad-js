@@ -1,6 +1,10 @@
 import moment from 'moment';
 
 export default class Wad {
+    constructor() {
+        this.errors = [];
+    }
+
     processBlob = (blob, callback) => {
         const data = new DataView(blob);
 
@@ -107,22 +111,34 @@ export default class Wad {
     }
 
     readLocalFile = (file, callback) => {
-        this.name = file.name;
-
         const timestamp = moment().utc();
+
         this.uploadStartAt = timestamp.format();
+        this.name = file.name;
         this.id = `${file.name}_${timestamp.unix()}`;
 
         const reader = this.initReader(callback);
         reader.readAsArrayBuffer(file);
     }
 
-    readRemoteFile = (url, callback) => {
-        // needs ID and name, etc.
+    readRemoteFile = (url, filename, callback, unique = false) => {
+        const timestamp = moment().utc();
+
+        this.uploadStartAt = timestamp.format();
+        this.name = filename;
+        this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
+
         fetch(url)
             .then(response => response.arrayBuffer())
             .then((result) => {
+                this.bytesLoaded = result.byteLength;
+                this.size = result.byteLength;
+
                 this.processBlob(result, callback);
+            })
+            .catch((error) => {
+                console.error(`An error occurred while uploading '${filename}'.`, error);
+                this.errors.push(error);
             });
     }
 
