@@ -14,10 +14,8 @@ export default () => (
         />
         <div className={style.headerInner}>
             <div>
-                <a target="_blank" rel="noopener noreferrer" href={REPO}>
-                    version
-                    {' '}
-                    {VERSION}
+                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/HELP.md`}>
+                    help
                 </a>
             </div>
             <div>
@@ -28,6 +26,12 @@ export default () => (
             <div>
                 <a target="_blank" rel="noopener noreferrer" href={ISSUES}>
                     report an issue
+                </a>
+            </div>
+            <div>
+                <a target="_blank" rel="noopener noreferrer" href={REPO}>
+                    v
+                    {VERSION}
                 </a>
             </div>
         </div>
