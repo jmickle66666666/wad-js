@@ -7,7 +7,12 @@ import Wad from '../models/Wad';
 import ErrorMessage from './ErrorMessage';
 
 export default class WadUploader extends Component {
-    state = { wad: { errors: [] } }
+    state = {
+        wad: { errors: [] },
+        remoteWadUrl: '',
+        remoteWadFilename: '',
+        untouchedFilename: true,
+    }
 
     updateWad = (wad) => {
         this.setState(() => ({ wad }));
@@ -70,6 +75,10 @@ export default class WadUploader extends Component {
             remoteWadFilename,
             this.updateWad,
         );
+
+        this.setState(() => ({
+            untouchedFilename: true,
+        }));
     }
 
     saveRemoteWadMetadata = (event) => {
@@ -77,10 +86,28 @@ export default class WadUploader extends Component {
         this.setState(() => ({
             [id]: value,
         }));
+
+        const { untouchedFilename } = this.state;
+        if (id === 'remoteWadUrl' && untouchedFilename) {
+            const filename = value.substring(value.lastIndexOf('/') + 1);
+            this.setState(() => ({
+                remoteWadFilename: filename,
+            }));
+        }
+
+        if (id === 'remoteWadFilename') {
+            this.setState(() => ({
+                untouchedFilename: false,
+            }));
+        }
     }
 
     render() {
-        const { wad } = this.state;
+        const {
+            wad,
+            remoteWadUrl,
+            remoteWadFilename,
+        } = this.state;
         return (
             <Fragment>
                 <span id="uploader" />
@@ -95,8 +122,18 @@ export default class WadUploader extends Component {
                             <div className={style.uploaderLabel}>From URL:</div>
                             <div className={style.remoteInputOuter}>
                                 <div className={style.remoteInputInner}>
-                                    <input id="remoteWadUrl" placeholder="https://" onInput={this.saveRemoteWadMetadata} />
-                                    <input id="remoteWadFilename" placeholder="doom.wad" onInput={this.saveRemoteWadMetadata} />
+                                    <input
+                                        id="remoteWadUrl"
+                                        value={remoteWadUrl}
+                                        placeholder="https://"
+                                        onInput={this.saveRemoteWadMetadata}
+                                    />
+                                    <input
+                                        id="remoteWadFilename"
+                                        value={remoteWadFilename}
+                                        placeholder="doom.wad"
+                                        onInput={this.saveRemoteWadMetadata}
+                                    />
                                 </div>
                                 <button onClick={this.handleRemoteWadUpload}>Upload from URL</button>
                             </div>
