@@ -17,14 +17,14 @@ export default class LocalStorageManager {
             return null;
         }
 
-        const value = localStorage.getItem(key);
+        const value = localStorage.getItem(`${PROJECT}-${key}`);
 
         return value;
     }
 
     set(key, value) {
         try {
-            this.localStorage.setItem(key, JSON.stringify(value));
+            this.localStorage.setItem(`${PROJECT}-${key}`, JSON.stringify(value));
 
             return value;
         } catch (error) {

@@ -1,6 +1,6 @@
 {
     "name": "wadjs",
-    "version": "0.1.4",
+    "version": "0.1.6",
     "author": {
         "name": "jmickle66666666"
     },
@@ -53,6 +53,7 @@
         "webpack-dev-server": "^3.2.1"
     },
     "dependencies": {
+        "jszip": "^3.2.0",
         "moment": "^2.24.0",
         "react": "^16.8.3",
         "react-dom": "^16.8.3",

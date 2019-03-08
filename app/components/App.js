@@ -14,14 +14,28 @@ import WadDetails from './WadDetails';
 
 const localStorageManager = new LocalStorageManager();
 
+const { NODE_ENV } = process.env;
+
+if (NODE_ENV === 'development') {
+    document.title += ' [dev]';
+}
+
 export default class App extends Component {
     constructor() {
         super();
         const wads = this.getSavedWads();
+
         this.state = {
             wads,
             selectedWad: {},
         };
+    }
+
+    componentDidMount() {
+        const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
+        if (!freedoomPreloaded) {
+            this.preUploadFreedoom();
+        }
     }
 
     getSavedWads() {
@@ -54,6 +68,36 @@ export default class App extends Component {
         }
 
         return wads;
+    }
+
+    preUploadFreedoom = () => {
+        const freedoom1 = new Wad();
+        freedoom1.readRemoteFile(
+            '/public/freedoom1.wad',
+            'freedoom1.wad',
+            this.addFreedoom,
+            true,
+        );
+
+        const freedoom2 = new Wad();
+        freedoom2.readRemoteFile(
+            '/public/freedoom2.wad',
+            'freedoom2.wad',
+            this.addFreedoom,
+            true,
+        );
+
+        // dev: comment out when feature is ready
+        // localStorageManager.set('freedoom-preloaded', true);
+    }
+
+    addFreedoom = (wad) => {
+        if (wad.errors.length > 0) {
+            console.error(`An error occurred while uploading '${wad.name}'.`, wad.errors);
+            return;
+        }
+
+        this.addWad(wad);
     }
 
     addWad = (wad) => {
@@ -116,7 +160,7 @@ export default class App extends Component {
                     <Logo />
                     <div className={style.top}>
                         <WadUploader addWad={this.addWad} />
-                        {Object.keys(wads).length && (
+                        {Object.keys(wads).length > 0 && (
                             <WadList
                                 wads={wads}
                                 deleteWad={this.deleteWad}

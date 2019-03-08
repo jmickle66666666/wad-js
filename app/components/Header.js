@@ -21,6 +21,11 @@ export default () => (
                 </a>
             </div>
             <div>
+                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/CHANGELOG.md`}>
+                    changelog
+                </a>
+            </div>
+            <div>
                 <a target="_blank" rel="noopener noreferrer" href={ISSUES}>
                     report an issue
                 </a>

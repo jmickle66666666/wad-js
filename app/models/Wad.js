@@ -1,6 +1,105 @@
 import moment from 'moment';
 
+import JSZip from 'jszip';
+
 export default class Wad {
+    constructor() {
+        this.errors = [];
+    }
+
+    isValidType = (wadType) => {
+        const type = wadType || this.wadType;
+
+        if (type === 'IWAD' || type === 'PWAD') {
+            return true;
+        }
+
+        return false;
+    }
+
+    checkZipFile = (blob) => {
+        const fileSignature = blob.getUint32(0, false).toString(16);
+        const isZipped = fileSignature === '504b0304';
+        this.isZipped = isZipped;
+        return isZipped;
+    }
+
+    unZipFile = (blob, callback) => {
+        const zip = new JSZip();
+
+        zip.loadAsync(blob)
+            .then((unzippedContent) => {
+                const fileNames = Object.keys(unzippedContent.files).map(fileName => fileName);
+
+                // TODO: have a stronger check for WAD files
+                const wadFileNames = fileNames.filter(fileName => fileName.toLowerCase().includes('.wad'));
+
+                if (wadFileNames.length === 0) {
+                    this.errors.push(`No WAD file found in '${this.name}'.`);
+                    callback(this);
+                    return;
+                }
+
+                // TODO: handle more than 1 zipped wad
+                if (wadFileNames.length > 1) {
+                    this.errors.push(`${wadFileNames.length} WAD files found in '${this.name}'. Extracting multiple WADs from the same ZIP file is not supported at this time.`);
+                    callback(this);
+                    return;
+                }
+
+                console.info(`Extracting '${wadFileNames[0]}' from '${this.name}'...`);
+
+                unzippedContent.file(wadFileNames[0]).async('arrayBuffer').then((wad) => {
+                    this.bytesLoaded = wad.byteLength;
+                    this.size = wad.byteLength;
+                    this.processBlob(wad, callback);
+                });
+            })
+            .catch((error) => {
+                console.error(`An error occurred while unzipping '${this.name}'.`, error);
+                this.errors.push(error);
+                callback(this);
+            });
+    }
+
+    processBlob = (blob, callback) => {
+        const data = new DataView(blob);
+
+        this.checkZipFile(data);
+
+        if (this.isZipped) {
+            this.unZipFile(blob, callback);
+            return false;
+        }
+
+        this.bytesLoaded = this.size;
+        this.uploadEndAt = moment().utc().format();
+
+        const {
+            wadType,
+            headerLumpCount,
+            indexAddress,
+        } = this.readHeader(data);
+
+        if (!this.isValidType(wadType)) {
+            const error = `'${this.name}' is not a valid WAD file.`;
+            this.errors.push(error);
+            callback(this);
+
+            return false;
+        }
+
+        this.wadType = wadType;
+        this.headerLumpCount = headerLumpCount;
+        this.indexLumpCount = 0;
+        this.indexAddress = indexAddress;
+        this.indexOffset = indexAddress;
+
+        callback(this);
+
+        return true;
+    }
+
     initReader = (callback) => {
         const reader = new FileReader();
         this.errors = [];
@@ -27,60 +126,11 @@ export default class Wad {
 
         reader.onload = (event) => {
             const { result } = event.target;
-            const data = new DataView(result);
 
-            this.bytesLoaded = this.size;
-            this.uploadEndAt = moment().utc().format();
-
-            const {
-                wadType,
-                headerLumpCount,
-                indexAddress,
-            } = this.readHeader(data);
-
-            if (!this.isValidType(wadType)) {
-                const error = `'${this.name}' is not a valid WAD file.`;
-                this.errors.push(error);
-                callback(this);
-
-                return false;
-            }
-
-            this.wadType = wadType;
-            this.headerLumpCount = headerLumpCount;
-            this.indexLumpCount = 0;
-            this.indexAddress = indexAddress;
-            this.indexOffset = indexAddress;
-
-            callback(this);
-
-            return true;
+            this.processBlob(result, callback);
         };
 
         return reader;
-    }
-
-    isValidType = (wadType) => {
-        const type = wadType || this.wadType;
-
-        if (type === 'IWAD' || type === 'PWAD') {
-            return true;
-        }
-
-        return false;
-    }
-
-    get uploadedPercentage() {
-        const progress = this.bytesLoaded / this.size * 100;
-        return Math.ceil(progress);
-    }
-
-    get uploaded() {
-        return this.errors.length === 0 && this.uploadedPercentage >= 100;
-    }
-
-    get processed() {
-        return this.headerLumpCount === this.indexLumpCount;
     }
 
     readHeader = (data) => {
@@ -101,15 +151,36 @@ export default class Wad {
         };
     }
 
-    readFile = (file, callback) => {
-        this.name = file.name;
-
+    readLocalFile = (file, callback) => {
         const timestamp = moment().utc();
+
         this.uploadStartAt = timestamp.format();
+        this.name = file.name;
         this.id = `${file.name}_${timestamp.unix()}`;
 
         const reader = this.initReader(callback);
         reader.readAsArrayBuffer(file);
+    }
+
+    readRemoteFile = (url, filename, callback, unique = false) => {
+        const timestamp = moment().utc();
+
+        this.uploadStartAt = timestamp.format();
+        this.name = filename;
+        this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
+
+        fetch(url)
+            .then(response => response.arrayBuffer())
+            .then((result) => {
+                this.bytesLoaded = result.byteLength;
+                this.size = result.byteLength;
+
+                this.processBlob(result, callback);
+            })
+            .catch((error) => {
+                console.error(`An error occurred while uploading '${filename}'.`, error);
+                this.errors.push(error);
+            });
     }
 
     restore = (wad) => {
@@ -140,5 +211,18 @@ export default class Wad {
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.id = id;
+    }
+
+    get uploadedPercentage() {
+        const progress = this.bytesLoaded / this.size * 100;
+        return Math.ceil(progress);
+    }
+
+    get uploaded() {
+        return this.errors.length === 0 && this.uploadedPercentage >= 100;
+    }
+
+    get processed() {
+        return this.headerLumpCount === this.indexLumpCount;
     }
 }

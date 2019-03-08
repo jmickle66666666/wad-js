@@ -39,7 +39,7 @@ npm start
 Build the app for production.
 
 ```
-npm build
+npm run build
 ```
 
 
