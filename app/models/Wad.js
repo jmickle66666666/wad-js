@@ -1,12 +1,76 @@
 import moment from 'moment';
 
+import JSZip from 'jszip';
+
 export default class Wad {
     constructor() {
         this.errors = [];
     }
 
+    isValidType = (wadType) => {
+        const type = wadType || this.wadType;
+
+        if (type === 'IWAD' || type === 'PWAD') {
+            return true;
+        }
+
+        return false;
+    }
+
+    checkZipFile = (blob) => {
+        const fileSignature = blob.getUint32(0, false).toString(16);
+        const isZipped = fileSignature === '504b0304';
+        this.isZipped = isZipped;
+        return isZipped;
+    }
+
+    unZipFile = (blob, callback) => {
+        const zip = new JSZip();
+
+        zip.loadAsync(blob)
+            .then((unzippedContent) => {
+                const fileNames = Object.keys(unzippedContent.files).map(fileName => fileName);
+
+                // TODO: have a stronger check for WAD files
+                const wadFileNames = fileNames.filter(fileName => fileName.toLowerCase().includes('.wad'));
+
+                if (wadFileNames.length === 0) {
+                    this.errors.push(`No WAD file found in '${this.name}'.`);
+                    callback(this);
+                    return;
+                }
+
+                // TODO: handle more than 1 zipped wad
+                if (wadFileNames.length > 1) {
+                    this.errors.push(`${wadFileNames.length} WAD files found in '${this.name}'. Extracting multiple WADs from the same ZIP file is not supported at this time.`);
+                    callback(this);
+                    return;
+                }
+
+                console.info(`Extracting '${wadFileNames[0]}' from '${this.name}'...`);
+
+                unzippedContent.file(wadFileNames[0]).async('arrayBuffer').then((wad) => {
+                    this.bytesLoaded = wad.byteLength;
+                    this.size = wad.byteLength;
+                    this.processBlob(wad, callback);
+                });
+            })
+            .catch((error) => {
+                console.error(`An error occurred while unzipping '${this.name}'.`, error);
+                this.errors.push(error);
+                callback(this);
+            });
+    }
+
     processBlob = (blob, callback) => {
         const data = new DataView(blob);
+
+        this.checkZipFile(data);
+
+        if (this.isZipped) {
+            this.unZipFile(blob, callback);
+            return false;
+        }
 
         this.bytesLoaded = this.size;
         this.uploadEndAt = moment().utc().format();
@@ -67,29 +131,6 @@ export default class Wad {
         };
 
         return reader;
-    }
-
-    isValidType = (wadType) => {
-        const type = wadType || this.wadType;
-
-        if (type === 'IWAD' || type === 'PWAD') {
-            return true;
-        }
-
-        return false;
-    }
-
-    get uploadedPercentage() {
-        const progress = this.bytesLoaded / this.size * 100;
-        return Math.ceil(progress);
-    }
-
-    get uploaded() {
-        return this.errors.length === 0 && this.uploadedPercentage >= 100;
-    }
-
-    get processed() {
-        return this.headerLumpCount === this.indexLumpCount;
     }
 
     readHeader = (data) => {
@@ -170,5 +211,18 @@ export default class Wad {
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.id = id;
+    }
+
+    get uploadedPercentage() {
+        const progress = this.bytesLoaded / this.size * 100;
+        return Math.ceil(progress);
+    }
+
+    get uploaded() {
+        return this.errors.length === 0 && this.uploadedPercentage >= 100;
+    }
+
+    get processed() {
+        return this.headerLumpCount === this.indexLumpCount;
     }
 }
