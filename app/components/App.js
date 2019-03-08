@@ -14,6 +14,12 @@ import WadDetails from './WadDetails';
 
 const localStorageManager = new LocalStorageManager();
 
+const { NODE_ENV } = process.env;
+
+if (NODE_ENV === 'development') {
+    document.title += ' [dev]';
+}
+
 export default class App extends Component {
     constructor() {
         super();
