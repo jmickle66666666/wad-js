@@ -97,16 +97,13 @@ export default class App extends Component {
         );
 
         // dev: comment out when feature is ready
-        // localStorageManager.set('freedoom-preloaded', true);
+        localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {
-        if (wad.errors.length > 0) {
-            console.error(`An error occurred while uploading '${wad.name}'.`, wad.errors);
-            return;
+        if (Object.keys(wad.errors).length === 0 && wad.bytesLoaded === wad.size && wad.indexLumpCount === wad.headerLumpCount) {
+            this.addWad(wad);
         }
-
-        this.addWad(wad);
     }
 
     addWad = (wad) => {
