@@ -161,6 +161,15 @@ export default class App extends Component {
         });
     }
 
+    updateSelectedWadFromList = (updatedWad) => {
+        this.setState(prevState => ({
+            wads: {
+                ...prevState.wads,
+                [updatedWad.id]: updatedWad,
+            },
+        }));
+    }
+
     updateFilename = (name) => {
         const { selectedWad } = this.state;
         const wad = { ...selectedWad };
@@ -171,6 +180,7 @@ export default class App extends Component {
         } else {
             wad.errors.empty_filename = '';
             wad.name = name;
+            this.updateSelectedWadFromList(wad);
         }
 
         this.setState(() => ({
