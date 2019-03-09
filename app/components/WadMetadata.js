@@ -14,11 +14,26 @@ export default ({ wad, updateFilename }) => (
         </Help>
         <div className={style.wadMetadataInner}>
             <ErrorMessageList errors={wad.errors} />
-            <div>
-                <label>
-                    Filename:
-                    <input value={wad.name} onChange={event => updateFilename(event.target.value)} />
+            <div className={style.wadMetadataTable}>
+                <label htmlFor="filename" className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>
+                        Filename:
+                    </div>
+                    <input
+                        id="filename"
+                        className={style.wadMetadataValue}
+                        value={wad.name}
+                        onChange={event => updateFilename(event.target.value)}
+                    />
                 </label>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Type:</div>
+                    <div className={style.wadMetadataValue}>{wad.wadType}</div>
+                </div>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Lump count:</div>
+                    <div className={style.wadMetadataValue}>{wad.headerLumpCount}</div>
+                </div>
             </div>
         </div>
     </div>

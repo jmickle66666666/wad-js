@@ -20,6 +20,8 @@ if (NODE_ENV === 'development') {
     document.title += ' [dev]';
 }
 
+const prefixWindowtitle = document.title;
+
 export default class App extends Component {
     constructor() {
         super();
@@ -35,6 +37,13 @@ export default class App extends Component {
         const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             this.preUploadFreedoom();
+        }
+
+        const { match } = this.props;
+        const { params } = match;
+        const { wadName } = params;
+        if (wadName) {
+            this.selectWad(wadName);
         }
     }
 
@@ -138,12 +147,16 @@ export default class App extends Component {
 
     selectWad = (wadId) => {
         this.setState((prevState) => {
-            if (!prevState.wads[wadId]) {
+            const selectedWad = prevState.wads[wadId];
+            if (!selectedWad) {
+                document.title = prefixWindowtitle;
                 return {};
             }
 
+            document.title = `${prefixWindowtitle} / ${selectedWad.name}`;
+
             return {
-                selectedWad: prevState.wads[wadId],
+                selectedWad,
             };
         });
     }

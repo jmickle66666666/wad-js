@@ -8,6 +8,10 @@
     align-self: flex-start;
 }
 
+.wadMetadataTitle {
+    text-align: left;
+}
+
 .wadMetadataInner {
     padding-top: 10px;
     padding-left: 40px;
@@ -18,6 +22,30 @@
     border-radius: 0 0 10px 10px;
 }
 
-.wadMetadataTitle {
-    text-align: left;
+.wadMetadataTable {
+    display: flex;
+    flex-wrap: wrap;
+    margin: auto;
+}
+
+.wadMetadataEntry {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 7px;
+    min-width: 50%;
+    justify-content: center;
+}
+
+.wadMetadataLabel {
+    width: 100px;
+    margin-right: 5px;
+}
+
+.wadMetadataValue {
+    width: 100px;
+}
+
+input.wadMetadataValue {
+    width: 100px;
+    box-sizing: border-box;
 }
