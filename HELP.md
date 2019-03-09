@@ -16,4 +16,8 @@ This list of uploaded WADs allows you to browse between the different WADs you h
 
 ## WAD Metadata
 
+On this panel, you can see some data about the WAD in general.
+
+You can also change the filename to your convenience, but it can not be empty.
+
 ## WAD Lumps
