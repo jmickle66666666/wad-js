@@ -4,11 +4,14 @@ import style from './WadDetails.scss';
 
 import WadMetadata from './WadMetadata';
 
-export default ({ selectedWad: wad }) => (
+export default ({ selectedWad: wad, updateFilename }) => (
     <Fragment>
         <h2 className={style.wadDetailsTitle}>
             {wad.name}
         </h2>
-        <WadMetadata wad={style.wad} />
+        <WadMetadata
+            wad={wad}
+            updateFilename={updateFilename}
+        />
     </Fragment>
 );

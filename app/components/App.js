@@ -148,6 +148,23 @@ export default class App extends Component {
         });
     }
 
+    updateFilename = (name) => {
+        const { selectedWad } = this.state;
+        const wad = { ...selectedWad };
+
+        if (name === '') {
+            const error = 'WAD filename can not be empty.';
+            wad.errors.empty_filename = error;
+        } else {
+            wad.errors.empty_filename = '';
+            wad.name = name;
+        }
+
+        this.setState(() => ({
+            selectedWad: wad,
+        }));
+    }
+
     render() {
         const {
             wads,
@@ -168,7 +185,13 @@ export default class App extends Component {
                             />
                         )}
                     </div>
-                    {selectedWad.id && <WadDetails selectedWad={selectedWad} />}
+                    {selectedWad.id
+                        && (
+                            <WadDetails
+                                selectedWad={selectedWad}
+                                updateFilename={this.updateFilename}
+                            />
+                        )}
                 </div>
             </div>
         );

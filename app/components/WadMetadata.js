@@ -2,11 +2,24 @@ import React from 'react';
 
 import style from './WadMetadata.scss';
 
-export default wad => (
+import Help from './Help';
+import ErrorMessageList from './ErrorMessageList';
+
+export default ({ wad, updateFilename }) => (
     <div className={style.wadMetadataOuter}>
-        <h3 className={style.wadMetadataTitle}>
-            Metadata
-        </h3>
-        <div className={style.wadMetadataInner} />
+        <Help id="wad-metadata" title="the metadata panel">
+            <h3 className={style.wadMetadataTitle}>
+                Metadata
+            </h3>
+        </Help>
+        <div className={style.wadMetadataInner}>
+            <ErrorMessageList errors={wad.errors} />
+            <div>
+                <label>
+                    Filename:
+                    <input value={wad.name} onChange={event => updateFilename(event.target.value)} />
+                </label>
+            </div>
+        </div>
     </div>
 );

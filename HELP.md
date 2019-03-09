@@ -12,4 +12,8 @@ You can upload a file with the same name multiple times. This allows you to comp
 
 ## Uploaded WADs
 
-This list of uploaded WADs allows you to browser between the different WADs you have added to wadJS.
+This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
+
+## WAD Metadata
+
+## WAD Lumps
