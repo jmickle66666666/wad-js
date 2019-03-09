@@ -5,6 +5,7 @@ import JSZip from 'jszip';
 export default class Wad {
     constructor() {
         this.errors = {};
+        this.lumps = {};
     }
 
     isValidType = (wadType) => {
@@ -98,6 +99,8 @@ export default class Wad {
 
         callback(this);
 
+        this.readLumpIndex(data, callback);
+
         return true;
     }
 
@@ -132,6 +135,35 @@ export default class Wad {
         };
 
         return reader;
+    }
+
+    readLumpIndex = (data, callback) => {
+        let x = 0;
+        for (let i = this.indexOffset; i < data.byteLength; i += 16) {
+            x++;
+            this.indexLumpCount = x;
+
+            const address = data.getInt32(i, true);
+            const size = data.getInt32(i + 4, true);
+
+            let name = '';
+
+            for (let j = i + 8; j < i + 16; j++) {
+                if (data.getUint8(j) !== 0) {
+                    name += String.fromCharCode(data.getUint8(j));
+                }
+            }
+
+            const lump = {
+                address,
+                size,
+                name,
+            };
+
+            this.lumps[name] = lump;
+        }
+
+        callback(this);
     }
 
     readHeader = (data) => {
@@ -198,8 +230,10 @@ export default class Wad {
             uploadStartAt,
             uploadEndAt,
             id,
+            lumps,
         } = wad;
 
+        this.id = id;
         this.name = name;
         this.wadType = wadType;
         this.headerLumpCount = headerLumpCount;
@@ -211,7 +245,7 @@ export default class Wad {
         this.errors = errors;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
-        this.id = id;
+        this.lumps = lumps;
     }
 
     get uploadedPercentage() {

@@ -3,6 +3,7 @@ import React, { Fragment } from 'react';
 import style from './WadDetails.scss';
 
 import WadMetadata from './WadMetadata';
+import WadLumpList from './WadLumpList';
 
 export default ({ selectedWad: wad, updateFilename }) => (
     <Fragment>
@@ -13,5 +14,6 @@ export default ({ selectedWad: wad, updateFilename }) => (
             wad={wad}
             updateFilename={updateFilename}
         />
+        <WadLumpList wad={wad} />
     </Fragment>
 );

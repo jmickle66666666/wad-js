@@ -1,0 +1,26 @@
+.wadLumpsOuter {
+    background: rgb(210, 210, 210);
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgb(150, 150, 150);
+    flex: 1;
+    margin: 25px;
+    align-self: flex-start;
+}
+
+.wadLumpsTitle {
+    text-align: left;
+}
+
+.wadLumpsInner {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 40px;
+    background: rgb(240, 240, 240);
+    box-sizing: border-box;
+    border-radius: 0 0 10px 10px;
+    justify-content: center;
+}

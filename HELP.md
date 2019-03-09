@@ -21,3 +21,5 @@ On this panel, you can see some data about the WAD in general.
 You can also change the filename to your convenience, but it can not be empty.
 
 ## WAD Lumps
+
+You can view the lumps within a selected WAD from this part of the application.
