@@ -4,7 +4,7 @@ import JSZip from 'jszip';
 
 export default class Wad {
     constructor() {
-        this.errors = [];
+        this.errors = {};
     }
 
     isValidType = (wadType) => {
@@ -29,35 +29,36 @@ export default class Wad {
 
         zip.loadAsync(blob)
             .then((unzippedContent) => {
-                const fileNames = Object.keys(unzippedContent.files).map(fileName => fileName);
+                const filenames = Object.keys(unzippedContent.files).map(filename => filename);
 
                 // TODO: have a stronger check for WAD files
-                const wadFileNames = fileNames.filter(fileName => fileName.toLowerCase().includes('.wad'));
+                const wadFilenames = filenames.filter(filename => filename.toLowerCase().includes('.wad'));
 
-                if (wadFileNames.length === 0) {
-                    this.errors.push(`No WAD file found in '${this.name}'.`);
+                if (wadFilenames.length === 0) {
+                    this.errors.not_found = `No WAD file found in '${this.name}'.`;
                     callback(this);
                     return;
                 }
 
                 // TODO: handle more than 1 zipped wad
-                if (wadFileNames.length > 1) {
-                    this.errors.push(`${wadFileNames.length} WAD files found in '${this.name}'. Extracting multiple WADs from the same ZIP file is not supported at this time.`);
+                if (wadFilenames.length > 1) {
+                    this.errors.zip_multiple_wads = `${wadFilenames.length} WAD files found in '${this.name}'. Extracting multiple WADs from the same ZIP file is not supported at this time.`;
                     callback(this);
                     return;
                 }
 
-                console.info(`Extracting '${wadFileNames[0]}' from '${this.name}'...`);
+                console.info(`Extracting '${wadFilenames[0]}' from '${this.name}'...`);
 
-                unzippedContent.file(wadFileNames[0]).async('arrayBuffer').then((wad) => {
-                    this.bytesLoaded = wad.byteLength;
-                    this.size = wad.byteLength;
-                    this.processBlob(wad, callback);
-                });
+                unzippedContent.file(wadFilenames[0]).async('arrayBuffer')
+                    .then((wad) => {
+                        this.bytesLoaded = wad.byteLength;
+                        this.size = wad.byteLength;
+                        this.processBlob(wad, callback);
+                    });
             })
             .catch((error) => {
                 console.error(`An error occurred while unzipping '${this.name}'.`, error);
-                this.errors.push(error);
+                this.errors.unzip_error = error;
                 callback(this);
             });
     }
@@ -83,7 +84,7 @@ export default class Wad {
 
         if (!this.isValidType(wadType)) {
             const error = `'${this.name}' is not a valid WAD file.`;
-            this.errors.push(error);
+            this.errors.invalidType = error;
             callback(this);
 
             return false;
@@ -102,15 +103,15 @@ export default class Wad {
 
     initReader = (callback) => {
         const reader = new FileReader();
-        this.errors = [];
+        this.errors = {};
 
         reader.onerror = (error) => {
-            this.errors.push(error);
+            this.errors.read_error = error;
             callback(this);
         };
 
         reader.onloadstart = () => {
-            this.errors = [];
+            this.errors = {};
         };
 
         reader.onprogress = (data) => {
@@ -179,7 +180,7 @@ export default class Wad {
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, error);
-                this.errors.push(error);
+                this.errors.upload_error = error;
             });
     }
 
@@ -219,7 +220,7 @@ export default class Wad {
     }
 
     get uploaded() {
-        return this.errors.length === 0 && this.uploadedPercentage >= 100;
+        return this.uploadedPercentage >= 100;
     }
 
     get processed() {

@@ -20,6 +20,8 @@ if (NODE_ENV === 'development') {
     document.title += ' [dev]';
 }
 
+const prefixWindowtitle = document.title;
+
 export default class App extends Component {
     constructor() {
         super();
@@ -35,6 +37,13 @@ export default class App extends Component {
         const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             this.preUploadFreedoom();
+        }
+
+        const { match } = this.props;
+        const { params } = match;
+        const { wadName } = params;
+        if (wadName) {
+            this.selectWad(wadName);
         }
     }
 
@@ -138,14 +147,45 @@ export default class App extends Component {
 
     selectWad = (wadId) => {
         this.setState((prevState) => {
-            if (!prevState.wads[wadId]) {
+            const selectedWad = prevState.wads[wadId];
+            if (!selectedWad) {
+                document.title = prefixWindowtitle;
                 return {};
             }
 
+            document.title = `${prefixWindowtitle} / ${selectedWad.name}`;
+
             return {
-                selectedWad: prevState.wads[wadId],
+                selectedWad,
             };
         });
+    }
+
+    updateSelectedWadFromList = (updatedWad) => {
+        this.setState(prevState => ({
+            wads: {
+                ...prevState.wads,
+                [updatedWad.id]: updatedWad,
+            },
+        }));
+    }
+
+    updateFilename = (name) => {
+        const { selectedWad } = this.state;
+        const wad = { ...selectedWad };
+
+        if (name === '') {
+            const error = 'WAD filename can not be empty.';
+            wad.errors.empty_filename = error;
+        } else {
+            wad.errors.empty_filename = '';
+            wad.name = name;
+            this.updateSelectedWadFromList(wad);
+        }
+
+        this.setState(() => ({
+            selectedWad: wad,
+        }));
     }
 
     render() {
@@ -168,7 +208,13 @@ export default class App extends Component {
                             />
                         )}
                     </div>
-                    {selectedWad.id && <WadDetails selectedWad={selectedWad} />}
+                    {selectedWad.id
+                        && (
+                            <WadDetails
+                                selectedWad={selectedWad}
+                                updateFilename={this.updateFilename}
+                            />
+                        )}
                 </div>
             </div>
         );

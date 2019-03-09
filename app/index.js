@@ -1,6 +1,6 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-import App from './components/App';
+import Controller from './components/Controller';
 
-ReactDOM.render(<App />, document.getElementById("app"));
+ReactDOM.render(<Controller />, document.getElementById('app'));

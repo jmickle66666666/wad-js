@@ -1,4 +1,4 @@
-## WAD Uploader
+## Uploader
 
 Use the WAD Uploader to add files you want to inspect with wadJS. Supported file formats are `.wad`, `.zip`, and `.pk3`.
 
@@ -12,4 +12,12 @@ You can upload a file with the same name multiple times. This allows you to comp
 
 ## Uploaded WADs
 
-This list of uploaded WADs allows you to browser between the different WADs you have added to wadJS.
+This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
+
+## WAD Metadata
+
+On this panel, you can see some data about the WAD in general.
+
+You can also change the filename to your convenience, but it can not be empty.
+
+## WAD Lumps

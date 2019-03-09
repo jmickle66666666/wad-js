@@ -6,6 +6,7 @@ import Wad from '../models/Wad';
 
 import Help from './Help';
 import ErrorMessage from './ErrorMessage';
+import ErrorMessageList from './ErrorMessageList';
 
 export default class WadUploader extends Component {
     state = {
@@ -28,7 +29,7 @@ export default class WadUploader extends Component {
             };
         });
 
-        if (wad.errors.length === 0 && wad.bytesLoaded === wad.size) {
+        if (Object.keys(wad.errors).length === 0 && wad.bytesLoaded === wad.size) {
             const { addWad } = this.props;
             addWad(wad);
         }
@@ -187,7 +188,7 @@ export default class WadUploader extends Component {
                                             </div>
                                         )
                                     }
-                                    {wad.errors && wad.errors.map(error => <ErrorMessage key={error} message={error} />)}
+                                    <ErrorMessageList errors={wad.errors} />
                                 </div>
                             );
                         })}
