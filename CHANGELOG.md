@@ -4,11 +4,19 @@
 
 * With this new update, lumps such as "THINGS", "VERTEXES" (sic! the plural of vertex is vertices...), "LINEDEFS", etc., are now grouped under the lump that holds the name of the map. As a result, the lumps in question do not show up in the list anymore but they will soon once I focus more on the map lumps.
 
-## v0.1.10
+## v0.1.10: Selectable lumps
 
-## v0.1.9
- 
-## v0.1.8 
+* You can now click on a lump to see more details about it.
+* Additionally, if you reload the page, the application will focus your browser view to the appropriate wad or lump details, so you can resume right where you left.
+* From a data model perspective, lumps now have their own class, which means that they have their own set of methods, separate from the Wad class.
+
+## v0.1.9: Display WAD lumps
+
+* When you click on an uploaded lump, a whole list of the lumps within the file will now be displayed below the WAD name.
+
+## v0.1.8: Better error handling for upload
+
+* I made the upload of files more resilient in order to get more visibility on possible issues and errors that show up when adding WADs to your list.
 
 ## v0.1.7: Handle multiple files
 
