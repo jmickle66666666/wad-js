@@ -5,8 +5,14 @@ import style from './WadDetails.scss';
 import WadMetadata from './WadMetadata';
 import WadLumpList from './WadLumpList';
 
-export default ({ selectedWad: wad, updateFilename }) => (
+export default ({
+    selectedWad: wad,
+    selectedLump,
+    selectLump,
+    updateFilename,
+}) => (
     <Fragment>
+        <span id="wadDetails" className={style.wadDetailsAnchor} />
         <h2 className={style.wadDetailsTitle}>
             {wad.name}
         </h2>
@@ -14,6 +20,10 @@ export default ({ selectedWad: wad, updateFilename }) => (
             wad={wad}
             updateFilename={updateFilename}
         />
-        <WadLumpList wad={wad} />
+        <WadLumpList
+            wad={wad}
+            selectedLump={selectedLump}
+            selectLump={selectLump}
+        />
     </Fragment>
 );

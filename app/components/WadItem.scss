@@ -19,15 +19,19 @@
     width: 265px;
 }
 
+#selectedWad {
+    background: rgb(175, 175, 175);
+}
+
 .deleteWad {
     color: rgb(100, 100, 100);
 }
 
 .active {
-    background: rgb(210, 210, 210);
+    background: rgb(210, 210, 210) !important;
 }
 
 .timestamp {
-    color: rgb(150, 150, 150);
+    color: rgb(110, 110, 110);
     font-size: 14px;
 }

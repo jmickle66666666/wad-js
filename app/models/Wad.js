@@ -1,6 +1,7 @@
 import moment from 'moment';
 
 import JSZip from 'jszip';
+import Lump from './Lump';
 
 export default class Wad {
     constructor() {
@@ -99,7 +100,7 @@ export default class Wad {
 
         callback(this);
 
-        this.readLumpIndex(data, callback);
+        this.readLumpIndex(blob, data, callback);
 
         return true;
     }
@@ -137,7 +138,7 @@ export default class Wad {
         return reader;
     }
 
-    readLumpIndex = (data, callback) => {
+    readLumpIndex = (blob, data, callback) => {
         let x = 0;
         for (let i = this.indexOffset; i < data.byteLength; i += 16) {
             x++;
@@ -154,16 +155,29 @@ export default class Wad {
                 }
             }
 
-            const lump = {
+            const lump = new Lump();
+
+            lump.setIndexData({
                 address,
                 size,
                 name,
-            };
+            });
 
             this.lumps[name] = lump;
+
+            const lumpData = new DataView(blob, address);
+
+            // console.log({ lumpData });
         }
 
         callback(this);
+    }
+
+    checkLumpTypeFromHeader(data, string) {
+        for (let i = 0; i < string.length; i++) {
+            if (string.charCodeAt(i) !== data.getUint8(i)) return false;
+        }
+        return true;
     }
 
     readHeader = (data) => {
@@ -218,6 +232,7 @@ export default class Wad {
 
     restore = (wad) => {
         const {
+            id,
             name,
             wadType,
             headerLumpCount,
@@ -229,7 +244,6 @@ export default class Wad {
             errors,
             uploadStartAt,
             uploadEndAt,
-            id,
             lumps,
         } = wad;
 
@@ -259,5 +273,13 @@ export default class Wad {
 
     get processed() {
         return this.headerLumpCount === this.indexLumpCount;
+    }
+
+    get lumpNames() {
+        return Object.keys(this.lumps);
+    }
+
+    get errorIds() {
+        return Object.keys(this.errors);
     }
 }

@@ -30,6 +30,7 @@ export default class App extends Component {
         this.state = {
             wads,
             selectedWad: {},
+            selectedLump: {},
         };
     }
 
@@ -41,9 +42,13 @@ export default class App extends Component {
 
         const { match } = this.props;
         const { params } = match;
-        const { wadName } = params;
+        const { wadName, lumpName } = params;
         if (wadName) {
-            this.selectWad(wadName);
+            this.selectWad(wadName, true);
+        }
+
+        if (lumpName) {
+            this.selectLump(lumpName, true);
         }
     }
 
@@ -97,11 +102,11 @@ export default class App extends Component {
         );
 
         // dev: comment out when feature is ready
-        localStorageManager.set('freedoom-preloaded', true);
+        // localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {
-        if (Object.keys(wad.errors).length === 0 && wad.bytesLoaded === wad.size && wad.indexLumpCount === wad.headerLumpCount) {
+        if (wad.errorIds.length === 0 && wad.bytesLoaded === wad.size && wad.indexLumpCount === wad.headerLumpCount) {
             this.addWad(wad);
         }
     }
@@ -142,7 +147,7 @@ export default class App extends Component {
         });
     }
 
-    selectWad = (wadId) => {
+    selectWad = (wadId, init) => {
         this.setState((prevState) => {
             const selectedWad = prevState.wads[wadId];
             if (!selectedWad) {
@@ -154,7 +159,46 @@ export default class App extends Component {
 
             return {
                 selectedWad,
+                selectedLump: {},
             };
+        }, () => {
+            if (init) {
+                setTimeout(() => {
+                    const element = document.getElementById('wadDetails');
+                    if (element) {
+                        element.scrollIntoView();
+                    }
+                }, 100);
+            }
+        });
+    }
+
+    selectLump = (lumpName, init) => {
+        this.setState((prevState) => {
+            if (!prevState.selectedWad) {
+                return {};
+            }
+
+            const selectedLump = prevState.selectedWad.lumps[lumpName];
+            if (!selectedLump) {
+                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name}`;
+                return {};
+            }
+
+            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${selectedLump.name}`;
+
+            return {
+                selectedLump,
+            };
+        }, () => {
+            if (init) {
+                setTimeout(() => {
+                    const element = document.getElementById('lumpDetails');
+                    if (element) {
+                        element.scrollIntoView();
+                    }
+                }, 200);
+            }
         });
     }
 
@@ -189,6 +233,7 @@ export default class App extends Component {
         const {
             wads,
             selectedWad,
+            selectedLump,
         } = this.state;
         return (
             <div className={style.app}>
@@ -200,6 +245,7 @@ export default class App extends Component {
                         {Object.keys(wads).length > 0 && (
                             <WadList
                                 wads={wads}
+                                selectedWad={selectedWad}
                                 deleteWad={this.deleteWad}
                                 selectWad={this.selectWad}
                             />
@@ -209,6 +255,8 @@ export default class App extends Component {
                         && (
                             <WadDetails
                                 selectedWad={selectedWad}
+                                selectedLump={selectedLump}
+                                selectLump={this.selectLump}
                                 updateFilename={this.updateFilename}
                             />
                         )}
