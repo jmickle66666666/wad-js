@@ -65,44 +65,50 @@ export default class Wad {
             });
     }
 
-    processBlob = (blob, callback) => {
-        const data = new DataView(blob);
+    processBlob(blob, callback) {
+        try {
+            const data = new DataView(blob);
 
-        this.checkZipFile(data);
+            this.checkZipFile(data);
 
-        if (this.isZipped) {
-            this.unZipFile(blob, callback);
-            return false;
-        }
+            if (this.isZipped) {
+                this.unZipFile(blob, callback);
+                return false;
+            }
 
-        this.bytesLoaded = this.size;
-        this.uploadEndAt = moment().utc().format();
+            this.bytesLoaded = this.size;
+            this.uploadEndAt = moment().utc().format();
 
-        const {
-            wadType,
-            headerLumpCount,
-            indexAddress,
-        } = this.readHeader(data);
+            const {
+                wadType,
+                headerLumpCount,
+                indexAddress,
+            } = this.readHeader(data);
 
-        if (!this.isValidType(wadType)) {
-            const error = `'${this.name}' is not a valid WAD file.`;
-            this.errors.invalidType = error;
+            if (!this.isValidType(wadType)) {
+                const error = `'${this.name}' is not a valid WAD file.`;
+                this.errors.invalidType = error;
+                callback(this);
+
+                return false;
+            }
+
+            this.wadType = wadType;
+            this.headerLumpCount = headerLumpCount;
+            this.indexLumpCount = 0;
+            this.indexAddress = indexAddress;
+            this.indexOffset = indexAddress;
+
             callback(this);
 
-            return false;
+            this.readLumpIndex(blob, data, callback);
+
+            return true;
+        } catch (error) {
+            console.error(`An error occurred while processing the file data of '${this.name}'.`, { error });
+            this.errors.data_error = error.message;
+            callback(this);
         }
-
-        this.wadType = wadType;
-        this.headerLumpCount = headerLumpCount;
-        this.indexLumpCount = 0;
-        this.indexAddress = indexAddress;
-        this.indexOffset = indexAddress;
-
-        callback(this);
-
-        this.readLumpIndex(blob, data, callback);
-
-        return true;
     }
 
     initReader = (callback) => {
@@ -205,6 +211,9 @@ export default class Wad {
         this.name = file.name;
         this.id = `${file.name}_${timestamp.unix()}`;
 
+
+        console.log(file.type);
+
         const reader = this.initReader(callback);
         reader.readAsArrayBuffer(file);
     }
@@ -225,7 +234,7 @@ export default class Wad {
                 this.processBlob(result, callback);
             })
             .catch((error) => {
-                console.error(`An error occurred while uploading '${filename}'.`, error);
+                console.error(`An error occurred while uploading '${filename}'.`, { error });
                 this.errors.upload_error = error;
             });
     }
@@ -281,5 +290,11 @@ export default class Wad {
 
     get errorIds() {
         return Object.keys(this.errors);
+    }
+
+    get megabyteSize() {
+        const convertedSize = this.size / 1024 / 1024;
+        const truncatedSize = convertedSize.toFixed(1);
+        return `${truncatedSize} MB`;
     }
 }
