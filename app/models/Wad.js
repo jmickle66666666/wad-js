@@ -59,8 +59,8 @@ export default class Wad {
                     });
             })
             .catch((error) => {
-                console.error(`An error occurred while unzipping '${this.name}'.`, error);
-                this.errors.unzip_error = error;
+                console.error(`An error occurred while unzipping '${this.name}'.`, { error });
+                this.errors.unzip_error = error.message;
                 callback(this);
             });
     }
@@ -87,12 +87,13 @@ export default class Wad {
 
             if (!this.isValidType(wadType)) {
                 const error = `'${this.name}' is not a valid WAD file.`;
-                this.errors.invalidType = error;
+                this.errors.invalid_wad_signature = error;
                 callback(this);
 
                 return false;
             }
 
+            this.uploaded = true;
             this.wadType = wadType;
             this.headerLumpCount = headerLumpCount;
             this.indexLumpCount = 0;
@@ -108,6 +109,8 @@ export default class Wad {
             console.error(`An error occurred while processing the file data of '${this.name}'.`, { error });
             this.errors.data_error = error.message;
             callback(this);
+
+            return false;
         }
     }
 
@@ -176,6 +179,8 @@ export default class Wad {
             // console.log({ lumpData });
         }
 
+        this.processed = true;
+
         callback(this);
     }
 
@@ -211,11 +216,14 @@ export default class Wad {
         this.name = file.name;
         this.id = `${file.name}_${timestamp.unix()}`;
 
-
-        console.log(file.type);
-
-        const reader = this.initReader(callback);
-        reader.readAsArrayBuffer(file);
+        if (['', 'application/zip'].includes(file.type)) {
+            const reader = this.initReader(callback);
+            reader.readAsArrayBuffer(file);
+        } else {
+            const error = `'${this.name}' is not a valid WAD file.`;
+            this.errors.invalid_mime = error;
+            callback(this);
+        }
     }
 
     readRemoteFile = (url, filename, callback, unique = false) => {
@@ -235,7 +243,7 @@ export default class Wad {
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, { error });
-                this.errors.upload_error = error;
+                this.errors.upload_error = error.message;
             });
     }
 
@@ -273,15 +281,7 @@ export default class Wad {
 
     get uploadedPercentage() {
         const progress = this.bytesLoaded / this.size * 100;
-        return Math.ceil(progress);
-    }
-
-    get uploaded() {
-        return this.uploadedPercentage >= 100;
-    }
-
-    get processed() {
-        return this.headerLumpCount === this.indexLumpCount;
+        return Number.isNaN(progress) ? '' : Math.ceil(progress);
     }
 
     get lumpNames() {
