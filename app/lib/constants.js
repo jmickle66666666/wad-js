@@ -16,8 +16,7 @@ export const PNAMES = 'PNAMES';
 export const TEXTUREx = ['TEXTURE1', 'TEXTURE2'];
 export const GRAPHIC_MARKERS = ['P_', 'PP_', 'P1_', 'P2_', 'P3_', 'S_', 'S2_', 'S3_', 'SS_'];
 export const FLAT_MARKERS = ['F_', 'FF_', 'F1_', 'F2_', 'F3_'];
-export const MAPLUMPS = ['THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES'];
-export const THINGS = 'THINGS';
+
 export const TEXTLUMPS = ['DEHACKED', 'MAPINFO', 'ZMAPINFO', 'EMAPINFO',
     'DMXGUS', 'DMXGUSC', 'WADINFO', 'EMENUS', 'MUSINFO',
     'SNDINFO', 'GLDEFS', 'KEYCONF', 'SCRIPTS', 'LANGUAGE',
@@ -33,3 +32,7 @@ export const EXTENSIONS = {
     midi: 'mid',
     png: 'png',
 };
+
+export const MAPLUMPS = ['THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES'];
+
+export const THINGS = 'THINGS';

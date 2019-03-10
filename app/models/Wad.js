@@ -149,8 +149,94 @@ export default class Wad {
         return reader;
     }
 
-    readLumpIndex = (blob, data, callback) => {
-        const lumps = {};
+    handleMapLumpEntry(map, lumps, lumpIndexData, callback) {
+        const updatedNonMapLumps = 0;
+        let updatedMap = { ...map };
+        const updatedLumps = { ...lumps };
+
+        // we assume that 'THINGS' is the first lump that appears after the map name lump
+        if (lumpIndexData.name === THINGS) {
+            // it's time to dump the map object (which holds data about the previous map) into the list of lumps
+            if (map.nameLump.name !== '') {
+                const lump = this.createLumpIndex({
+                    ...map.nameLump,
+                    data: {
+                        ...map.dataLumps,
+                    },
+                });
+                updatedLumps[map.nameLump.name] = lump;
+
+                // reset temporary map object
+                updatedMap = {
+                    nameLump: { name: '' },
+                    dataLumps: {},
+                };
+            }
+
+            // find the lump that holds the name of the map in the map object
+            /* eslint-disable-next-line no-loop-func */
+            const mapNameLumpId = Object.keys(lumps).find(lumpName => lumps[lumpName].index === lumpIndexData.index - 1);
+
+            if (!mapNameLumpId) {
+                const error = `Orphan map lump in '${this.name}': Could not find the map lump that '${lumpIndexData.name}' lump belongs to.`;
+                this.errors.map_lump = error;
+                callback(this);
+            }
+
+            const mapNameLump = lumps[mapNameLumpId];
+
+            updatedMap.nameLump = {
+                ...mapNameLump,
+                type: 'map',
+            };
+        }
+
+        updatedMap.dataLumps[lumpIndexData.name] = { ...lumpIndexData };
+
+        return {
+            updatedNonMapLumps,
+            updatedMap,
+            updatedLumps,
+        };
+    }
+
+    handleLastMapLumpEntry(map, lumps, lumpIndexData, nonMapLumps) {
+        let updatedNonMapLumps = nonMapLumps;
+        let updatedMap = { ...map };
+        const updatedLumps = { ...lumps };
+
+        // we have not encountered map data lumps but we still have data in the temporary object
+        updatedNonMapLumps += 1;
+
+        // it looks like we are not going to encounter another map name lump, so dump the data in the proper map name lump and reset the temporary map object
+        if (nonMapLumps > 2) {
+            const lump = this.createLumpIndex({
+                ...map.nameLump,
+                data: {
+                    ...map.dataLumps,
+                },
+            });
+            updatedLumps[map.nameLump.name] = lump;
+
+            // reset temporary map object
+            updatedMap = {
+                nameLump: { name: '' },
+                dataLumps: {},
+            };
+        }
+
+        const lump = this.createLumpIndex(lumpIndexData);
+        updatedLumps[lumpIndexData.name] = lump;
+
+        return {
+            updatedNonMapLumps,
+            updatedMap,
+            updatedLumps,
+        };
+    }
+
+    readLumpIndex(blob, data, callback) {
+        let lumps = {};
         let nonMapLumps = 0;
         let map = {
             nameLump: { name: '' },
@@ -181,68 +267,25 @@ export default class Wad {
             };
 
             if (MAPLUMPS.includes(name)) {
-                nonMapLumps = 0;
+                const {
+                    updatedNonMapLumps,
+                    updatedMap,
+                    updatedLumps,
+                } = this.handleMapLumpEntry(map, lumps, lumpIndexData, callback);
 
-                // we assume that 'THINGS' is the first lump that appears after the map name lump
-                if (name === THINGS) {
-                    // it's time to dump the map object (which holds data about the previous map) into the list of lumps
-                    if (map.nameLump.name !== '') {
-                        const lump = this.createLumpIndex({
-                            ...map.nameLump,
-                            data: {
-                                ...map.dataLumps,
-                            },
-                        });
-                        lumps[map.nameLump.name] = lump;
-
-                        // reset temporary map object
-                        map = {
-                            nameLump: { name: '' },
-                            dataLumps: {},
-                        };
-                    }
-                    // find the lump that holds the name of the map in the map object
-                    /* eslint-disable-next-line no-loop-func */
-                    const mapNameLumpId = Object.keys(lumps).find(lumpName => lumps[lumpName].index === x - 1);
-
-                    if (!mapNameLumpId) {
-                        const error = `Orphan map lump in '${this.name}': Could not find the map lump that '${name}' lump belongs to.`;
-                        this.errors.map_lump = error;
-                        callback(this);
-                    }
-
-                    const mapNameLump = lumps[mapNameLumpId];
-
-                    map.nameLump = {
-                        ...mapNameLump,
-                        type: 'map',
-                    };
-                }
-
-                map.dataLumps[name] = { ...lumpIndexData };
+                nonMapLumps = updatedNonMapLumps;
+                map = { ...updatedMap };
+                lumps = { ...updatedLumps };
             } else if (map.nameLump.name !== '') {
-                // we have not encountered map data lumps but we still have data in the temporary object
-                nonMapLumps += 1;
+                const {
+                    updatedNonMapLumps,
+                    updatedMap,
+                    updatedLumps,
+                } = this.handleLastMapLumpEntry(map, lumps, lumpIndexData, nonMapLumps);
 
-                // it looks like we are not going to encounter another map name lump, so dump the data in the proper map name lump and reset the temporary map object
-                if (nonMapLumps > 2) {
-                    const lump = this.createLumpIndex({
-                        ...map.nameLump,
-                        data: {
-                            ...map.dataLumps,
-                        },
-                    });
-                    lumps[map.nameLump.name] = lump;
-
-                    // reset temporary map object
-                    map = {
-                        nameLump: { name: '' },
-                        dataLumps: {},
-                    };
-                }
-
-                const lump = this.createLumpIndex(lumpIndexData);
-                lumps[name] = lump;
+                nonMapLumps = updatedNonMapLumps;
+                map = { ...updatedMap };
+                lumps = { ...updatedLumps };
             } else {
                 const lump = this.createLumpIndex(lumpIndexData);
                 lumps[name] = lump;
