@@ -1,7 +1,9 @@
 import moment from 'moment';
-
 import JSZip from 'jszip';
+
 import Lump from './Lump';
+
+import { MAPLUMPS, THINGS } from '../lib/constants';
 
 export default class Wad {
     constructor() {
@@ -148,6 +150,12 @@ export default class Wad {
     }
 
     readLumpIndex = (blob, data, callback) => {
+        const lumps = {};
+        let map = {
+            nameLump: { name: '' },
+            dataLumps: {},
+        };
+
         let x = 0;
         for (let i = this.indexOffset; i < data.byteLength; i += 16) {
             x++;
@@ -164,24 +172,77 @@ export default class Wad {
                 }
             }
 
-            const lump = new Lump();
-
-            lump.setIndexData({
+            const lumpIndexData = {
+                index: x,
                 address,
                 size,
                 name,
-            });
+            };
 
-            this.lumps[name] = lump;
+            if (MAPLUMPS.includes(name)) {
+                // we assume that 'THINGS' is the first lump that appears after the map name lump
+                if (name === THINGS) {
+                    // it's time to dump what's in the map object into the list of lumps
+                    if (map.nameLump.name !== '') {
+                        // console.log({ map });
+                        const lump = this.createLumpIndex({
+                            ...map.nameLump,
+                            data: {
+                                ...map.dataLumps,
+                            },
+                        });
+                        lumps[map.nameLump.name] = lump;
 
-            const lumpData = new DataView(blob, address);
 
+                        console.log({ lump });
+
+                        // reset temporary map object
+                        map = {
+                            nameLump: { name: '' },
+                            dataLumps: {},
+                        };
+                    }
+                    // find the lump that holds the name of this map
+                    /* eslint-disable-next-line no-loop-func */
+                    const mapNameLumpId = Object.keys(lumps).find(lumpName => lumps[lumpName].index === x - 1);
+
+                    // console.log({ mapNameLump });
+
+                    if (!mapNameLumpId) {
+                        const error = `Orphan map lump in '${this.name}': Could not find the map lump that '${name}' lump belongs to.`;
+                        this.errors.map_lump = error;
+                        callback(this);
+                    }
+
+                    const mapNameLump = lumps[mapNameLumpId];
+
+                    map.nameLump = {
+                        ...mapNameLump,
+                        type: 'map',
+                    };
+                }
+
+                map.dataLumps[name] = { ...lumpIndexData };
+            } else {
+                console.log({ map });
+                const lump = this.createLumpIndex(lumpIndexData);
+                lumps[name] = lump;
+            }
+
+            // const lumpData = new DataView(blob, address);
             // console.log({ lumpData });
         }
 
+        this.lumps = lumps;
         this.processed = true;
 
         callback(this);
+    }
+
+    createLumpIndex(lumpIndexData) {
+        const lump = new Lump();
+        lump.setIndexData(lumpIndexData);
+        return lump;
     }
 
     checkLumpTypeFromHeader(data, string) {
@@ -191,7 +252,7 @@ export default class Wad {
         return true;
     }
 
-    readHeader = (data) => {
+    readHeader(data) {
         const wadTypeData = [];
 
         for (let i = 0; i < 4; i++) {

@@ -8,9 +8,16 @@ export default ({ lump, wad }) => (
         <div className={style.wadLumpDetailsOuter}>
             <h4>{lump.name}</h4>
             <div className={style.wadLumpDetailsInner}>
-                Size:
-                {' '}
-                {lump.size}
+                <div>
+                    Type:
+                    {' '}
+                    {lump.type}
+                </div>
+                <div>
+                    Size:
+                    {' '}
+                    {lump.sizeInBytes}
+                </div>
             </div>
         </div>
     </Fragment>
