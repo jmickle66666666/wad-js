@@ -8,12 +8,12 @@ export default ({ lump, wad }) => (
         <div className={style.wadLumpDetailsOuter}>
             <h4>{lump.name}</h4>
             <div className={style.wadLumpDetailsInner}>
-                <div>
+                <div className={style.wadLumpDetailsEntry}>
                     Type:
                     {' '}
                     {lump.type}
                 </div>
-                <div>
+                <div className={style.wadLumpDetailsEntry}>
                     Size:
                     {' '}
                     {lump.sizeInBytes}
