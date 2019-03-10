@@ -179,6 +179,10 @@ export default class App extends Component {
                 return {};
             }
 
+            if (!prevState.selectedWad.lumps) {
+                return {};
+            }
+
             const selectedLump = prevState.selectedWad.lumps[lumpName];
             if (!selectedLump) {
                 document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name}`;

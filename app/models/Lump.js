@@ -4,4 +4,8 @@ export default class Lump {
         this.size = size;
         this.name = name;
     }
+
+    get sizeInBytes() {
+        return `${this.size} bytes`;
+    }
 }
