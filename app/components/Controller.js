@@ -6,6 +6,7 @@ import App from './App';
 export default () => (
     <HashRouter>
         <Switch>
+            <Route path="/view/:wadName/lump/:lumpName" component={App} />
             <Route path="/view/:wadName" component={App} />
             <Route path="/" component={App} />
         </Switch>

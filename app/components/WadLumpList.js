@@ -5,7 +5,7 @@ import style from './WadLumpList.scss';
 import Help from './Help';
 import WadLumpItem from './WadLumpItem';
 
-export default ({ wad }) => (
+export default ({ wad, selectedLump, selectLump }) => (
     <div className={style.wadLumpsOuter}>
         <Help id="wad-lumps" title="the lumps panel">
             <h3 className={style.wadLumpsTitle}>
@@ -13,10 +13,16 @@ export default ({ wad }) => (
             </h3>
         </Help>
         <div className={style.wadLumpsInner}>
-            {Object.keys(wad.lumps).map((lumpName) => {
+            {wad.lumpNames.map((lumpName) => {
                 const lump = wad.lumps[lumpName];
                 return (
-                    <WadLumpItem key={lump.name} lump={lump} />
+                    <WadLumpItem
+                        key={lump.name}
+                        lump={lump}
+                        selectedLump={selectedLump}
+                        wad={wad}
+                        selectLump={selectLump}
+                    />
                 );
             })}
         </div>

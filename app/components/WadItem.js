@@ -4,9 +4,19 @@ import moment from 'moment';
 
 import style from './WadItem.scss';
 
-export default ({ wad, deleteWad, selectWad }) => (
+export default ({
+    wad,
+    selectedWad,
+    deleteWad,
+    selectWad,
+}) => (
     <div className={style.wadOuter}>
-        <a href={`#/view/${wad.id}`} className={style.wadInner} onClick={() => selectWad(wad.id)}>
+        <a
+            href={`#/view/${wad.id}`}
+            id={selectedWad && selectedWad.id === wad.id && style.selectedWad || null}
+            className={style.wadInner}
+            onClick={() => selectWad(wad.id)}
+        >
             <div>
                 <div>{wad.name}</div>
                 <div className={style.timestamp}>{moment(wad.uploadEndAt).format('MMMM D, YYYY [at] h:mm a')}</div>
@@ -18,7 +28,7 @@ export default ({ wad, deleteWad, selectWad }) => (
                 onKeyPress={(event) => { event.preventDefault(); deleteWad(wad.id); }}
                 tabIndex={0}
             >
-                &times;
+                    &times;
             </div>
         </a>
     </div>

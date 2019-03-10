@@ -5,7 +5,12 @@ import style from './WadList.scss';
 import Help from './Help';
 import WadItem from './WadItem';
 
-export default ({ wads, deleteWad, selectWad }) => (
+export default ({
+    wads,
+    selectedWad,
+    deleteWad,
+    selectWad,
+}) => (
     <div className={style.wadListOuter}>
 
         <Help
@@ -24,6 +29,7 @@ export default ({ wads, deleteWad, selectWad }) => (
                         wad={wads[wadId]}
                         deleteWad={deleteWad}
                         selectWad={selectWad}
+                        selectedWad={selectedWad}
                     />
                 ))
             }
