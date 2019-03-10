@@ -34,6 +34,13 @@ export default ({ wad, updateFilename }) => (
                     <div className={style.wadMetadataLabel}>Lump count:</div>
                     <div className={style.wadMetadataValue}>{wad.headerLumpCount}</div>
                 </div>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Size:</div>
+                    <div className={style.wadMetadataValue}>
+                        {wad.megabyteSize}
+                        {' '}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

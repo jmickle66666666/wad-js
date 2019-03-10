@@ -19,7 +19,8 @@ export default ({
                 className={style.wadLumpOuter}
                 onClick={() => selectLump(lump.name)}
             >
-                {lump.name}
+                <h4>{lump.name}</h4>
+                <div>{lump.sizeInBytes}</div>
             </a>
         );
     }

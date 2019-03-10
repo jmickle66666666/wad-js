@@ -1,7 +1,9 @@
 import moment from 'moment';
-
 import JSZip from 'jszip';
+
 import Lump from './Lump';
+
+import { MAPLUMPS, THINGS } from '../lib/constants';
 
 export default class Wad {
     constructor() {
@@ -59,50 +61,59 @@ export default class Wad {
                     });
             })
             .catch((error) => {
-                console.error(`An error occurred while unzipping '${this.name}'.`, error);
-                this.errors.unzip_error = error;
+                console.error(`An error occurred while unzipping '${this.name}'.`, { error });
+                this.errors.unzip_error = error.message;
                 callback(this);
             });
     }
 
-    processBlob = (blob, callback) => {
-        const data = new DataView(blob);
+    processBlob(blob, callback) {
+        try {
+            const data = new DataView(blob);
 
-        this.checkZipFile(data);
+            this.checkZipFile(data);
 
-        if (this.isZipped) {
-            this.unZipFile(blob, callback);
-            return false;
-        }
+            if (this.isZipped) {
+                this.unZipFile(blob, callback);
+                return false;
+            }
 
-        this.bytesLoaded = this.size;
-        this.uploadEndAt = moment().utc().format();
+            this.bytesLoaded = this.size;
+            this.uploadEndAt = moment().utc().format();
 
-        const {
-            wadType,
-            headerLumpCount,
-            indexAddress,
-        } = this.readHeader(data);
+            const {
+                wadType,
+                headerLumpCount,
+                indexAddress,
+            } = this.readHeader(data);
 
-        if (!this.isValidType(wadType)) {
-            const error = `'${this.name}' is not a valid WAD file.`;
-            this.errors.invalidType = error;
+            if (!this.isValidType(wadType)) {
+                const error = `'${this.name}' is not a valid WAD file.`;
+                this.errors.invalid_wad_signature = error;
+                callback(this);
+
+                return false;
+            }
+
+            this.uploaded = true;
+            this.wadType = wadType;
+            this.headerLumpCount = headerLumpCount;
+            this.indexLumpCount = 0;
+            this.indexAddress = indexAddress;
+            this.indexOffset = indexAddress;
+
+            callback(this);
+
+            this.readLumpIndex(blob, data, callback);
+
+            return true;
+        } catch (error) {
+            console.error(`An error occurred while processing the file data of '${this.name}'.`, { error });
+            this.errors.data_error = error.message;
             callback(this);
 
             return false;
         }
-
-        this.wadType = wadType;
-        this.headerLumpCount = headerLumpCount;
-        this.indexLumpCount = 0;
-        this.indexAddress = indexAddress;
-        this.indexOffset = indexAddress;
-
-        callback(this);
-
-        this.readLumpIndex(blob, data, callback);
-
-        return true;
     }
 
     initReader = (callback) => {
@@ -139,6 +150,13 @@ export default class Wad {
     }
 
     readLumpIndex = (blob, data, callback) => {
+        const lumps = {};
+        let nonMapLumps = 0;
+        let map = {
+            nameLump: { name: '' },
+            dataLumps: {},
+        };
+
         let x = 0;
         for (let i = this.indexOffset; i < data.byteLength; i += 16) {
             x++;
@@ -155,22 +173,95 @@ export default class Wad {
                 }
             }
 
-            const lump = new Lump();
-
-            lump.setIndexData({
+            const lumpIndexData = {
+                index: x,
                 address,
                 size,
                 name,
-            });
+            };
 
-            this.lumps[name] = lump;
+            if (MAPLUMPS.includes(name)) {
+                nonMapLumps = 0;
 
-            const lumpData = new DataView(blob, address);
+                // we assume that 'THINGS' is the first lump that appears after the map name lump
+                if (name === THINGS) {
+                    // it's time to dump the map object (which holds data about the previous map) into the list of lumps
+                    if (map.nameLump.name !== '') {
+                        const lump = this.createLumpIndex({
+                            ...map.nameLump,
+                            data: {
+                                ...map.dataLumps,
+                            },
+                        });
+                        lumps[map.nameLump.name] = lump;
 
+                        // reset temporary map object
+                        map = {
+                            nameLump: { name: '' },
+                            dataLumps: {},
+                        };
+                    }
+                    // find the lump that holds the name of the map in the map object
+                    /* eslint-disable-next-line no-loop-func */
+                    const mapNameLumpId = Object.keys(lumps).find(lumpName => lumps[lumpName].index === x - 1);
+
+                    if (!mapNameLumpId) {
+                        const error = `Orphan map lump in '${this.name}': Could not find the map lump that '${name}' lump belongs to.`;
+                        this.errors.map_lump = error;
+                        callback(this);
+                    }
+
+                    const mapNameLump = lumps[mapNameLumpId];
+
+                    map.nameLump = {
+                        ...mapNameLump,
+                        type: 'map',
+                    };
+                }
+
+                map.dataLumps[name] = { ...lumpIndexData };
+            } else if (map.nameLump.name !== '') {
+                // we have not encountered map data lumps but we still have data in the temporary object
+                nonMapLumps += 1;
+
+                // it looks like we are not going to encounter another map name lump, so dump the data in the proper map name lump and reset the temporary map object
+                if (nonMapLumps > 2) {
+                    const lump = this.createLumpIndex({
+                        ...map.nameLump,
+                        data: {
+                            ...map.dataLumps,
+                        },
+                    });
+                    lumps[map.nameLump.name] = lump;
+
+                    // reset temporary map object
+                    map = {
+                        nameLump: { name: '' },
+                        dataLumps: {},
+                    };
+                }
+
+                const lump = this.createLumpIndex(lumpIndexData);
+                lumps[name] = lump;
+            } else {
+                const lump = this.createLumpIndex(lumpIndexData);
+                lumps[name] = lump;
+            }
+
+            // const lumpData = new DataView(blob, address);
             // console.log({ lumpData });
         }
 
+        this.lumps = lumps;
+        this.processed = true;
+
         callback(this);
+    }
+
+    createLumpIndex(lumpIndexData) {
+        const lump = new Lump();
+        lump.setIndexData(lumpIndexData);
+        return lump;
     }
 
     checkLumpTypeFromHeader(data, string) {
@@ -180,7 +271,7 @@ export default class Wad {
         return true;
     }
 
-    readHeader = (data) => {
+    readHeader(data) {
         const wadTypeData = [];
 
         for (let i = 0; i < 4; i++) {
@@ -205,8 +296,14 @@ export default class Wad {
         this.name = file.name;
         this.id = `${file.name}_${timestamp.unix()}`;
 
-        const reader = this.initReader(callback);
-        reader.readAsArrayBuffer(file);
+        if (['', 'application/zip'].includes(file.type)) {
+            const reader = this.initReader(callback);
+            reader.readAsArrayBuffer(file);
+        } else {
+            const error = `'${this.name}' is not a valid WAD file.`;
+            this.errors.invalid_mime = error;
+            callback(this);
+        }
     }
 
     readRemoteFile = (url, filename, callback, unique = false) => {
@@ -225,8 +322,8 @@ export default class Wad {
                 this.processBlob(result, callback);
             })
             .catch((error) => {
-                console.error(`An error occurred while uploading '${filename}'.`, error);
-                this.errors.upload_error = error;
+                console.error(`An error occurred while uploading '${filename}'.`, { error });
+                this.errors.upload_error = error.message;
             });
     }
 
@@ -264,15 +361,7 @@ export default class Wad {
 
     get uploadedPercentage() {
         const progress = this.bytesLoaded / this.size * 100;
-        return Math.ceil(progress);
-    }
-
-    get uploaded() {
-        return this.uploadedPercentage >= 100;
-    }
-
-    get processed() {
-        return this.headerLumpCount === this.indexLumpCount;
+        return Number.isNaN(progress) ? '' : Math.ceil(progress);
     }
 
     get lumpNames() {
@@ -281,5 +370,11 @@ export default class Wad {
 
     get errorIds() {
         return Object.keys(this.errors);
+    }
+
+    get megabyteSize() {
+        const convertedSize = this.size / 1024 / 1024;
+        const truncatedSize = convertedSize.toFixed(1);
+        return `${truncatedSize} MB`;
     }
 }

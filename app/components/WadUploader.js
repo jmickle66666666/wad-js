@@ -29,10 +29,12 @@ export default class WadUploader extends Component {
             };
         });
 
-        if (wad.errorIds.length === 0 && wad.bytesLoaded === wad.size && wad.indexLumpCount === wad.headerLumpCount) {
-            const { addWad } = this.props;
-            addWad(wad);
-        }
+        setTimeout(() => {
+            if (wad.uploaded && wad.processed) {
+                const { addWad } = this.props;
+                addWad(wad);
+            }
+        }, 100);
     }
 
     handleLocalWadUpload = (event) => {

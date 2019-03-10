@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import style from './App.scss';
 
 import Wad from '../models/Wad';
+import Lump from '../models/Lump';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
 
@@ -70,8 +71,21 @@ export default class App extends Component {
         const wadsData = Object.keys(jsonWads).map(wadId => jsonWads[wadId]);
 
         const wadList = wadsData.map((wadData) => {
+            // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
+
+            const lumps = {};
+            wad.lumpNames.map((lumpName) => {
+                // Lump instances must be re-instantiated
+                const lump = new Lump();
+                lump.setIndexData(wad.lumps[lumpName]);
+                lumps[lumpName] = lump;
+                return null;
+            });
+
+            wad.lumps = lumps;
+
             return wad;
         });
 
@@ -106,7 +120,7 @@ export default class App extends Component {
     }
 
     addFreedoom = (wad) => {
-        if (wad.errorIds.length === 0 && wad.bytesLoaded === wad.size && wad.indexLumpCount === wad.headerLumpCount) {
+        if (wad.uploaded && wad.processed) {
             this.addWad(wad);
         }
     }
@@ -140,6 +154,16 @@ export default class App extends Component {
             }
 
             localStorageManager.set('wads', updatedWads);
+
+            if (prevState.selectedWad && prevState.selectedWad.id === wadId) {
+                window.location.hash = '#uploader';
+
+                return ({
+                    wads: updatedWads,
+                    selectedWad: {},
+                    selectedLump: {},
+                });
+            }
 
             return ({
                 wads: updatedWads,
@@ -176,6 +200,10 @@ export default class App extends Component {
     selectLump = (lumpName, init) => {
         this.setState((prevState) => {
             if (!prevState.selectedWad) {
+                return {};
+            }
+
+            if (!prevState.selectedWad.lumps) {
                 return {};
             }
 
