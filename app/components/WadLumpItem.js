@@ -20,6 +20,7 @@ export default ({
                 onClick={() => selectLump(lump.name)}
             >
                 <h4>{lump.name}</h4>
+                <div>{lump.type}</div>
                 <div>{lump.sizeInBytes}</div>
             </a>
         );
