@@ -200,7 +200,7 @@ export default class Wad {
         };
     }
 
-    handleLastMapLumpEntry(map, lumps, lumpIndexData, nonMapLumps) {
+    handleLastMapLumpEntry(map, lumps, nonMapLumps) {
         let updatedNonMapLumps = nonMapLumps;
         let updatedMap = { ...map };
         const updatedLumps = { ...lumps };
@@ -225,9 +225,6 @@ export default class Wad {
             };
         }
 
-        const lump = this.createLumpIndex(lumpIndexData);
-        updatedLumps[lumpIndexData.name] = lump;
-
         return {
             updatedNonMapLumps,
             updatedMap,
@@ -237,16 +234,21 @@ export default class Wad {
 
     readLumpIndex(blob, data, callback) {
         let lumps = {};
-        let nonMapLumps = 0;
+
         let map = {
             nameLump: { name: '' },
             dataLumps: {},
         };
 
+        let nonMapLumps = 0;
+
+        let lumpClusterType = '';
+
         let x = 0;
         for (let i = this.indexOffset; i < data.byteLength; i += 16) {
             x++;
             this.indexLumpCount = x;
+            let mapLump = false;
 
             const address = data.getInt32(i, true);
             const size = data.getInt32(i + 4, true);
@@ -266,7 +268,10 @@ export default class Wad {
                 name,
             };
 
+            // map-related operations
             if (MAPLUMPS.includes(name)) {
+                mapLump = true;
+
                 const {
                     updatedNonMapLumps,
                     updatedMap,
@@ -281,18 +286,43 @@ export default class Wad {
                     updatedNonMapLumps,
                     updatedMap,
                     updatedLumps,
-                } = this.handleLastMapLumpEntry(map, lumps, lumpIndexData, nonMapLumps);
+                } = this.handleLastMapLumpEntry(map, lumps, nonMapLumps);
 
                 nonMapLumps = updatedNonMapLumps;
                 map = { ...updatedMap };
                 lumps = { ...updatedLumps };
-            } else {
-                const lump = this.createLumpIndex(lumpIndexData);
-                lumps[name] = lump;
             }
 
-            // const lumpData = new DataView(blob, address);
-            // console.log({ lumpData });
+            // non-map lumps
+            if (!mapLump) {
+                if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
+                    // start marker
+                    if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                        // patch marker
+                        console.info('Patch start marker found:', name);
+                        lumpClusterType = 'patch';
+                    }
+                } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
+                    // end marker
+                    console.info('End marker found:', name);
+                    lumpClusterType = '';
+                } else if (lumpClusterType) {
+                    // we know the type of this lump because it belongs to a cluster with a start marker (end marker is not fully guaranteed, though)
+                    const lumpIndexDataWithType = {
+                        ...lumpIndexData,
+                        type: lumpClusterType,
+                    };
+
+                    const lump = this.createLumpIndex(lumpIndexDataWithType);
+                    lumps[name] = lump;
+                } else {
+                    // unmarked lump
+                    const lump = this.createLumpIndex(lumpIndexData);
+                    lumps[name] = lump;
+                }
+            }
+
+            const lumpData = new DataView(blob, address, size);
         }
 
         this.lumps = lumps;
@@ -305,13 +335,6 @@ export default class Wad {
         const lump = new Lump();
         lump.setIndexData(lumpIndexData);
         return lump;
-    }
-
-    checkLumpTypeFromHeader(data, string) {
-        for (let i = 0; i < string.length; i++) {
-            if (string.charCodeAt(i) !== data.getUint8(i)) return false;
-        }
-        return true;
     }
 
     readHeader(data) {
