@@ -14,8 +14,6 @@ export const COLORMAP = 'COLORMAP';
 export const ENDOOM = 'ENDOOM';
 export const PNAMES = 'PNAMES';
 export const TEXTUREx = ['TEXTURE1', 'TEXTURE2'];
-export const GRAPHIC_MARKERS = ['P_', 'PP_', 'P1_', 'P2_', 'P3_', 'S_', 'S2_', 'S3_', 'SS_'];
-export const FLAT_MARKERS = ['F_', 'FF_', 'F1_', 'F2_', 'F3_'];
 
 export const TEXTLUMPS = ['DEHACKED', 'MAPINFO', 'ZMAPINFO', 'EMAPINFO',
     'DMXGUS', 'DMXGUSC', 'WADINFO', 'EMENUS', 'MUSINFO',
