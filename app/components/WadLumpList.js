@@ -5,11 +5,16 @@ import style from './WadLumpList.scss';
 import Help from './Help';
 import WadLumpItem from './WadLumpItem';
 
-export default ({ wad, selectedLump, selectLump }) => (
+export default ({
+    wad,
+    selectedLump,
+    selectLump,
+    focusOnWad,
+}) => (
     <div className={style.wadLumpsOuter}>
         <Help id="wad-lumps" title="the lumps panel">
-            <h3 className={style.wadLumpsTitle}>
-                Lumps
+            <h3 className={style.wadLumpsTitle} onClick={focusOnWad}>
+                    Lumps
             </h3>
         </Help>
         <div className={style.wadLumpsInner}>

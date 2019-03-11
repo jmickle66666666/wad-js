@@ -12,6 +12,7 @@ import Logo from './Logo';
 import WadUploader from './WadUploader';
 import WadList from './WadList';
 import WadDetails from './WadDetails';
+import BackToTop from './BackToTop';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -116,7 +117,7 @@ export default class App extends Component {
         );
 
         // dev: comment out when feature is ready
-        // localStorageManager.set('freedoom-preloaded', true);
+        localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {
@@ -171,6 +172,14 @@ export default class App extends Component {
         });
     }
 
+    deselectAll = () => {
+        document.title = `${prefixWindowtitle}`;
+        this.setState(() => ({
+            selectedWad: {},
+            selectedLump: {},
+        }));
+    }
+
     selectWad = (wadId, init) => {
         this.setState((prevState) => {
             const selectedWad = prevState.wads[wadId];
@@ -188,10 +197,7 @@ export default class App extends Component {
         }, () => {
             if (init) {
                 setTimeout(() => {
-                    const element = document.getElementById('wadDetails');
-                    if (element) {
-                        element.scrollIntoView();
-                    }
+                    this.focusOnWad();
                 }, 100);
             }
         });
@@ -221,13 +227,24 @@ export default class App extends Component {
         }, () => {
             if (init) {
                 setTimeout(() => {
-                    const element = document.getElementById('lumpDetails');
-                    if (element) {
-                        element.scrollIntoView();
-                    }
+                    this.focusOnLump();
                 }, 200);
             }
         });
+    }
+
+    focusOnWad = () => {
+        const element = document.getElementById('wadDetails');
+        if (element) {
+            element.scrollIntoView();
+        }
+    }
+
+    focusOnLump = () => {
+        const element = document.getElementById('lumpDetails');
+        if (element) {
+            element.scrollIntoView();
+        }
     }
 
     updateSelectedWadFromList = (updatedWad) => {
@@ -269,7 +286,10 @@ export default class App extends Component {
                 <div className={style.main}>
                     <Logo />
                     <div className={style.top}>
-                        <WadUploader addWad={this.addWad} />
+                        <WadUploader
+                            addWad={this.addWad}
+                            deselectAll={this.deselectAll}
+                        />
                         {Object.keys(wads).length > 0 && (
                             <WadList
                                 wads={wads}
@@ -286,9 +306,12 @@ export default class App extends Component {
                                 selectedLump={selectedLump}
                                 selectLump={this.selectLump}
                                 updateFilename={this.updateFilename}
+                                focusOnWad={this.focusOnWad}
+                                focusOnLump={this.focusOnLump}
                             />
                         )}
                 </div>
+                <BackToTop focusOnWad={this.focusOnWad} />
             </div>
         );
     }
