@@ -8,6 +8,9 @@ import arrayToQuotedString from '../lib/arrayToQuotedString';
 import {
     VALID_FILE_FORMATS,
     VALID_WAD_TYPES,
+    LUMP_INDEX_ENTRY_SIZE,
+    LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
+    LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
     PLAYPAL,
     COLORMAP,
     MAP_LUMPS,
@@ -80,6 +83,7 @@ export default class Wad {
 
             this.bytesLoaded = this.size;
             this.uploadEndAt = moment().utc().format();
+            this.uploadedWith = `${PROJECT} v${VERSION}`;
 
             const {
                 wadType,
@@ -255,7 +259,7 @@ export default class Wad {
 
     readLumpName(lumpIndexAddress, data) {
         let name = '';
-        for (let i = lumpIndexAddress + 8; i < lumpIndexAddress + 16; i++) {
+        for (let i = lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME; i < lumpIndexAddress + LUMP_INDEX_ENTRY_SIZE; i++) {
             if (data.getUint8(i) !== 0) {
                 name += String.fromCharCode(data.getUint8(i));
             }
@@ -279,11 +283,11 @@ export default class Wad {
         let lumpIndexAddress;
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
-            lumpIndexAddress = this.indexOffset + i * 16;
+            lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
             let mapLump = false;
 
             const address = data.getInt32(lumpIndexAddress, true);
-            const size = data.getInt32(lumpIndexAddress, true);
+            const size = data.getInt32(lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE, true);
 
             const name = this.readLumpName(lumpIndexAddress, data);
 
@@ -441,6 +445,7 @@ export default class Wad {
         this.uploadStartAt = timestamp.format();
         this.name = filename;
         this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
+        this.uploadedFrom = url;
 
         fetch(url)
             .then(response => response.arrayBuffer())
@@ -470,6 +475,8 @@ export default class Wad {
             errors,
             uploadStartAt,
             uploadEndAt,
+            uploadedWith,
+            uploadedFrom,
             lumps,
         } = wad;
 
@@ -485,6 +492,8 @@ export default class Wad {
         this.errors = errors;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
+        this.uploadedWith = uploadedWith;
+        this.uploadedFrom = uploadedFrom,
         this.lumps = lumps;
     }
 

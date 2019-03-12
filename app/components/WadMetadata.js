@@ -15,15 +15,16 @@ export default ({
         <Help id="wad-metadata" title="the metadata panel">
             <h3 className={style.wadMetadataTitle} onClick={focusOnWad}>
                     Metadata
-            </h3>
+                </h3>
         </Help>
         <div className={style.wadMetadataInner}>
             <ErrorMessageList errors={wad.errors} />
+            <h4 className={style.wadMetadataSubtitle}>General</h4>
             <div className={style.wadMetadataTable}>
                 <label htmlFor="filename" className={style.wadMetadataEntry}>
                     <div className={style.wadMetadataLabel}>
                             Filename:
-                        </div>
+                    </div>
                     <input
                         id="filename"
                         className={style.wadMetadataValue}
@@ -31,10 +32,6 @@ export default ({
                         onChange={event => updateFilename(event.target.value)}
                     />
                 </label>
-                <div className={style.wadMetadataEntry}>
-                    <div className={style.wadMetadataLabel}>Uploaded:</div>
-                    <div className={style.wadMetadataValue}><small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small></div>
-                </div>
                 <div className={style.wadMetadataEntry}>
                     <div className={style.wadMetadataLabel}>Type:</div>
                     <div className={style.wadMetadataValue}>{wad.wadType}</div>
@@ -50,6 +47,30 @@ export default ({
                         {' '}
                     </div>
                 </div>
+            </div>
+            <h4 className={style.wadMetadataSubtitle}>Upload</h4>
+            <div className={style.wadMetadataTable}>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Uploaded on:</div>
+                    <div className={style.wadMetadataValue}>
+                        <small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small>
+
+                    </div>
+                </div>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Uploaded with:</div>
+                    <div className={style.wadMetadataValue}>
+                        {wad.uploadedWith}
+                    </div>
+                </div>
+                {wad.uploadedFrom && (
+                    <div className={style.wadMetadataCentered}>
+                            Uploaded from
+                        {' '}
+                        <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
+                            .
+                    </div>
+                )}
             </div>
         </div>
     </div>
