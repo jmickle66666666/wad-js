@@ -10,17 +10,21 @@
 
 .wadLumpsTitle {
     text-align: left;
+    cursor: pointer;
 }
 
 .wadLumpsInner {
-    display: flex;
-    flex-wrap: wrap;
     padding-top: 10px;
     padding-left: 40px;
     padding-right: 40px;
     padding-bottom: 40px;
     background: rgb(240, 240, 240);
-    box-sizing: border-box;
     border-radius: 0 0 10px 10px;
+}
+
+.wadLumpsList {
+    display: flex;
+    flex-wrap: wrap;
+    box-sizing: border-box;
     justify-content: center;
 }

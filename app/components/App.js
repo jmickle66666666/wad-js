@@ -12,6 +12,7 @@ import Logo from './Logo';
 import WadUploader from './WadUploader';
 import WadList from './WadList';
 import WadDetails from './WadDetails';
+import BackToTop from './BackToTop';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -32,6 +33,7 @@ export default class App extends Component {
             wads,
             selectedWad: {},
             selectedLump: {},
+            selectedLumpType: '',
         };
     }
 
@@ -43,9 +45,14 @@ export default class App extends Component {
 
         const { match } = this.props;
         const { params } = match;
-        const { wadName, lumpName } = params;
+        const { wadName, lumpName, lumpType } = params;
+
         if (wadName) {
             this.selectWad(wadName, true);
+        }
+
+        if (lumpType) {
+            this.selectLumpType(lumpType, true);
         }
 
         if (lumpName) {
@@ -76,11 +83,17 @@ export default class App extends Component {
             wad.restore(wadData);
 
             const lumps = {};
-            wad.lumpNames.map((lumpName) => {
-                // Lump instances must be re-instantiated
-                const lump = new Lump();
-                lump.setIndexData(wad.lumps[lumpName]);
-                lumps[lumpName] = lump;
+            Object.keys(wad.lumps).map((lumpType) => {
+                const lumpTypes = {};
+                Object.keys(wad.lumps[lumpType]).map((lumpName) => {
+                    // Lump instances must be re-instantiated
+                    const lump = new Lump();
+                    lump.setIndexData(wad.lumps[lumpType][lumpName]);
+                    lumpTypes[lumpName] = lump;
+                    return null;
+                });
+                lumps[lumpType] = lumpTypes;
+
                 return null;
             });
 
@@ -171,6 +184,14 @@ export default class App extends Component {
         });
     }
 
+    deselectAll = () => {
+        document.title = `${prefixWindowtitle}`;
+        this.setState(() => ({
+            selectedWad: {},
+            selectedLump: {},
+        }));
+    }
+
     selectWad = (wadId, init) => {
         this.setState((prevState) => {
             const selectedWad = prevState.wads[wadId];
@@ -179,19 +200,36 @@ export default class App extends Component {
                 return {};
             }
 
-            document.title = `${prefixWindowtitle} / ${selectedWad.name}`;
+            let selectedLump = {};
+
+            if (prevState.selectedLump.name) {
+                if (selectedWad.lumps[prevState.selectedLumpType][prevState.selectedLump.name]) {
+                    selectedLump = { ...selectedWad.lumps[prevState.selectedLumpType][prevState.selectedLump.name] };
+                }
+
+                if (selectedLump.name) {
+                    document.title = `${prefixWindowtitle} / ${selectedWad.name} / ${prevState.selectedLumpType} / ${prevState.selectedLump.name}`;
+                } else {
+                    document.title = `${prefixWindowtitle} / ${selectedWad.name} / ${prevState.selectedLumpType}`;
+                }
+            } else if (prevState.selectedLumpType) {
+                if (selectedWad.lumps[prevState.selectedLumpType]) {
+                    document.title = `${prefixWindowtitle} / ${selectedWad.name} / ${prevState.selectedLumpType}`;
+                } else {
+                    document.title = `${prefixWindowtitle} / ${selectedWad.name}`;
+                }
+            } else {
+                document.title = `${prefixWindowtitle} / ${selectedWad.name}`;
+            }
 
             return {
                 selectedWad,
-                selectedLump: {},
+                selectedLump,
             };
         }, () => {
             if (init) {
                 setTimeout(() => {
-                    const element = document.getElementById('wadDetails');
-                    if (element) {
-                        element.scrollIntoView();
-                    }
+                    this.focusOnWad();
                 }, 100);
             }
         });
@@ -207,13 +245,17 @@ export default class App extends Component {
                 return {};
             }
 
-            const selectedLump = prevState.selectedWad.lumps[lumpName];
-            if (!selectedLump) {
-                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name}`;
+            if (!prevState.selectedLumpType) {
                 return {};
             }
 
-            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${selectedLump.name}`;
+            const selectedLump = prevState.selectedWad.lumps[prevState.selectedLumpType][lumpName];
+            if (!selectedLump) {
+                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType}`;
+                return {};
+            }
+
+            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType} / ${selectedLump.name}`;
 
             return {
                 selectedLump,
@@ -221,13 +263,38 @@ export default class App extends Component {
         }, () => {
             if (init) {
                 setTimeout(() => {
-                    const element = document.getElementById('lumpDetails');
-                    if (element) {
-                        element.scrollIntoView();
-                    }
+                    this.focusOnLump();
                 }, 200);
             }
         });
+    }
+
+    selectLumpType = (lumpType) => {
+        this.setState((prevState) => {
+            if (!prevState.selectedWad) {
+                return {};
+            }
+
+            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${lumpType}`;
+
+            return {
+                selectedLumpType: lumpType,
+            };
+        });
+    }
+
+    focusOnWad = () => {
+        const element = document.getElementById('wadDetails');
+        if (element) {
+            element.scrollIntoView();
+        }
+    }
+
+    focusOnLump = () => {
+        const element = document.getElementById('lumpDetails');
+        if (element) {
+            element.scrollIntoView();
+        }
     }
 
     updateSelectedWadFromList = (updatedWad) => {
@@ -262,6 +329,7 @@ export default class App extends Component {
             wads,
             selectedWad,
             selectedLump,
+            selectedLumpType,
         } = this.state;
         return (
             <div className={style.app}>
@@ -269,13 +337,18 @@ export default class App extends Component {
                 <div className={style.main}>
                     <Logo />
                     <div className={style.top}>
-                        <WadUploader addWad={this.addWad} />
+                        <WadUploader
+                            addWad={this.addWad}
+                            deselectAll={this.deselectAll}
+                        />
                         {Object.keys(wads).length > 0 && (
                             <WadList
                                 wads={wads}
                                 selectedWad={selectedWad}
                                 deleteWad={this.deleteWad}
                                 selectWad={this.selectWad}
+                                selectedLumpType={selectedLumpType}
+                                selectedLump={selectedLump}
                             />
                         )}
                     </div>
@@ -284,11 +357,16 @@ export default class App extends Component {
                             <WadDetails
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
+                                selectedLumpType={selectedLumpType}
                                 selectLump={this.selectLump}
+                                selectLumpType={this.selectLumpType}
                                 updateFilename={this.updateFilename}
+                                focusOnWad={this.focusOnWad}
+                                focusOnLump={this.focusOnLump}
                             />
                         )}
                 </div>
+                <BackToTop focusOnWad={this.focusOnWad} />
             </div>
         );
     }

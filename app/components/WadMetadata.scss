@@ -10,6 +10,7 @@
 
 .wadMetadataTitle {
     text-align: left;
+    cursor: pointer;
 }
 
 .wadMetadataInner {
@@ -37,15 +38,19 @@
 }
 
 .wadMetadataLabel {
-    width: 100px;
+    width: 125px;
     margin-right: 5px;
 }
 
 .wadMetadataValue {
-    width: 100px;
+    width: 125px;
+}
+
+.wadMetadataContinuous {
+    max-width: 255px;
 }
 
 input.wadMetadataValue {
-    width: 100px;
+    width: 125px;
     box-sizing: border-box;
 }

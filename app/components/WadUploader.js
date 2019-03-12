@@ -122,6 +122,9 @@ export default class WadUploader extends Component {
 
     render() {
         const {
+            deselectAll,
+        } = this.props;
+        const {
             wads,
             remoteWadErrors,
             remoteWadUrl,
@@ -132,7 +135,9 @@ export default class WadUploader extends Component {
                 <span id="uploader" />
                 <div className={style.uploaderOuter}>
                     <Help id="uploader" title="how to use the uploader">
-                        <h2 className={style.uploaderTitle}>Uploader</h2>
+                        <a href="#/uploader" onClick={deselectAll}>
+                            <h2 className={style.uploaderTitle}>Uploader</h2>
+                        </a>
                     </Help>
                     <div className={style.uploaderInner}>
                         <label htmlFor="localInput" className={style.uploaderInput}>

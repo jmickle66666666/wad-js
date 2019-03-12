@@ -8,11 +8,12 @@ import WadItem from './WadItem';
 export default ({
     wads,
     selectedWad,
+    selectedLumpType,
+    selectedLump,
     deleteWad,
     selectWad,
 }) => (
     <div className={style.wadListOuter}>
-
         <Help
             id="uploaded-wads"
             title="uploaded wads"
@@ -30,6 +31,8 @@ export default ({
                         deleteWad={deleteWad}
                         selectWad={selectWad}
                         selectedWad={selectedWad}
+                        selectedLumpType={selectedLumpType}
+                        selectedLump={selectedLump}
                     />
                 ))
             }
