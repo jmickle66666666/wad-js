@@ -8,7 +8,9 @@ import arrayToQuotedString from '../lib/arrayToQuotedString';
 import {
     VALID_FILE_FORMATS,
     VALID_WAD_TYPES,
-    MAPLUMPS,
+    PLAYPAL,
+    COLORMAP,
+    MAP_LUMPS,
     THINGS,
     UNCATEGORIZED,
 } from '../lib/constants';
@@ -17,7 +19,6 @@ export default class Wad {
     constructor() {
         this.errors = {};
         this.lumps = {};
-        this.lumpTypeCount = {};
     }
 
     checkZipFile = (blob) => {
@@ -148,11 +149,10 @@ export default class Wad {
         return reader;
     }
 
-    handleMapLumpEntry(map, lumps, lumpIndexData, lumpTypeCount, callback) {
+    handleMapLumpEntry(map, lumps, lumpIndexData, callback) {
         const updatedNonMapLumps = 0;
         let updatedMap = { ...map };
         const updatedLumps = { ...lumps };
-        let updatedLumpTypeCount = { ...lumpTypeCount };
 
         // we assume that 'THINGS' is the first lump that appears after the map name lump
         if (lumpIndexData.name === THINGS) {
@@ -171,11 +171,6 @@ export default class Wad {
                     nameLump: { name: '' },
                     dataLumps: {},
                 };
-
-                updatedLumpTypeCount = {
-                    ...lumpTypeCount,
-                    map: (lumpTypeCount.map || 0) + 1,
-                };
             }
 
             // find the lump that holds the name of the map in the map object
@@ -192,7 +187,7 @@ export default class Wad {
 
             updatedMap.nameLump = {
                 ...mapNameLump,
-                type: 'map',
+                type: 'maps',
             };
         }
 
@@ -202,15 +197,13 @@ export default class Wad {
             updatedNonMapLumps,
             updatedMap,
             updatedLumps,
-            updatedLumpTypeCount,
         };
     }
 
-    handleLastMapLumpEntry(map, lumps, nonMapLumps, lumpTypeCount) {
+    handleLastMapLumpEntry(map, lumps, nonMapLumps) {
         let updatedNonMapLumps = nonMapLumps;
         let updatedMap = { ...map };
         const updatedLumps = { ...lumps };
-        let updatedLumpTypeCount = { ...lumpTypeCount };
 
         // we have not encountered map data lumps but we still have data in the temporary object
         updatedNonMapLumps += 1;
@@ -230,18 +223,12 @@ export default class Wad {
                 nameLump: { name: '' },
                 dataLumps: {},
             };
-
-            updatedLumpTypeCount = {
-                ...lumpTypeCount,
-                map: (lumpTypeCount.map || 0) + 1,
-            };
         }
 
         return {
             updatedNonMapLumps,
             updatedMap,
             updatedLumps,
-            updatedLumpTypeCount,
         };
     }
 
@@ -261,12 +248,12 @@ export default class Wad {
             organizedLumps[lump.type][lumpName] = lump;
         }
 
+        console.log({ organizedLumps });
+
         return organizedLumps;
     }
 
     readLumpIndex(blob, data, callback) {
-        let lumpTypeCount = {};
-
         let lumps = {};
 
         let map = {
@@ -276,12 +263,12 @@ export default class Wad {
 
         let nonMapLumps = 0;
 
+        let lumpType = '';
         let lumpClusterType = '';
 
         let x = 0;
-        for (let i = this.indexOffset; i < data.byteLength; i += 16) {
+        for (let i = this.indexOffset; x < this.headerLumpCount; i += 16) {
             x++;
-            this.indexLumpCount = x;
             let mapLump = false;
 
             const address = data.getInt32(i, true);
@@ -303,77 +290,76 @@ export default class Wad {
             };
 
             // map-related operations
-            if (MAPLUMPS.includes(name)) {
+            if (MAP_LUMPS.includes(name)) {
                 mapLump = true;
 
                 const {
                     updatedNonMapLumps,
                     updatedMap,
                     updatedLumps,
-                    updatedLumpTypeCount,
                 } = this.handleMapLumpEntry(
                     map,
                     lumps,
                     lumpIndexData,
-                    lumpTypeCount,
                     callback,
                 );
 
                 nonMapLumps = updatedNonMapLumps;
                 map = { ...updatedMap };
                 lumps = { ...updatedLumps };
-                lumpTypeCount = updatedLumpTypeCount;
             } else if (map.nameLump.name !== '') {
                 const {
                     updatedNonMapLumps,
                     updatedMap,
                     updatedLumps,
-                    updatedLumpTypeCount,
                 } = this.handleLastMapLumpEntry(
                     map,
                     lumps,
                     nonMapLumps,
-                    lumpTypeCount,
                 );
 
                 nonMapLumps = updatedNonMapLumps;
                 map = { ...updatedMap };
                 lumps = { ...updatedLumps };
-                lumpTypeCount = updatedLumpTypeCount;
             }
 
             // non-map lumps
             if (!mapLump) {
+                if (name === PLAYPAL) {
+                    lumpType = 'palettes';
+                } else if (name === COLORMAP) {
+                    lumpType = 'colormaps';
+                }
+
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
                     // start marker
                     if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
                         console.info('Patch start marker found:', name);
-                        lumpClusterType = 'patch';
+                        lumpClusterType = 'patches';
                     } else if (/^F[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
                         console.info('Flat start marker found:', name);
-                        lumpClusterType = 'flat';
+                        lumpClusterType = 'flats';
                     } else if (/^S[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
                         console.info('Sprite start marker found:', name);
-                        lumpClusterType = 'sprite';
+                        lumpClusterType = 'sprites';
+                    } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                        // patch marker
+                        console.info('Sprite start marker found:', name);
+                        lumpClusterType = 'colormaps';
                     }
                 } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
                     // end marker
                     console.info('End marker found:', name);
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
-                    // we know the type of this lump because it belongs to a cluster with a start marker (end marker is not fully guaranteed, though)
+                    // we know the type of this lump because it belongs to a cluster
+                    // lump cluster type is meant to be applied to a group of consecutive lumps
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
                         type: lumpClusterType,
-                    };
-
-
-                    lumpTypeCount = {
-                        ...lumpTypeCount,
-                        [lumpClusterType]: (lumpTypeCount[lumpClusterType] || 0) + 1,
                     };
 
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
@@ -382,21 +368,22 @@ export default class Wad {
                     // unmarked lump
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
-                        type: UNCATEGORIZED,
+                        type: lumpType || UNCATEGORIZED,
                     };
 
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
                     lumps[name] = lump;
+
+                    // lump type applies to a single lump
+                    lumpType = '';
                 }
             }
-
-            const lumpData = new DataView(blob, address, size);
         }
 
         const organizedLumps = this.organizeLumps(lumps);
 
+        this.indexLumpCount = x;
         this.lumps = organizedLumps;
-        this.lumpTypeCount = lumpTypeCount;
         this.processed = true;
 
         callback(this);
@@ -479,7 +466,6 @@ export default class Wad {
             uploadStartAt,
             uploadEndAt,
             lumps,
-            lumpTypeCount,
         } = wad;
 
         this.id = id;
@@ -495,7 +481,6 @@ export default class Wad {
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.lumps = lumps;
-        this.lumpTypeCount = lumpTypeCount;
     }
 
     get uploadedPercentage() {
@@ -503,12 +488,8 @@ export default class Wad {
         return Number.isNaN(progress) ? '' : Math.ceil(progress);
     }
 
-    get lumpNames() {
-        return Object.keys(this.lumps);
-    }
-
     get lumpTypes() {
-        return Object.keys(this.lumpTypeCount);
+        return Object.keys(this.lumps);
     }
 
     get errorIds() {

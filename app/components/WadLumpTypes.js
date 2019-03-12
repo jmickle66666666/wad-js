@@ -21,7 +21,7 @@ export default ({ wad, selectedLumpType, selectLumpType }) => (
                 {wad.lumpTypes.map(lumpType => (
                     <a
                         href={`#/${wad.id}/${selectedLumpType}`}
-                        id={selectedLumpType && selectedLumpType === lumpType && style.selectedLumpType || null}
+                        id={(selectedLumpType && selectedLumpType === lumpType && style.selectedLumpType) || null}
                         key={lumpType}
                         className={style.wadLumpTypeOuter}
                         onClick={() => selectLumpType(lumpType)}
@@ -29,14 +29,6 @@ export default ({ wad, selectedLumpType, selectLumpType }) => (
                         {lumpType}
                     </a>
                 ))}
-                <a
-                    href={`#/${wad.id}/${UNCATEGORIZED}`}
-                    id={(selectedLumpType && selectedLumpType === UNCATEGORIZED && style.selectedLumpType) || null}
-                    className={style.wadLumpTypeOuter}
-                    onClick={() => selectLumpType(UNCATEGORIZED)}
-                >
-                    {UNCATEGORIZED}
-                </a>
             </div>
         </div>
     </div>
