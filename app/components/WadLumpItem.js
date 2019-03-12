@@ -12,6 +12,7 @@ export default ({
     wad,
     selectLump,
     selectedLumpType,
+    focusOnLump,
 }) => {
     if (!isSelectedLump({ selectedLump, lump })) {
         return (
@@ -30,6 +31,7 @@ export default ({
         <WadLumpDetails
             lump={lump}
             wad={wad}
+            focusOnLump={focusOnLump}
         />
     );
 };

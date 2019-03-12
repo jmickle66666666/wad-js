@@ -283,10 +283,16 @@ export default class App extends Component {
         });
     }
 
-    focusOnWad = () => {
+    focusOnWad = (keepState = true) => {
         const element = document.getElementById('wadDetails');
         if (element) {
             element.scrollIntoView();
+            if (!keepState) {
+                this.setState(() => ({
+                    selectedLump: {},
+                    selectedLumpType: '',
+                }));
+            }
         }
     }
 
@@ -358,6 +364,7 @@ export default class App extends Component {
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
+                                selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
                                 updateFilename={this.updateFilename}

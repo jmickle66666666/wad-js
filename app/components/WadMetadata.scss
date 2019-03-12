@@ -21,7 +21,15 @@
     background: rgb(240, 240, 240);
     box-sizing: border-box;
     border-radius: 0 0 10px 10px;
+}
 
+.wadMetadataSubtitle {
+    margin-left: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgb(45, 45, 45);
+}
+
+.wadMetadataContent {
     a {
         color: rgb(140, 140, 140);
 
@@ -30,12 +38,6 @@
             text-decoration: none;
         }
     }
-}
-
-.wadMetadataSubtitle {
-    margin-left: 0;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgb(45, 45, 45);
 }
 
 .wadMetadataTable {

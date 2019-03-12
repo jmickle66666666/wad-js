@@ -11,6 +11,7 @@ export default ({
     selectedLumpType,
     selectLump,
     focusOnWad,
+    focusOnLump,
 }) => (
     <div className={style.wadLumpsOuter}>
         <Help id="wad-lumps" title="the lumps panel">
@@ -31,6 +32,7 @@ export default ({
                                     selectedLumpType={selectedLumpType}
                                     wad={wad}
                                     selectLump={selectLump}
+                                    focusOnLump={focusOnLump}
                                 />
                             )
                     ) || null;
