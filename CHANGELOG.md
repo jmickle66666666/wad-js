@@ -1,4 +1,7 @@
 
+## v0.1.13: Lump views
+
+* Lumps are now broken down by category in the UI. This should help avoid long lists of lumps and simplify browsing. Also, it should improve the performances of the app when it re-renders.
 
 ## v0.1.12: Patch lumps
 

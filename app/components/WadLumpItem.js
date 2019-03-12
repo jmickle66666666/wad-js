@@ -11,16 +11,16 @@ export default ({
     selectedLump,
     wad,
     selectLump,
+    selectedLumpType,
 }) => {
     if (!isSelectedLump({ selectedLump, lump })) {
         return (
             <a
-                href={`#/view/${wad.id}/lump/${lump.name}`}
+                href={`#/${wad.id}/${selectedLumpType}/${lump.name}`}
                 className={style.wadLumpOuter}
                 onClick={() => selectLump(lump.name)}
             >
                 <h4>{lump.name}</h4>
-                <div>{lump.type}</div>
                 <div>{lump.sizeInBytes}</div>
             </a>
         );

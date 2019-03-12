@@ -1,0 +1,28 @@
+.wadLumpTypeTitle {
+    color: rgb(240, 240, 240);
+    text-align: center;
+}
+
+.wadLumpTypes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.wadLumpTypeOuter {
+    display: flex;
+    cursor: pointer; 
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    margin: 5px;
+    background: rgb(240, 240, 240);
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgb(150, 150, 150);
+    min-width: 190px;
+}
+
+#selectedLumpType {
+    background: rgb(175, 175, 175);
+}

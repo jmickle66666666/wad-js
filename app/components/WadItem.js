@@ -7,13 +7,15 @@ import style from './WadItem.scss';
 export default ({
     wad,
     selectedWad,
+    selectedLumpType,
+    selectedLump,
     deleteWad,
     selectWad,
 }) => (
     <div className={style.wadOuter}>
         <a
-            href={`#/view/${wad.id}`}
-            id={selectedWad && selectedWad.id === wad.id && style.selectedWad || null}
+            href={`#/${wad.id}${selectedLumpType ? `/${selectedLumpType}` : ''}${selectedLump.name ? `/${selectedLump.name}` : ''}`}
+            id={(selectedWad && selectedWad.id === wad.id && style.selectedWad) || null}
             className={style.wadInner}
             onClick={() => selectWad(wad.id)}
         >
@@ -29,7 +31,7 @@ export default ({
                 tabIndex={0}
             >
                     &times;
-            </div>
+                </div>
         </a>
     </div>
 );

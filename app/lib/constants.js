@@ -31,6 +31,12 @@ export const EXTENSIONS = {
     png: 'png',
 };
 
+export const UNCATEGORIZED = 'uncategorized';
+
+export const VALID_FILE_FORMATS = ['', 'application/zip'];
+
+export const VALID_WAD_TYPES = ['IWAD', 'PWAD'];
+
 export const MAPLUMPS = ['THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES'];
 
 export const THINGS = 'THINGS';

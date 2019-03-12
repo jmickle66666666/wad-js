@@ -20,6 +20,10 @@ On this panel, you can see some data about the WAD in general.
 
 You can also change the filename to your convenience, but it can not be empty.
 
+## Lump Types
+
+You can select the type of lumps you wish to view within a selected WAD.
+
 ## WAD Lumps
 
-You can view the lumps within a selected WAD from this part of the application.
+This part of the application shows details about the lumps that belong to a specific type.

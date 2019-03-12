@@ -20,10 +20,6 @@ export default ({
         <div className={style.wadMetadataInner}>
             <ErrorMessageList errors={wad.errors} />
             <div className={style.wadMetadataTable}>
-                <div className={style.wadMetadataEntry}>
-                    <div className={style.wadMetadataLabel}>Uploaded:</div>
-                    <div className={style.wadMetadataValue}>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</div>
-                </div>
                 <label htmlFor="filename" className={style.wadMetadataEntry}>
                     <div className={style.wadMetadataLabel}>
                             Filename:
@@ -35,6 +31,10 @@ export default ({
                         onChange={event => updateFilename(event.target.value)}
                     />
                 </label>
+                <div className={style.wadMetadataEntry}>
+                    <div className={style.wadMetadataLabel}>Uploaded:</div>
+                    <div className={style.wadMetadataValue}><small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small></div>
+                </div>
                 <div className={style.wadMetadataEntry}>
                     <div className={style.wadMetadataLabel}>Type:</div>
                     <div className={style.wadMetadataValue}>{wad.wadType}</div>
