@@ -2,11 +2,15 @@ import React, { Fragment } from 'react';
 
 import style from './WadLumpDetails.scss';
 
+import WadLumpDetailDisplay from './WadLumpDetailDisplay';
+
 export default ({ lump, wad, focusOnLump }) => (
     <Fragment>
         <span id="lumpDetails" className={style.wadLumpDetailsAnchor} />
         <div className={style.wadLumpDetailsOuter}>
-            <h4 onClick={focusOnLump} className={style.wadLumpDetailsTitle}>{lump.name}</h4>
+            <h4 onClick={focusOnLump} className={style.wadLumpDetailsTitle}>
+                {lump.name}
+            </h4>
             <div className={style.wadLumpDetailsInner}>
                 <div className={style.wadLumpDetailsEntry}>
                     Type:
@@ -18,6 +22,7 @@ export default ({ lump, wad, focusOnLump }) => (
                     {' '}
                     {lump.sizeInBytes}
                 </div>
+                <WadLumpDetailDisplay lump={lump} />
             </div>
         </div>
     </Fragment>
