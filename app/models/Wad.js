@@ -104,7 +104,7 @@ export default class Wad {
 
             callback(this);
 
-            this.readLumpIndex(blob, data, callback);
+            this.readLumpIndex(data, callback);
 
             return true;
         } catch (error) {
@@ -253,37 +253,42 @@ export default class Wad {
         return organizedLumps;
     }
 
-    readLumpIndex(blob, data, callback) {
+    readLumpName(lumpIndexAddress, data) {
+        let name = '';
+        for (let i = lumpIndexAddress + 8; i < lumpIndexAddress + 16; i++) {
+            if (data.getUint8(i) !== 0) {
+                name += String.fromCharCode(data.getUint8(i));
+            }
+        }
+
+        return name;
+    }
+
+    readLumpIndex(data, callback) {
         let lumps = {};
+        let lumpType = '';
+        let lumpClusterType = '';
+        let nonMapLumps = 0;
 
         let map = {
             nameLump: { name: '' },
             dataLumps: {},
         };
 
-        let nonMapLumps = 0;
-
-        let lumpType = '';
-        let lumpClusterType = '';
-
-        let x = 0;
-        for (let i = this.indexOffset; x < this.headerLumpCount; i += 16) {
-            x++;
+        let indexLumpCount = 0;
+        let lumpIndexAddress;
+        for (let i = 0; i < this.headerLumpCount; i++) {
+            indexLumpCount++;
+            lumpIndexAddress = this.indexOffset + i * 16;
             let mapLump = false;
 
-            const address = data.getInt32(i, true);
-            const size = data.getInt32(i + 4, true);
+            const address = data.getInt32(lumpIndexAddress, true);
+            const size = data.getInt32(lumpIndexAddress, true);
 
-            let name = '';
-
-            for (let j = i + 8; j < i + 16; j++) {
-                if (data.getUint8(j) !== 0) {
-                    name += String.fromCharCode(data.getUint8(j));
-                }
-            }
+            const name = this.readLumpName(lumpIndexAddress, data);
 
             const lumpIndexData = {
-                index: x,
+                index: i,
                 address,
                 size,
                 name,
@@ -382,7 +387,7 @@ export default class Wad {
 
         const organizedLumps = this.organizeLumps(lumps);
 
-        this.indexLumpCount = x;
+        this.indexLumpCount = indexLumpCount;
         this.lumps = organizedLumps;
         this.processed = true;
 
