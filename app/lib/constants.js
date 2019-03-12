@@ -9,8 +9,6 @@ export const MUS = 'mus';
 export const GRAPHIC = 'graphic';
 export const FLAT = 'flat';
 export const MARKER = 'marker';
-export const PLAYPAL = 'PLAYPAL';
-export const COLORMAP = 'COLORMAP';
 export const ENDOOM = 'ENDOOM';
 export const PNAMES = 'PNAMES';
 export const TEXTUREx = ['TEXTURE1', 'TEXTURE2'];
@@ -31,12 +29,22 @@ export const EXTENSIONS = {
     png: 'png',
 };
 
-export const UNCATEGORIZED = 'uncategorized';
-
-export const VALID_FILE_FORMATS = ['', 'application/zip'];
+export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
 
 export const VALID_WAD_TYPES = ['IWAD', 'PWAD'];
 
-export const MAPLUMPS = ['THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES'];
+export const UNCATEGORIZED = 'uncategorized';
+
+export const PLAYPAL = 'PLAYPAL';
+
+export const COLORMAP = 'COLORMAP';
+
+export const MAP_LUMPS = [
+    'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES',
+];
+
+export const OPENGL_LUMPS = [
+    'GL_VERT', 'GL_SEGS', 'GL_SSECT', 'GL_NODES', 'GL_PVS',
+];
 
 export const THINGS = 'THINGS';
