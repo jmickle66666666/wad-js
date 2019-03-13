@@ -1,8 +1,8 @@
 
-## v0.1.14: Moved to localForage + PLAYPAL
+## v0.1.14: Moved to localForage + PLAYPAL and COLORMAP
 
 * I ran into issues with the size limits of the localStorage API pretty quickly, so I outsourced the task of saving WADs to local memory to a libray called localForage.
-* I started working on parsing the palette lumps. There's plenty to do there.
+* Implemented logic to parse palettes and colormaps from WADs.
 
 ## v0.1.13: Lump views
 
