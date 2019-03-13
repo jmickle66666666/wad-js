@@ -1,4 +1,9 @@
 
+## v0.1.14: Moved to localForage + PLAYPAL
+
+* I ran into issues with the size limits of the localStorage API pretty quickly, so I outsourced the task of saving WADs to local memory to a libray called localForage.
+* I started working on parsing the palette lumps. There's plenty to do there.
+
 ## v0.1.13: Lump views
 
 * Lumps are now broken down by category in the UI. This should help avoid long lists of lumps and simplify browsing. Also, it should improve the performances of the app when it re-renders.
