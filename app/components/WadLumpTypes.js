@@ -26,7 +26,12 @@ export default ({ wad, selectedLumpType, selectLumpType }) => (
                         className={style.wadLumpTypeOuter}
                         onClick={() => selectLumpType(lumpType)}
                     >
-                        {lumpType}
+                        <div className={style.wadLumpType}>{lumpType}</div>
+                        <div className={style.wadTypeCount}>
+                            {wad.lumpTypeCount[lumpType]}
+                            {' '}
+                            objects
+                        </div>
                     </a>
                 ))}
             </div>

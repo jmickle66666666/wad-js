@@ -12,6 +12,7 @@
 .wadLumpTypeOuter {
     display: flex;
     cursor: pointer; 
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 15px;
@@ -21,7 +22,15 @@
     border-radius: 10px;
     border: 1px solid rgb(150, 150, 150);
     min-width: 190px;
+}
+
+.wadLumpType {
     text-transform: capitalize;
+}
+
+.wadTypeCount {
+    color: rgb(110, 110, 110);
+    font-size: 14px;
 }
 
 #selectedLumpType {

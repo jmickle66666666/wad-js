@@ -493,7 +493,7 @@ export default class Wad {
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.uploadedWith = uploadedWith;
-        this.uploadedFrom = uploadedFrom,
+        this.uploadedFrom = uploadedFrom;
         this.lumps = lumps;
     }
 
@@ -504,6 +504,16 @@ export default class Wad {
 
     get lumpTypes() {
         return Object.keys(this.lumps);
+    }
+
+    get lumpTypeCount() {
+        const lumpTypeCount = {};
+        this.lumpTypes.map((lumpType) => {
+            lumpTypeCount[lumpType] = Object.keys(this.lumps[lumpType]).length;
+            return null;
+        });
+
+        return lumpTypeCount;
     }
 
     get errorIds() {
