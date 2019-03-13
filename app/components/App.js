@@ -25,20 +25,21 @@ if (NODE_ENV === 'development') {
 const prefixWindowtitle = document.title;
 
 export default class App extends Component {
-    constructor() {
-        super();
-        const wads = this.getSavedWads();
-
-        this.state = {
-            wads,
-            selectedWad: {},
-            selectedLump: {},
-            selectedLumpType: '',
-        };
+    state = {
+        wads: {},
+        selectedWad: {},
+        selectedLump: {},
+        selectedLumpType: '',
     }
 
-    componentDidMount() {
-        const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
+    async componentDidMount() {
+        const wads = await this.getSavedWads();
+
+        this.setState(() => ({
+            wads,
+        }));
+
+        const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             this.preUploadFreedoom();
         }
@@ -60,22 +61,14 @@ export default class App extends Component {
         }
     }
 
-    getSavedWads() {
-        const savedWads = localStorageManager.get('wads');
+    async getSavedWads() {
+        const savedWads = await localStorageManager.get('wads');
 
         if (!savedWads) {
             return {};
         }
 
-        let jsonWads = {};
-        try {
-            jsonWads = JSON.parse(savedWads);
-        } catch (error) {
-            console.error('Could not parse WADs in local storage.', error);
-            return {};
-        }
-
-        const wadsData = Object.keys(jsonWads).map(wadId => jsonWads[wadId]);
+        const wadsData = Object.keys(savedWads).map(wadId => savedWads[wadId]);
 
         const wadList = wadsData.map((wadData) => {
             // Wad instances must be re-instantiated
