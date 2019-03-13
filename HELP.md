@@ -10,6 +10,8 @@ Zipped files must contain only one WAD file to be processed. The handling of com
 
 You can upload a file with the same name multiple times. This allows you to compare different versions of a WAD.
 
+Additionally, all the files you upload to wadJS are kept in the memory of your device's browser. This means that you can leave the application or refresh the page without having to reuploaded all your files afterwards.
+
 ## Uploaded WADs
 
 This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
