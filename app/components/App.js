@@ -13,6 +13,7 @@ import WadUploader from './WadUploader';
 import WadList from './WadList';
 import WadDetails from './WadDetails';
 import BackToTop from './BackToTop';
+import ErrorMessage from './ErrorMessage';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -30,6 +31,7 @@ export default class App extends Component {
         selectedWad: {},
         selectedLump: {},
         selectedLumpType: '',
+        displayError: {},
     }
 
     async componentDidMount() {
@@ -323,13 +325,41 @@ export default class App extends Component {
         }));
     }
 
+    componentDidCatch(error, info) {
+        this.setState(() => ({ displayError: { error, info } }));
+    }
+
     render() {
         const {
+            displayError,
             wads,
             selectedWad,
             selectedLump,
             selectedLumpType,
         } = this.state;
+
+        if (displayError.error) {
+            const { message, lineNumber, columnNumber } = displayError.error;
+            const error = `Error: ${message} (${lineNumber}:${columnNumber})`;
+            return (
+                <div className={style.app}>
+                    <Header />
+                    <div className={style.errorScreenOuter}>
+                        <div className={style.errorScreenInner}>
+                            <ErrorMessage message={error} />
+                            <div>
+                                URL:
+                                {' '}
+                                {document.location.href}
+                            </div>
+                            <a href="/">Click here to reload the app.</a>
+                        </div>
+                    </div>
+                    <BackToTop focusOnWad={this.focusOnWad} />
+                </div>
+            );
+        }
+
         return (
             <div className={style.app}>
                 <Header />
