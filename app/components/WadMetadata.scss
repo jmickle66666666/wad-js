@@ -23,10 +23,28 @@
     border-radius: 0 0 10px 10px;
 }
 
+.wadMetadataSubtitle {
+    margin-left: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgb(45, 45, 45);
+}
+
+.wadMetadataContent {
+    a {
+        color: rgb(140, 140, 140);
+
+        &:hover {
+            color: rgb(100, 100, 100);
+            text-decoration: none;
+        }
+    }
+}
+
 .wadMetadataTable {
     display: flex;
     flex-wrap: wrap;
     margin: auto;
+    margin-bottom: 20px;
 }
 
 .wadMetadataEntry {
@@ -46,8 +64,9 @@
     width: 125px;
 }
 
-.wadMetadataContinuous {
-    max-width: 255px;
+.wadMetadataCentered {
+    text-align: center;
+    width: 100%;
 }
 
 input.wadMetadataValue {

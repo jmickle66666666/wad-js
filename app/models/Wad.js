@@ -8,7 +8,15 @@ import arrayToQuotedString from '../lib/arrayToQuotedString';
 import {
     VALID_FILE_FORMATS,
     VALID_WAD_TYPES,
+    LUMP_INDEX_ENTRY_SIZE,
+    LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
+    LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
+    PALETTE_SIZE,
     PLAYPAL,
+    BYTES_PER_COLOR,
+    GREEN_COLOR_OFFSET,
+    BLUE_COLOR_OFFSET,
+    COLORMAP_SIZE,
     COLORMAP,
     MAP_LUMPS,
     THINGS,
@@ -21,14 +29,14 @@ export default class Wad {
         this.lumps = {};
     }
 
-    checkZipFile = (blob) => {
+    checkZipFile(blob) {
         const fileSignature = blob.getUint32(0, false).toString(16);
         const isZipped = fileSignature === '504b0304';
         this.isZipped = isZipped;
         return isZipped;
     }
 
-    unZipFile = (blob, callback) => {
+    unZipFile(blob, callback) {
         const zip = new JSZip();
 
         zip.loadAsync(blob)
@@ -80,6 +88,7 @@ export default class Wad {
 
             this.bytesLoaded = this.size;
             this.uploadEndAt = moment().utc().format();
+            this.uploadedWith = `${PROJECT} v${VERSION}`;
 
             const {
                 wadType,
@@ -116,7 +125,7 @@ export default class Wad {
         }
     }
 
-    initReader = (callback) => {
+    initReader(callback) {
         const reader = new FileReader();
         this.errors = {};
 
@@ -232,6 +241,63 @@ export default class Wad {
         };
     }
 
+    readPalettes(data) {
+        const size = data.byteLength;
+        const paletteCount = size / PALETTE_SIZE;
+        const palettes = [];
+
+        if (!Number.isInteger(paletteCount)) {
+            const error = `Unexpected palette size. Dividing the PLAYPAL lump by the standard palette size (${PALETTE_SIZE} bytes) yields a decimal result (i.e., '${paletteCount}'). The palette(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
+
+            console.error('An error occurred while parsing PLAYPAL', { error });
+
+            this.errors.PLAYPAL = error;
+        }
+
+        for (let i = 0; i < paletteCount; i++) {
+            const palette = [];
+            for (let j = 0; j < PALETTE_SIZE / BYTES_PER_COLOR; j++) {
+                const red = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + 0);
+                const green = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + GREEN_COLOR_OFFSET);
+                const blue = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + BLUE_COLOR_OFFSET);
+                palette.push({ red, green, blue });
+            }
+
+            palettes.push(palette);
+        }
+
+        return palettes;
+    }
+
+    // should be used for C_START/C_END
+    readColormaps(data) {
+        const size = data.byteLength;
+        const colormapCount = size / COLORMAP_SIZE;
+
+        const colormaps = [];
+
+        if (!Number.isInteger(colormapCount)) {
+            const error = `Unexpected colormap size. Dividing the COLORMAP lump by the standard colormap size (${COLORMAP_SIZE} bytes) yields a decimal result (i.e., '${colormapCount}'). The colormap(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
+
+            console.error('An error occurred while parsing COLORMAP', { error });
+
+            this.errors.COLORMAP = error;
+        }
+
+        for (let i = 0; i < colormapCount; i++) {
+            const colormap = [];
+            for (let j = 0; j < COLORMAP_SIZE; j++) {
+                colormap.push(data.getUint8((i * COLORMAP_SIZE) + j));
+            }
+
+            colormaps.push(colormap);
+        }
+
+        console.log({ colormaps });
+
+        return colormaps;
+    }
+
     organizeLumps(lumps) {
         const organizedLumps = {};
 
@@ -253,41 +319,50 @@ export default class Wad {
         return organizedLumps;
     }
 
+    readLumpName(lumpIndexAddress, data) {
+        let name = '';
+        for (let i = lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME; i < lumpIndexAddress + LUMP_INDEX_ENTRY_SIZE; i++) {
+            if (data.getUint8(i) !== 0) {
+                name += String.fromCharCode(data.getUint8(i));
+            }
+        }
+
+        return name;
+    }
+
     readLumpIndex(blob, data, callback) {
         let lumps = {};
+        let lumpType = '';
+        let lumpClusterType = '';
+        let nonMapLumps = 0;
 
         let map = {
             nameLump: { name: '' },
             dataLumps: {},
         };
 
-        let nonMapLumps = 0;
+        let parsedLumpData = {};
 
-        let lumpType = '';
-        let lumpClusterType = '';
-
-        let x = 0;
-        for (let i = this.indexOffset; x < this.headerLumpCount; i += 16) {
-            x++;
+        let indexLumpCount = 0;
+        let lumpIndexAddress;
+        for (let i = 0; i < this.headerLumpCount; i++) {
+            indexLumpCount++;
+            lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
             let mapLump = false;
 
-            const address = data.getInt32(i, true);
-            const size = data.getInt32(i + 4, true);
+            const address = data.getInt32(lumpIndexAddress, true);
+            const size = data.getInt32(lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE, true);
 
-            let name = '';
-
-            for (let j = i + 8; j < i + 16; j++) {
-                if (data.getUint8(j) !== 0) {
-                    name += String.fromCharCode(data.getUint8(j));
-                }
-            }
+            const name = this.readLumpName(lumpIndexAddress, data);
 
             const lumpIndexData = {
-                index: x,
+                index: i,
                 address,
                 size,
                 name,
             };
+
+            const lumpData = new DataView(blob, address, size);
 
             // map-related operations
             if (MAP_LUMPS.includes(name)) {
@@ -327,8 +402,10 @@ export default class Wad {
             if (!mapLump) {
                 if (name === PLAYPAL) {
                     lumpType = 'palettes';
+                    parsedLumpData = this.readPalettes(lumpData);
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
+                    parsedLumpData = this.readColormaps(lumpData);
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -359,6 +436,7 @@ export default class Wad {
                     // lump cluster type is meant to be applied to a group of consecutive lumps
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
+                        data: parsedLumpData,
                         type: lumpClusterType,
                     };
 
@@ -368,6 +446,7 @@ export default class Wad {
                     // unmarked lump
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
+                        data: parsedLumpData,
                         type: lumpType || UNCATEGORIZED,
                     };
 
@@ -380,13 +459,19 @@ export default class Wad {
             }
         }
 
+        if (this.errorIds.length > 0) {
+            callback(this);
+            return false;
+        }
+
         const organizedLumps = this.organizeLumps(lumps);
 
-        this.indexLumpCount = x;
+        this.indexLumpCount = indexLumpCount;
         this.lumps = organizedLumps;
         this.processed = true;
 
         callback(this);
+        return true;
     }
 
     createLumpIndex(lumpIndexData) {
@@ -413,7 +498,7 @@ export default class Wad {
         };
     }
 
-    readLocalFile = (file, callback) => {
+    readLocalFile(file, callback) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -430,12 +515,13 @@ export default class Wad {
         }
     }
 
-    readRemoteFile = (url, filename, callback, unique = false) => {
+    readRemoteFile(url, filename, callback, unique = false) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
         this.name = filename;
         this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
+        this.uploadedFrom = url;
 
         fetch(url)
             .then(response => response.arrayBuffer())
@@ -451,7 +537,7 @@ export default class Wad {
             });
     }
 
-    restore = (wad) => {
+    restore(wad) {
         const {
             id,
             name,
@@ -465,6 +551,8 @@ export default class Wad {
             errors,
             uploadStartAt,
             uploadEndAt,
+            uploadedWith,
+            uploadedFrom,
             lumps,
         } = wad;
 
@@ -480,6 +568,8 @@ export default class Wad {
         this.errors = errors;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
+        this.uploadedWith = uploadedWith;
+        this.uploadedFrom = uploadedFrom;
         this.lumps = lumps;
     }
 
@@ -490,6 +580,16 @@ export default class Wad {
 
     get lumpTypes() {
         return Object.keys(this.lumps);
+    }
+
+    get lumpTypeCount() {
+        const lumpTypeCount = {};
+        this.lumpTypes.map((lumpType) => {
+            lumpTypeCount[lumpType] = Object.keys(this.lumps[lumpType]).length;
+            return null;
+        });
+
+        return lumpTypeCount;
     }
 
     get errorIds() {

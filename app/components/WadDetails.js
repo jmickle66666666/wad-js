@@ -18,9 +18,11 @@ export default ({
 }) => (
     <Fragment>
         <span id="wadDetails" className={style.wadDetailsAnchor} />
-        <h2 className={style.wadDetailsTitle} onClick={focusOnWad}>
-            {wad.name}
-        </h2>
+        <a href={`#/${wad.id}`} onClick={() => focusOnWad(false)}>
+            <h2 className={style.wadDetailsTitle}>
+                {wad.name}
+            </h2>
+        </a>
         <WadMetadata
             wad={wad}
             updateFilename={updateFilename}
@@ -31,15 +33,17 @@ export default ({
             selectedLumpType={selectedLumpType}
             selectLumpType={selectLumpType}
         />
-        {wad.lumps[selectedLumpType] && (
-            <WadLumpList
-                wad={wad}
-                selectedLump={selectedLump}
-                selectedLumpType={selectedLumpType}
-                selectLump={selectLump}
-                focusOnWad={focusOnWad}
-                focusOnLump={focusOnLump}
-            />
-        )}
+        {
+            wad.lumps[selectedLumpType] && (
+                <WadLumpList
+                    wad={wad}
+                    selectedLump={selectedLump}
+                    selectedLumpType={selectedLumpType}
+                    selectLump={selectLump}
+                    focusOnWad={focusOnWad}
+                    focusOnLump={focusOnLump}
+                />
+            )
+        }
     </Fragment>
 );

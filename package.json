@@ -1,6 +1,6 @@
 {
     "name": "wadjs",
-    "version": "0.1.13",
+    "version": "0.1.14",
     "author": {
         "name": "jmickle66666666"
     },
@@ -24,8 +24,10 @@
         "@babel/core": "^7.3.4",
         "@babel/plugin-proposal-class-properties": "^7.3.4",
         "@babel/plugin-transform-arrow-functions": "^7.2.0",
+        "@babel/plugin-transform-runtime": "^7.3.4",
         "@babel/preset-env": "^7.3.4",
         "@babel/preset-react": "^7.0.0",
+        "@babel/runtime": "^7.3.4",
         "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.5",
         "browserify": "^13.3.0",
@@ -54,6 +56,7 @@
     },
     "dependencies": {
         "jszip": "^3.2.0",
+        "localforage": "^1.7.3",
         "moment": "^2.24.0",
         "react": "^16.8.3",
         "react-dom": "^16.8.3",

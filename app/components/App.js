@@ -13,6 +13,7 @@ import WadUploader from './WadUploader';
 import WadList from './WadList';
 import WadDetails from './WadDetails';
 import BackToTop from './BackToTop';
+import ErrorMessage from './ErrorMessage';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -25,20 +26,22 @@ if (NODE_ENV === 'development') {
 const prefixWindowtitle = document.title;
 
 export default class App extends Component {
-    constructor() {
-        super();
-        const wads = this.getSavedWads();
-
-        this.state = {
-            wads,
-            selectedWad: {},
-            selectedLump: {},
-            selectedLumpType: '',
-        };
+    state = {
+        wads: {},
+        selectedWad: {},
+        selectedLump: {},
+        selectedLumpType: '',
+        displayError: {},
     }
 
-    componentDidMount() {
-        const freedoomPreloaded = localStorageManager.get('freedoom-preloaded');
+    async componentDidMount() {
+        const wads = await this.getSavedWads();
+
+        this.setState(() => ({
+            wads,
+        }));
+
+        const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             this.preUploadFreedoom();
         }
@@ -60,22 +63,14 @@ export default class App extends Component {
         }
     }
 
-    getSavedWads() {
-        const savedWads = localStorageManager.get('wads');
+    async getSavedWads() {
+        const savedWads = await localStorageManager.get('wads');
 
         if (!savedWads) {
             return {};
         }
 
-        let jsonWads = {};
-        try {
-            jsonWads = JSON.parse(savedWads);
-        } catch (error) {
-            console.error('Could not parse WADs in local storage.', error);
-            return {};
-        }
-
-        const wadsData = Object.keys(jsonWads).map(wadId => jsonWads[wadId]);
+        const wadsData = Object.keys(savedWads).map(wadId => savedWads[wadId]);
 
         const wadList = wadsData.map((wadData) => {
             // Wad instances must be re-instantiated
@@ -283,10 +278,16 @@ export default class App extends Component {
         });
     }
 
-    focusOnWad = () => {
+    focusOnWad = (keepState = true) => {
         const element = document.getElementById('wadDetails');
         if (element) {
             element.scrollIntoView();
+            if (!keepState) {
+                this.setState(() => ({
+                    selectedLump: {},
+                    selectedLumpType: '',
+                }));
+            }
         }
     }
 
@@ -324,13 +325,41 @@ export default class App extends Component {
         }));
     }
 
+    componentDidCatch(error, info) {
+        this.setState(() => ({ displayError: { error, info } }));
+    }
+
     render() {
         const {
+            displayError,
             wads,
             selectedWad,
             selectedLump,
             selectedLumpType,
         } = this.state;
+
+        if (displayError.error) {
+            const { message, lineNumber, columnNumber } = displayError.error;
+            const error = `Error: ${message} (${lineNumber}:${columnNumber})`;
+            return (
+                <div className={style.app}>
+                    <Header />
+                    <div className={style.errorScreenOuter}>
+                        <div className={style.errorScreenInner}>
+                            <ErrorMessage message={error} />
+                            <div>
+                                URL:
+                                {' '}
+                                {document.location.href}
+                            </div>
+                            <a href="/">Click here to reload the app.</a>
+                        </div>
+                    </div>
+                    <BackToTop focusOnWad={this.focusOnWad} />
+                </div>
+            );
+        }
+
         return (
             <div className={style.app}>
                 <Header />
@@ -358,6 +387,7 @@ export default class App extends Component {
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
+                                selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
                                 updateFilename={this.updateFilename}

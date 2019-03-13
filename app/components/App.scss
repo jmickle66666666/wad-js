@@ -43,3 +43,28 @@ h4 {
     justify-content: center;
     flex-wrap: wrap;
 }
+
+.errorScreenOuter {
+    display: flex;
+    max-width: 1200px;
+    height: 90vh;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorScreenInner {
+    background: rgb(210, 210, 210);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+
+    a {
+        color: rgb(140, 140, 140);
+
+        &:hover {
+            color: rgb(100, 100, 100);
+            text-decoration: none;
+        }
+    }
+}
