@@ -16,6 +16,7 @@ import {
     BYTES_PER_COLOR,
     GREEN_COLOR_OFFSET,
     BLUE_COLOR_OFFSET,
+    COLORMAP_SIZE,
     COLORMAP,
     MAP_LUMPS,
     THINGS,
@@ -265,9 +266,36 @@ export default class Wad {
             palettes.push(palette);
         }
 
-        console.log({ palettes });
-
         return palettes;
+    }
+
+    // should be used for C_START/C_END
+    readColormaps(data) {
+        const size = data.byteLength;
+        const colormapCount = size / COLORMAP_SIZE;
+
+        const colormaps = [];
+
+        if (!Number.isInteger(colormapCount)) {
+            const error = `Unexpected colormap size. Dividing the COLORMAP lump by the standard colormap size (${COLORMAP_SIZE} bytes) yields a decimal result (i.e., '${colormapCount}'). The colormap(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
+
+            console.error('An error occurred while parsing COLORMAP', { error });
+
+            this.errors.COLORMAP = error;
+        }
+
+        for (let i = 0; i < colormapCount; i++) {
+            const colormap = [];
+            for (let j = 0; j < COLORMAP_SIZE; j++) {
+                colormap.push(data.getUint8((i * COLORMAP_SIZE) + j));
+            }
+
+            colormaps.push(colormap);
+        }
+
+        console.log({ colormaps });
+
+        return colormaps;
     }
 
     organizeLumps(lumps) {
@@ -377,6 +405,7 @@ export default class Wad {
                     parsedLumpData = this.readPalettes(lumpData);
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
+                    parsedLumpData = this.readColormaps(lumpData);
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {

@@ -43,7 +43,9 @@ export const PALETTE_SIZE = 768;
 
 export const BYTES_PER_COLOR = 3;
 export const GREEN_COLOR_OFFSET = 1;
-export const BLUE_COLOR_OFFSET = 1;
+export const BLUE_COLOR_OFFSET = 2;
+
+export const COLORMAP_SIZE = 256;
 
 export const UNCATEGORIZED = 'uncategorized';
 

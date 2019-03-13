@@ -22,7 +22,7 @@ export default ({ lump, wad, focusOnLump }) => (
                     {' '}
                     {lump.sizeInBytes}
                 </div>
-                <WadLumpDetailDisplay lump={lump} />
+                <WadLumpDetailDisplay wad={wad} lump={lump} />
             </div>
         </div>
     </Fragment>

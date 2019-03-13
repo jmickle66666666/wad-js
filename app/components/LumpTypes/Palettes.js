@@ -9,6 +9,16 @@ export default ({ lump }) => (
                 Palette #
                 {index}
             </h5>
+            <div className={style.paletteColorList}>
+                {palette.map(({ red, green, blue }, index) => (
+                    <div
+                        key={index}
+                        title={`color #${index}: rgb(${red},${green},${blue})`}
+                        className={style.paletteColor}
+                        style={{ background: `rgb(${red},${green},${blue})` }}
+                    />
+                ))}
+            </div>
         </div>
     ))) || null
 );
