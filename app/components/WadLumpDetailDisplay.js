@@ -1,9 +1,18 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import style from './WadLumpDetailDisplay.scss';
 
-export default ({ lump }) => (
-    <Fragment>
-        details!
-    </Fragment>
-);
+import Palettes from './LumpTypes/Palettes';
+
+export default ({ lump }) => {
+    switch (lump.type) {
+    default: {
+        return null;
+    }
+    case 'palettes': {
+        return (
+            <Palettes lump={lump} />
+        );
+    }
+    }
+};

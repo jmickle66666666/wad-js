@@ -39,6 +39,12 @@ export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;
 
 export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME = 8;
 
+export const PALETTE_SIZE = 768;
+
+export const BYTES_PER_COLOR = 3;
+export const GREEN_COLOR_OFFSET = 1;
+export const BLUE_COLOR_OFFSET = 1;
+
 export const UNCATEGORIZED = 'uncategorized';
 
 export const PLAYPAL = 'PLAYPAL';

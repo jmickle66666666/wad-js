@@ -11,7 +11,11 @@ import {
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
+    PALETTE_SIZE,
     PLAYPAL,
+    BYTES_PER_COLOR,
+    GREEN_COLOR_OFFSET,
+    BLUE_COLOR_OFFSET,
     COLORMAP,
     MAP_LUMPS,
     THINGS,
@@ -24,14 +28,14 @@ export default class Wad {
         this.lumps = {};
     }
 
-    checkZipFile = (blob) => {
+    checkZipFile(blob) {
         const fileSignature = blob.getUint32(0, false).toString(16);
         const isZipped = fileSignature === '504b0304';
         this.isZipped = isZipped;
         return isZipped;
     }
 
-    unZipFile = (blob, callback) => {
+    unZipFile(blob, callback) {
         const zip = new JSZip();
 
         zip.loadAsync(blob)
@@ -108,7 +112,7 @@ export default class Wad {
 
             callback(this);
 
-            this.readLumpIndex(data, callback);
+            this.readLumpIndex(blob, data, callback);
 
             return true;
         } catch (error) {
@@ -120,7 +124,7 @@ export default class Wad {
         }
     }
 
-    initReader = (callback) => {
+    initReader(callback) {
         const reader = new FileReader();
         this.errors = {};
 
@@ -236,6 +240,36 @@ export default class Wad {
         };
     }
 
+    readPalettes(data) {
+        const size = data.byteLength;
+        const paletteCount = size / PALETTE_SIZE;
+        const palettes = [];
+
+        if (!Number.isInteger(paletteCount)) {
+            const error = `Unexpected palette size. Dividing the PLAYPAL lump by the standard palette size (${PALETTE_SIZE} bytes) yields a decimal result (i.e., '${paletteCount}'). The palette(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
+
+            console.error('An error occurred while parsing PLAYPAL', { error });
+
+            this.errors.PLAYPAL = error;
+        }
+
+        for (let i = 0; i < paletteCount; i++) {
+            const palette = [];
+            for (let j = 0; j < PALETTE_SIZE / BYTES_PER_COLOR; j++) {
+                const red = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + 0);
+                const green = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + GREEN_COLOR_OFFSET);
+                const blue = data.getUint8((i * PALETTE_SIZE) + (j * BYTES_PER_COLOR) + BLUE_COLOR_OFFSET);
+                palette.push({ red, green, blue });
+            }
+
+            palettes.push(palette);
+        }
+
+        console.log({ palettes });
+
+        return palettes;
+    }
+
     organizeLumps(lumps) {
         const organizedLumps = {};
 
@@ -268,7 +302,7 @@ export default class Wad {
         return name;
     }
 
-    readLumpIndex(data, callback) {
+    readLumpIndex(blob, data, callback) {
         let lumps = {};
         let lumpType = '';
         let lumpClusterType = '';
@@ -278,6 +312,8 @@ export default class Wad {
             nameLump: { name: '' },
             dataLumps: {},
         };
+
+        let parsedLumpData = {};
 
         let indexLumpCount = 0;
         let lumpIndexAddress;
@@ -297,6 +333,8 @@ export default class Wad {
                 size,
                 name,
             };
+
+            const lumpData = new DataView(blob, address, size);
 
             // map-related operations
             if (MAP_LUMPS.includes(name)) {
@@ -336,6 +374,7 @@ export default class Wad {
             if (!mapLump) {
                 if (name === PLAYPAL) {
                     lumpType = 'palettes';
+                    parsedLumpData = this.readPalettes(lumpData);
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
                 }
@@ -368,6 +407,7 @@ export default class Wad {
                     // lump cluster type is meant to be applied to a group of consecutive lumps
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
+                        data: parsedLumpData,
                         type: lumpClusterType,
                     };
 
@@ -377,6 +417,7 @@ export default class Wad {
                     // unmarked lump
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
+                        data: parsedLumpData,
                         type: lumpType || UNCATEGORIZED,
                     };
 
@@ -389,6 +430,11 @@ export default class Wad {
             }
         }
 
+        if (this.errorIds.length > 0) {
+            callback(this);
+            return false;
+        }
+
         const organizedLumps = this.organizeLumps(lumps);
 
         this.indexLumpCount = indexLumpCount;
@@ -396,6 +442,7 @@ export default class Wad {
         this.processed = true;
 
         callback(this);
+        return true;
     }
 
     createLumpIndex(lumpIndexData) {
@@ -422,7 +469,7 @@ export default class Wad {
         };
     }
 
-    readLocalFile = (file, callback) => {
+    readLocalFile(file, callback) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -439,7 +486,7 @@ export default class Wad {
         }
     }
 
-    readRemoteFile = (url, filename, callback, unique = false) => {
+    readRemoteFile(url, filename, callback, unique = false) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -461,7 +508,7 @@ export default class Wad {
             });
     }
 
-    restore = (wad) => {
+    restore(wad) {
         const {
             id,
             name,
