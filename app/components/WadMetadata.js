@@ -6,6 +6,8 @@ import style from './WadMetadata.scss';
 import Help from './Help';
 import ErrorMessageList from './ErrorMessageList';
 
+const versionError = uploadedWith => (uploadedWith !== `${PROJECT} v${VERSION}` && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest update and fix potential errors that may occur while manipulating the WAD data.`) || null;
+
 export default ({
     wad,
     updateFilename,
@@ -21,7 +23,7 @@ export default ({
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
-            <ErrorMessageList errors={wad.errors} />
+            <ErrorMessageList errors={{ ...wad.errors, version_error: versionError(wad.uploadedWith) }} />
             <a href={`#/${wad.id}`} onClick={() => focusOnWad(false)}>
                 <h4 className={style.wadMetadataSubtitle}>General</h4>
             </a>

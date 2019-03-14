@@ -47,6 +47,8 @@ export const BLUE_COLOR_OFFSET = 2;
 
 export const COLORMAP_SIZE = 256;
 
+export const FLAT_DIMENSIONS = 64;
+
 export const UNCATEGORIZED = 'uncategorized';
 
 export const PLAYPAL = 'PLAYPAL';

@@ -5,14 +5,20 @@ export default class Lump {
         index,
         address,
         size,
+        width,
+        height,
         data,
+        canvas,
     }) {
         this.name = name;
         this.type = type;
         this.index = index;
         this.address = address;
         this.size = size;
+        this.width = width;
+        this.height = height;
         this.data = data;
+        this.canvas = canvas;
     }
 
     get sizeInBytes() {

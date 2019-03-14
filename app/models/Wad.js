@@ -17,6 +17,7 @@ import {
     GREEN_COLOR_OFFSET,
     BLUE_COLOR_OFFSET,
     COLORMAP_SIZE,
+    FLAT_DIMENSIONS,
     COLORMAP,
     MAP_LUMPS,
     THINGS,
@@ -269,19 +270,18 @@ export default class Wad {
         return palettes;
     }
 
-    // should be used for C_START/C_END
-    readColormaps(data) {
+    readColormaps(data, name) {
         const size = data.byteLength;
         const colormapCount = size / COLORMAP_SIZE;
 
         const colormaps = [];
 
         if (!Number.isInteger(colormapCount)) {
-            const error = `Unexpected colormap size. Dividing the COLORMAP lump by the standard colormap size (${COLORMAP_SIZE} bytes) yields a decimal result (i.e., '${colormapCount}'). The colormap(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
+            const error = `Unexpected colormap size. Dividing the '${name}' lump by the standard colormap size (${COLORMAP_SIZE} bytes) yields a decimal result (i.e., '${colormapCount}'). The colormap(s) might be bigger than the usual size or there might be additional bytes in the lump.`;
 
-            console.error('An error occurred while parsing COLORMAP', { error });
+            console.error(`An error occurred while parsing colormaps '${name}'.`, { error });
 
-            this.errors.COLORMAP = error;
+            this.errors.colormaps = error;
         }
 
         for (let i = 0; i < colormapCount; i++) {
@@ -293,9 +293,26 @@ export default class Wad {
             colormaps.push(colormap);
         }
 
-        console.log({ colormaps });
-
         return colormaps;
+    }
+
+    readFlat(data) {
+        const flat = [];
+
+        const metadata = {
+            // hack for Heretic animated flats
+            width: data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS,
+            height: FLAT_DIMENSIONS,
+        };
+
+        for (let i = 0; i < data.byteLength; i++) {
+            flat.push(data.getUint8(i));
+        }
+
+        return {
+            metadata,
+            flat,
+        };
     }
 
     organizeLumps(lumps) {
@@ -355,7 +372,7 @@ export default class Wad {
 
             const name = this.readLumpName(lumpIndexAddress, data);
 
-            const lumpIndexData = {
+            let lumpIndexData = {
                 index: i,
                 address,
                 size,
@@ -405,7 +422,7 @@ export default class Wad {
                     parsedLumpData = this.readPalettes(lumpData);
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
-                    parsedLumpData = this.readColormaps(lumpData);
+                    parsedLumpData = this.readColormaps(lumpData, name);
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -434,6 +451,19 @@ export default class Wad {
                 } else if (lumpClusterType) {
                     // we know the type of this lump because it belongs to a cluster
                     // lump cluster type is meant to be applied to a group of consecutive lumps
+
+
+                    if (lumpClusterType === 'flats') {
+                        const { flat, metadata, canvas } = this.readFlat(lumpData);
+                        parsedLumpData = flat;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+                    } else if (lumpClusterType === 'colormaps') {
+                        parsedLumpData = this.readColormaps(lumpData, name);
+                    }
+
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
                         data: parsedLumpData,
