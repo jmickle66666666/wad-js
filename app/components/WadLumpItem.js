@@ -20,7 +20,11 @@ export default class WadLumpItem extends Component {
                 canvas.width = lump.width;
                 canvas.height = lump.height;
                 const context = canvas.getContext('2d');
-                const imageData = context.createImageData(64, 64);
+
+                const imageData = context.createImageData(
+                    canvas.width,
+                    canvas.height,
+                );
 
                 const palette0 = wad.lumps.palettes.PLAYPAL.data[0];
                 for (let i = 0; i < lump.size; i++) {
@@ -69,7 +73,13 @@ export default class WadLumpItem extends Component {
                     onClick={() => selectLump(lump.name)}
                 >
                     <h4>{lump.name}</h4>
-                    <img title={`${lump.width}x${lump.height}`} alt={lump.name} src={this.thumbnail} />
+                    {this.thumbnail && (
+                        <img
+                            title={`${lump.width}x${lump.height}`}
+                            alt={lump.name}
+                            src={this.thumbnail}
+                        />
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </a>
             );

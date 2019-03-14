@@ -299,10 +299,17 @@ export default class Wad {
     readFlat(data) {
         const flat = [];
 
+        // hack for Heretic 65x64 scrolling flats
+        const width = data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS;
+
+        // hack for Hexen 64x128 flats
+        const height = data.byteLength / width;
+
+        // we also need to handle so-called "hi-res" 128x128 ans 256x256 flats
+
         const metadata = {
-            // hack for Heretic animated flats
-            width: data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS,
-            height: FLAT_DIMENSIONS,
+            width,
+            height,
         };
 
         for (let i = 0; i < data.byteLength; i++) {
@@ -312,6 +319,16 @@ export default class Wad {
         return {
             metadata,
             flat,
+        };
+    }
+
+    readPatch() {
+        const image = [];
+        const metadata = {};
+
+        return {
+            metadata,
+            image,
         };
     }
 
@@ -449,21 +466,35 @@ export default class Wad {
                     console.info('End marker found:', name);
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
-                    // we know the type of this lump because it belongs to a cluster
-                    // lump cluster type is meant to be applied to a group of consecutive lumps
-
-
-                    if (lumpClusterType === 'flats') {
-                        const { flat, metadata, canvas } = this.readFlat(lumpData);
+                    switch (lumpClusterType) {
+                    default: {
+                        break;
+                    }
+                    case 'colormaps': {
+                        parsedLumpData = this.readColormaps(lumpData, name);
+                        break;
+                    }
+                    case 'flats': {
+                        const { flat, metadata } = this.readFlat(lumpData);
                         parsedLumpData = flat;
                         lumpIndexData = {
                             ...lumpIndexData,
                             ...metadata,
                         };
-                    } else if (lumpClusterType === 'colormaps') {
-                        parsedLumpData = this.readColormaps(lumpData, name);
+                        break;
+                    }
+                    case 'patches': {
+                        const { image, metadata } = this.readPatch(lumpData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+                    }
                     }
 
+                    // we know the type of this lump because it belongs to a cluster
+                    // lump cluster type is meant to be applied to a group of consecutive lumps
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
                         data: parsedLumpData,
