@@ -6,6 +6,8 @@ import style from './WadMetadata.scss';
 import Help from './Help';
 import ErrorMessageList from './ErrorMessageList';
 
+const versionError = uploadedWith => (uploadedWith !== VERSION && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest update and fix potential errors that may occur while manipulating the WAD data.`) || null;
+
 export default ({
     wad,
     updateFilename,
@@ -17,11 +19,11 @@ export default ({
             <a href={`#/${wad.id}`}>
                 <h3 className={style.wadMetadataTitle} onClick={() => focusOnWad(false)}>
                         Metadata
-                </h3>
+                    </h3>
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
-            <ErrorMessageList errors={wad.errors} />
+            <ErrorMessageList errors={{ ...wad.errors, version_error: versionError(wad.uploadedWith) }} />
             <a href={`#/${wad.id}`} onClick={() => focusOnWad(false)}>
                 <h4 className={style.wadMetadataSubtitle}>General</h4>
             </a>
@@ -30,7 +32,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Filename:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -61,7 +63,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Upload ID:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -85,10 +87,10 @@ export default ({
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from
-                                {' '}
+                            {' '}
                             <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
                                 .
-                            </div>
+                        </div>
                     )}
                 </div>
             </div>
