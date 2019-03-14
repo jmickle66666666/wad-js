@@ -1,3 +1,6 @@
+## v0.1.15: Flats
+
+* You can now see thumbnails of the flats when browsing your WADs. When you click on a particular flat, an enlarged version of the flat is shown.
 
 ## v0.1.14: Moved to localForage + PLAYPAL and COLORMAP
 
