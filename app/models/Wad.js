@@ -305,7 +305,7 @@ export default class Wad {
         // hack for Hexen 64x128 flats
         const height = data.byteLength / width;
 
-        // we also need to handle so called "hi-res" 128x128 ans 256x256 flats
+        // we also need to handle so-called "hi-res" 128x128 ans 256x256 flats
 
         const metadata = {
             width,
