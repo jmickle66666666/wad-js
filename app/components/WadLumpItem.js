@@ -20,7 +20,11 @@ export default class WadLumpItem extends Component {
                 canvas.width = lump.width;
                 canvas.height = lump.height;
                 const context = canvas.getContext('2d');
-                const imageData = context.createImageData(64, 64);
+
+                const imageData = context.createImageData(
+                    canvas.width,
+                    canvas.height,
+                );
 
                 const palette0 = wad.lumps.palettes.PLAYPAL.data[0];
                 for (let i = 0; i < lump.size; i++) {
