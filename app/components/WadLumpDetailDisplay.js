@@ -4,21 +4,27 @@ import style from './WadLumpDetailDisplay.scss';
 
 import Palettes from './LumpTypes/Palettes';
 import Colormaps from './LumpTypes/Colormaps';
+import Flat from './LumpTypes/Flat';
 
 export default ({ wad, lump }) => {
     switch (lump.type) {
-    default: {
-        return null;
-    }
-    case 'palettes': {
-        return (
-            <Palettes lump={lump} />
-        );
-    }
-    case 'colormaps': {
-        return (
-            <Colormaps wad={wad} lump={lump} />
-        );
-    }
+        default: {
+            return null;
+        }
+        case 'palettes': {
+            return (
+                <Palettes lump={lump} />
+            );
+        }
+        case 'colormaps': {
+            return (
+                <Colormaps wad={wad} lump={lump} />
+            );
+        }
+        case 'flats': {
+            return (
+                <Flat wad={wad} lump={lump} />
+            );
+        }
     }
 };
