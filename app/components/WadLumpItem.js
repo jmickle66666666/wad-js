@@ -69,7 +69,13 @@ export default class WadLumpItem extends Component {
                     onClick={() => selectLump(lump.name)}
                 >
                     <h4>{lump.name}</h4>
-                    <img title={`${lump.width}x${lump.height}`} alt={lump.name} src={this.thumbnail} />
+                    {this.thumbnail && (
+                        <img
+                            title={`${lump.width}x${lump.height}`}
+                            alt={lump.name}
+                            src={this.thumbnail}
+                        />
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </a>
             );
