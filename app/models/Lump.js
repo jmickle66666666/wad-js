@@ -7,6 +7,7 @@ export default class Lump {
         size,
         width,
         height,
+        count,
         data,
         canvas,
     }) {
@@ -17,6 +18,7 @@ export default class Lump {
         this.size = size;
         this.width = width;
         this.height = height;
+        this.count = count;
         this.data = data;
         this.canvas = canvas;
     }

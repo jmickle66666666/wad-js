@@ -10,7 +10,6 @@ export const GRAPHIC = 'graphic';
 export const FLAT = 'flat';
 export const MARKER = 'marker';
 export const ENDOOM = 'ENDOOM';
-export const PNAMES = 'PNAMES';
 export const TEXTUREx = ['TEXTURE1', 'TEXTURE2'];
 
 export const TEXTLUMPS = ['DEHACKED', 'MAPINFO', 'ZMAPINFO', 'EMAPINFO',
@@ -33,28 +32,6 @@ export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
 
 export const VALID_WAD_TYPES = ['IWAD', 'PWAD'];
 
-export const LUMP_INDEX_ENTRY_SIZE = 16;
-
-export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;
-
-export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME = 8;
-
-export const PALETTE_SIZE = 768;
-
-export const BYTES_PER_COLOR = 3;
-export const GREEN_COLOR_OFFSET = 1;
-export const BLUE_COLOR_OFFSET = 2;
-
-export const COLORMAP_SIZE = 256;
-
-export const FLAT_DIMENSIONS = 64;
-
-export const UNCATEGORIZED = 'uncategorized';
-
-export const PLAYPAL = 'PLAYPAL';
-
-export const COLORMAP = 'COLORMAP';
-
 export const MAP_LUMPS = [
     'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES',
 ];
@@ -64,3 +41,31 @@ export const OPENGL_LUMPS = [
 ];
 
 export const THINGS = 'THINGS';
+
+export const PLAYPAL = 'PLAYPAL';
+
+export const COLORMAP = 'COLORMAP';
+
+export const PNAMES = 'PNAMES';
+
+export const UNCATEGORIZED = 'uncategorized';
+
+export const LUMP_INDEX_ENTRY_SIZE = 16;
+
+export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;
+
+export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME = 8;
+
+export const PALETTE_SIZE = 768;
+
+export const COLORMAP_SIZE = 256;
+
+export const BYTES_PER_COLOR = 3;
+export const GREEN_COLOR_OFFSET = 1;
+export const BLUE_COLOR_OFFSET = 2;
+
+export const FLAT_DIMENSIONS = 64;
+
+export const IMAGE_DATA_HEADER_SIZE = 8;
+
+export const IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE = 3;
