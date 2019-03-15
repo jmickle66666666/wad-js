@@ -1,3 +1,8 @@
+## v0.1.16: Patch names
+
+* You can now consult the PNAMES lump to see a list of all the patches within the WAD.
+* I did some preliminary work to parse patch lumps.
+
 ## v0.1.15: Flats
 
 * You can now see thumbnails of the flats when browsing your WADs. When you click on a particular flat, an enlarged version of the flat is shown.

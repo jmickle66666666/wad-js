@@ -8,20 +8,23 @@ import arrayToQuotedString from '../lib/arrayToQuotedString';
 import {
     VALID_FILE_FORMATS,
     VALID_WAD_TYPES,
+    MAP_LUMPS,
+    THINGS,
+    PLAYPAL,
+    COLORMAP,
+    PNAMES,
+    UNCATEGORIZED,
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
     PALETTE_SIZE,
-    PLAYPAL,
+    COLORMAP_SIZE,
     BYTES_PER_COLOR,
     GREEN_COLOR_OFFSET,
     BLUE_COLOR_OFFSET,
-    COLORMAP_SIZE,
     FLAT_DIMENSIONS,
-    COLORMAP,
-    MAP_LUMPS,
-    THINGS,
-    UNCATEGORIZED,
+    IMAGE_DATA_HEADER_SIZE,
+    IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE,
 } from '../lib/constants';
 
 export default class Wad {
@@ -242,6 +245,10 @@ export default class Wad {
         };
     }
 
+    readText(data) {
+        return new TextDecoder().decode(data).replace(/\u0000/g, ' ');
+    }
+
     readPalettes(data) {
         const size = data.byteLength;
         const paletteCount = size / PALETTE_SIZE;
@@ -296,6 +303,30 @@ export default class Wad {
         return colormaps;
     }
 
+    readPatchNames(data) {
+        let patchCount = [];
+        const patchNames = [];
+        let patchName = [];
+        for (let i = 0; i < data.byteLength; i++) {
+            if (i === 0) {
+                patchCount = data.getUint32(i, true);
+            } else if (i > 3) {
+                const character = String.fromCharCode(data.getUint8(i, true));
+                patchName.push(character);
+                if (patchName.length === 8) {
+                    const formattedPatchName = patchName.join('').replace(/\u0000/g, '');
+                    patchNames.push(formattedPatchName);
+                    patchName = [];
+                }
+            }
+        }
+
+        return {
+            patchCount,
+            patchNames,
+        };
+    }
+
     readFlat(data) {
         const flat = [];
 
@@ -322,9 +353,62 @@ export default class Wad {
         };
     }
 
-    readPatch() {
+    readImageDataHeader(data) {
+        const header = [];
+        for (let i = 0; i < data.byteLength; i += 2) {
+            header.push(data.getUint16(i, true));
+        }
+
+        return header;
+    }
+
+    readImageDataColumnSpanHeader(data, columnAddress) {
+        const header = [];
+        for (let i = 0; i < IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE; i++) {
+            header.push(data.getUint8(columnAddress + i, true));
+        }
+
+        return header;
+    }
+
+    readImageData(header, body, name, size) {
         const image = [];
-        const metadata = {};
+
+        const [
+            width,
+            height,
+            // the { x,y } offset of patches is usually zero
+            xOffset,
+            yOffset,
+        ] = this.readImageDataHeader(header);
+
+        const metadata = {
+            width,
+            height,
+            xOffset,
+            yOffset,
+        };
+
+        const columnAddresses = [];
+        for (let i = 0; i < width; i++) {
+            columnAddresses[i] = body.getUint32(i * 4, true);
+        }
+
+        const columns = [];
+        for (let i = 0; i < columnAddresses.length; i++) {
+            try {
+                const [
+                    spanYOffset,
+                    pixelCount,
+                ] = this.readImageDataColumnSpanHeader(body, columnAddresses[i]);
+            } catch (error) {
+                console.error({
+                    error, name, width, height, columnAddresses, i, size,
+                });
+            }
+
+            // console.log({ spanYOffset, pixelCount });
+        }
 
         return {
             metadata,
@@ -374,6 +458,8 @@ export default class Wad {
             nameLump: { name: '' },
             dataLumps: {},
         };
+
+        let patchNames = [];
 
         let parsedLumpData = {};
 
@@ -440,6 +526,18 @@ export default class Wad {
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
                     parsedLumpData = this.readColormaps(lumpData, name);
+                } else if (name === PNAMES) {
+                    lumpType = 'patches';
+                    const { patchCount, patchNames: pNames } = this.readPatchNames(lumpData);
+                    parsedLumpData = pNames;
+                    lumpIndexData = {
+                        ...lumpIndexData,
+                        count: patchCount,
+                    };
+
+                    patchNames = pNames;
+                } else if (patchNames.includes(name)) {
+                    lumpType = 'patches';
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -483,14 +581,20 @@ export default class Wad {
                         };
                         break;
                     }
-                    case 'patches': {
-                        const { image, metadata } = this.readPatch(lumpData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
-                    }
+                        /*
+                        case 'patches': {
+                            const lumpHeader = new DataView(blob, address, IMAGE_DATA_HEADER_SIZE);
+                            const lumpBody = new DataView(blob, address + IMAGE_DATA_HEADER_SIZE, size - IMAGE_DATA_HEADER_SIZE);
+
+                            const { image, metadata } = this.readImageData(lumpHeader, lumpBody, name, size);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        */
                     }
 
                     // we know the type of this lump because it belongs to a cluster
