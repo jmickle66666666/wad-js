@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import style from './PatchNames.scss';
 
 export default ({ lump }) => (
-    <div>
+    <Fragment>
         <div className={style.patchCount}>
             Patch count:
             {' '}
@@ -16,5 +16,5 @@ export default ({ lump }) => (
                 </div>
             ))}
         </div>
-    </div>
+    </Fragment>
 );

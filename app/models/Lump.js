@@ -1,3 +1,5 @@
+import { PNAMES, IMAGE_LUMPS } from '../lib/constants';
+
 export default class Lump {
     setIndexData({
         name,
@@ -9,7 +11,6 @@ export default class Lump {
         height,
         count,
         data,
-        canvas,
     }) {
         this.name = name;
         this.type = type;
@@ -20,7 +21,6 @@ export default class Lump {
         this.height = height;
         this.count = count;
         this.data = data;
-        this.canvas = canvas;
     }
 
     get sizeInBytes() {
@@ -30,5 +30,17 @@ export default class Lump {
         }
 
         return `${this.size} bytes`;
+    }
+
+    get isImage() {
+        return this.name !== PNAMES && IMAGE_LUMPS.includes(this.type);
+    }
+
+    get isPNAMES() {
+        return this.name === PNAMES;
+    }
+
+    get isTEXTUREx() {
+        return /TEXTURE[0-9a-zA-Z]$/.test(this.name);
     }
 }

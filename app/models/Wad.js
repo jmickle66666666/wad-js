@@ -17,6 +17,7 @@ import {
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
+    COLOR_COUNT_PER_PALETTE,
     PALETTE_SIZE,
     COLORMAP_SIZE,
     BYTES_PER_COLOR,
@@ -24,7 +25,8 @@ import {
     BLUE_COLOR_OFFSET,
     FLAT_DIMENSIONS,
     IMAGE_DATA_HEADER_SIZE,
-    IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE,
+    IMAGE_DATA_BOUNDARY,
+    TRANSPARENT_PIXEL,
 } from '../lib/constants';
 
 export default class Wad {
@@ -304,20 +306,17 @@ export default class Wad {
     }
 
     readPatchNames(data) {
-        let patchCount = [];
+        const patchCount = data.getUint32(0, true);
         const patchNames = [];
         let patchName = [];
-        for (let i = 0; i < data.byteLength; i++) {
-            if (i === 0) {
-                patchCount = data.getUint32(i, true);
-            } else if (i > 3) {
-                const character = String.fromCharCode(data.getUint8(i, true));
-                patchName.push(character);
-                if (patchName.length === 8) {
-                    const formattedPatchName = patchName.join('').replace(/\u0000/g, '');
-                    patchNames.push(formattedPatchName);
-                    patchName = [];
-                }
+
+        for (let i = 4; i < data.byteLength; i++) {
+            const character = String.fromCharCode(data.getUint8(i, true));
+            patchName.push(character);
+            if (patchName.length === 8) {
+                const formattedPatchName = patchName.join('').replace(/\u0000/g, '');
+                patchNames.push(formattedPatchName);
+                patchName = [];
             }
         }
 
@@ -327,8 +326,104 @@ export default class Wad {
         };
     }
 
-    readFlat(data) {
-        const flat = [];
+    readTextures(data, textureLumpAddress) {
+        const textureCount = data.getUint32(0, true);
+        const textureNames = [];
+        const textures = {};
+
+        const textureAddresses = [];
+        for (let i = 0; i < textureCount; i++) {
+            textureAddresses[i] = data.getUint32(4 + (i * 4), true);
+        }
+
+        for (let i = 0; i < textureCount; i++) {
+            const address = textureAddresses[i];
+            const textureName = [];
+
+            for (let j = 0; j < 8; j++) {
+                const character = String.fromCharCode(data.getUint8(address + j));
+                textureName.push(character);
+            }
+
+            const name = textureName.join('').replace(/\u0000/g, '');
+            textureNames.push(name);
+
+            const width = data.getUint16(address + 11);
+            const height = data.getUint16(address + 13);
+
+            let size = 0;
+            if (textureAddresses[i + 1]) {
+                size = textureAddresses[i + 1] - textureAddresses[i];
+            } else {
+                size = textureLumpAddress - textureAddresses[i];
+            }
+
+            const texture = new Lump();
+            texture.setIndexData({
+                name,
+                address: textureLumpAddress + address,
+                size,
+                width,
+                height,
+                type: 'textures',
+            });
+
+            textures[name] = texture;
+        }
+
+        return {
+            textureCount,
+            textureNames,
+            textures,
+        };
+    }
+
+    convertColorIndexesToDataURL(arrayOfColorIndexes, width, height, name, palette) {
+        if (palette.length !== COLOR_COUNT_PER_PALETTE) {
+            console.error('The palette does not have enough colors to draw images.');
+            return '';
+        }
+
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext('2d');
+
+            const imageData = context.createImageData(
+                canvas.width,
+                canvas.height,
+            );
+
+            for (let i = 0; i < arrayOfColorIndexes.length; i++) {
+                if (arrayOfColorIndexes[i] === TRANSPARENT_PIXEL) {
+                    imageData.data[(i * 4) + 3] = 0;
+                } else {
+                    const { red, green, blue } = palette[arrayOfColorIndexes[i]];
+                    imageData.data[(i * 4) + 0] = red;
+                    imageData.data[(i * 4) + 1] = green;
+                    imageData.data[(i * 4) + 2] = blue;
+                    imageData.data[(i * 4) + 3] = 255;
+                }
+            }
+            const newCanvas = document.createElement('CANVAS');
+            newCanvas.width = imageData.width;
+            newCanvas.height = imageData.height;
+            newCanvas.getContext('2d').putImageData(imageData, 0, 0);
+            context.imageSmoothingEnabled = false;
+            context.drawImage(newCanvas, 0, 0);
+
+            const dataURL = canvas.toDataURL();
+
+            return dataURL;
+        } catch (error) {
+            console.error(`An error occurred while converting the color indexes of lump '${name}' to a Data URL`, { error });
+            return '';
+        }
+    }
+
+    readFlat(data, name, palette) {
+        const colorIndexes = [];
 
         // hack for Heretic 65x64 scrolling flats
         const width = data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS;
@@ -344,35 +439,28 @@ export default class Wad {
         };
 
         for (let i = 0; i < data.byteLength; i++) {
-            flat.push(data.getUint8(i));
+            colorIndexes.push(data.getUint8(i));
         }
+
+        const image = this.convertColorIndexesToDataURL(colorIndexes, width, height, name, palette);
 
         return {
             metadata,
-            flat,
+            image,
         };
     }
 
     readImageDataHeader(data) {
         const header = [];
-        for (let i = 0; i < data.byteLength; i += 2) {
+        for (let i = 0; i < IMAGE_DATA_HEADER_SIZE; i += 2) {
             header.push(data.getUint16(i, true));
         }
 
         return header;
     }
 
-    readImageDataColumnSpanHeader(data, columnAddress) {
-        const header = [];
-        for (let i = 0; i < IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE; i++) {
-            header.push(data.getUint8(columnAddress + i, true));
-        }
-
-        return header;
-    }
-
-    readImageData(header, body, name, size) {
-        const image = [];
+    readImageData(data, name, palette) {
+        const colorIndexes = [];
 
         const [
             width,
@@ -380,7 +468,7 @@ export default class Wad {
             // the { x,y } offset of patches is usually zero
             xOffset,
             yOffset,
-        ] = this.readImageDataHeader(header);
+        ] = this.readImageDataHeader(data);
 
         const metadata = {
             width,
@@ -389,26 +477,43 @@ export default class Wad {
             yOffset,
         };
 
+        // assume that the whole image is transparent
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                colorIndexes.push(TRANSPARENT_PIXEL);
+            }
+        }
+
         const columnAddresses = [];
         for (let i = 0; i < width; i++) {
-            columnAddresses[i] = body.getUint32(i * 4, true);
+            columnAddresses[i] = data.getUint32(8 + (i * 4), true);
         }
 
-        const columns = [];
-        for (let i = 0; i < columnAddresses.length; i++) {
-            try {
-                const [
-                    spanYOffset,
-                    pixelCount,
-                ] = this.readImageDataColumnSpanHeader(body, columnAddresses[i]);
-            } catch (error) {
-                console.error({
-                    error, name, width, height, columnAddresses, i, size,
-                });
+        let position = 0;
+        let pixelCount = 0;
+
+        for (let i = 0; i < width; i++) {
+            position = columnAddresses[i];
+            let rowStart = 0;
+
+            while (rowStart !== IMAGE_DATA_BOUNDARY) {
+                rowStart = data.getUint8(position);
+                position += 1;
+
+                if (rowStart === IMAGE_DATA_BOUNDARY) break;
+
+                pixelCount = data.getUint8(position);
+                position += 2;
+
+                for (let j = 0; j < pixelCount; j++) {
+                    colorIndexes[((rowStart + j) * width) + i] = data.getUint8(position);
+                    position += 1;
+                }
+                position += 1;
             }
-
-            // console.log({ spanYOffset, pixelCount });
         }
+
+        const image = this.convertColorIndexesToDataURL(colorIndexes, width, height, name, palette);
 
         return {
             metadata,
@@ -465,6 +570,9 @@ export default class Wad {
 
         let indexLumpCount = 0;
         let lumpIndexAddress;
+
+        let paletteData = [];
+
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
             lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
@@ -523,6 +631,8 @@ export default class Wad {
                 if (name === PLAYPAL) {
                     lumpType = 'palettes';
                     parsedLumpData = this.readPalettes(lumpData);
+                    // shortcut to access palette #0 when parsing graphics into Data URLs
+                    [paletteData] = parsedLumpData;
                 } else if (name === COLORMAP) {
                     lumpType = 'colormaps';
                     parsedLumpData = this.readColormaps(lumpData, name);
@@ -538,6 +648,21 @@ export default class Wad {
                     patchNames = pNames;
                 } else if (patchNames.includes(name)) {
                     lumpType = 'patches';
+                } else if (/TEXTURE[0-9a-zA-Z]$/.test(name)) {
+                    lumpType = 'textures';
+                    const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
+                    parsedLumpData = textureNames;
+                    lumpIndexData = {
+                        ...lumpIndexData,
+                        count: textureCount,
+                    };
+
+                    lumps = {
+                        ...lumps,
+                        ...textures,
+                    };
+
+                    console.log({ textureCount, textureNames, textures });
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -573,28 +698,34 @@ export default class Wad {
                         break;
                     }
                     case 'flats': {
-                        const { flat, metadata } = this.readFlat(lumpData);
-                        parsedLumpData = flat;
+                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                        parsedLumpData = image;
                         lumpIndexData = {
                             ...lumpIndexData,
                             ...metadata,
                         };
                         break;
                     }
-                        /*
-                        case 'patches': {
-                            const lumpHeader = new DataView(blob, address, IMAGE_DATA_HEADER_SIZE);
-                            const lumpBody = new DataView(blob, address + IMAGE_DATA_HEADER_SIZE, size - IMAGE_DATA_HEADER_SIZE);
+                    case 'patches': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
 
-                            const { image, metadata } = this.readImageData(lumpHeader, lumpBody, name, size);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
-                            break;
-                        }
-                        */
+                        break;
+                    }
+                    case 'sprites': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+
+                        break;
+                    }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
