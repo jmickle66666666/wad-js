@@ -9,8 +9,8 @@ import LocalStorageManager from '../lib/LocalStorageManager';
 
 import Header from './Header';
 import Logo from './Logo';
-import WadUploader from './WadUploader';
-import WadList from './WadList';
+import WadUploader from './Upload/WadUploader';
+import UploadedWadList from './Upload/UploadedWadList';
 import WadDetails from './WadDetails';
 import BackToTop from './BackToTop';
 import ErrorMessage from './ErrorMessage';
@@ -371,7 +371,7 @@ export default class App extends Component {
                             deselectAll={this.deselectAll}
                         />
                         {Object.keys(wads).length > 0 && (
-                            <WadList
+                            <UploadedWadList
                                 wads={wads}
                                 selectedWad={selectedWad}
                                 deleteWad={this.deleteWad}

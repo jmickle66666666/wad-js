@@ -1,9 +1,9 @@
 import React from 'react';
 
-import style from './WadList.scss';
+import style from './UploadedWadList.scss';
 
-import Help from './Help';
-import WadItem from './WadItem';
+import Help from '../Help';
+import UploadedWad from './UploadedWad';
 
 export default ({
     wads,
@@ -25,7 +25,7 @@ export default ({
         <div className={style.wadListInner}>
             {
                 Object.keys(wads).map(wadId => (
-                    <WadItem
+                    <UploadedWad
                         key={wadId}
                         wad={wads[wadId]}
                         deleteWad={deleteWad}

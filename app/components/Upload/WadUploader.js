@@ -2,11 +2,11 @@ import React, { Component, Fragment } from 'react';
 
 import style from './WadUploader.scss';
 
-import Wad from '../models/Wad';
+import Wad from '../../models/Wad';
 
-import Help from './Help';
-import ErrorMessage from './ErrorMessage';
-import ErrorMessageList from './ErrorMessageList';
+import Help from '../Help';
+import ErrorMessage from '../ErrorMessage';
+import ErrorMessageList from '../ErrorMessageList';
 
 export default class WadUploader extends Component {
     state = {
