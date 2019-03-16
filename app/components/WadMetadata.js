@@ -19,7 +19,7 @@ export default ({
             <a href={`#/${wad.id}`}>
                 <h3 className={style.wadMetadataTitle} onClick={() => focusOnWad(false)}>
                         Metadata
-                </h3>
+                    </h3>
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
@@ -32,7 +32,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Filename:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -57,13 +57,15 @@ export default ({
                     </div>
                 </div>
             </div>
-            <h4 className={style.wadMetadataSubtitle}>Upload</h4>
+            <a href={`#/${wad.id}`} onClick={() => focusOnWad(false)}>
+                <h4 className={style.wadMetadataSubtitle}>Upload</h4>
+            </a>
             <div className={style.wadMetadataContent}>
                 <div className={style.wadMetadataTable}>
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Upload ID:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -87,10 +89,10 @@ export default ({
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from
-                                {' '}
+                            {' '}
                             <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
                                 .
-                            </div>
+                        </div>
                     )}
                 </div>
             </div>

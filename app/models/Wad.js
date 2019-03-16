@@ -306,26 +306,75 @@ export default class Wad {
     }
 
     readPatchNames(data) {
-        let patchCount = [];
+        const patchCount = data.getUint32(0, true);
         const patchNames = [];
         let patchName = [];
-        for (let i = 0; i < data.byteLength; i++) {
-            if (i === 0) {
-                patchCount = data.getUint32(i, true);
-            } else if (i > 3) {
-                const character = String.fromCharCode(data.getUint8(i, true));
-                patchName.push(character);
-                if (patchName.length === 8) {
-                    const formattedPatchName = patchName.join('').replace(/\u0000/g, '');
-                    patchNames.push(formattedPatchName);
-                    patchName = [];
-                }
+
+        for (let i = 4; i < data.byteLength; i++) {
+            const character = String.fromCharCode(data.getUint8(i, true));
+            patchName.push(character);
+            if (patchName.length === 8) {
+                const formattedPatchName = patchName.join('').replace(/\u0000/g, '');
+                patchNames.push(formattedPatchName);
+                patchName = [];
             }
         }
 
         return {
             patchCount,
             patchNames,
+        };
+    }
+
+    readTextures(data, textureLumpAddress) {
+        const textureCount = data.getUint32(0, true);
+        const textureNames = [];
+        const textures = {};
+
+        const textureAddresses = [];
+        for (let i = 0; i < textureCount; i++) {
+            textureAddresses[i] = data.getUint32(4 + (i * 4), true);
+        }
+
+        for (let i = 0; i < textureCount; i++) {
+            const address = textureAddresses[i];
+            const textureName = [];
+
+            for (let j = 0; j < 8; j++) {
+                const character = String.fromCharCode(data.getUint8(address + j));
+                textureName.push(character);
+            }
+
+            const name = textureName.join('').replace(/\u0000/g, '');
+            textureNames.push(name);
+
+            const width = data.getUint16(address + 11);
+            const height = data.getUint16(address + 13);
+
+            let size = 0;
+            if (textureAddresses[i + 1]) {
+                size = textureAddresses[i + 1] - textureAddresses[i];
+            } else {
+                size = textureLumpAddress - textureAddresses[i];
+            }
+
+            const texture = new Lump();
+            texture.setIndexData({
+                name,
+                address: textureLumpAddress + address,
+                size,
+                width,
+                height,
+                type: 'textures',
+            });
+
+            textures[name] = texture;
+        }
+
+        return {
+            textureCount,
+            textureNames,
+            textures,
         };
     }
 
@@ -599,6 +648,21 @@ export default class Wad {
                     patchNames = pNames;
                 } else if (patchNames.includes(name)) {
                     lumpType = 'patches';
+                } else if (/TEXTURE[0-9a-zA-Z]$/.test(name)) {
+                    lumpType = 'textures';
+                    const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
+                    parsedLumpData = textureNames;
+                    lumpIndexData = {
+                        ...lumpIndexData,
+                        count: textureCount,
+                    };
+
+                    lumps = {
+                        ...lumps,
+                        ...textures,
+                    };
+
+                    console.log({ textureCount, textureNames, textures });
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {

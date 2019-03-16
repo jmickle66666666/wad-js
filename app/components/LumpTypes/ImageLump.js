@@ -4,6 +4,13 @@ import style from './ImageLump.scss';
 
 export default ({ wad, lump }) => (
     <Fragment>
+        <div className={style.wadLumpDetailsEntry}>
+            Dimensions:
+            {' '}
+            {lump.width}
+            &times;
+            {lump.height}
+        </div>
         <div className={style.image}>
             <img
                 title={`${lump.name} (${lump.width}×${lump.height})`}

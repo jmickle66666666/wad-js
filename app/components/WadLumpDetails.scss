@@ -2,7 +2,6 @@
     display: block;
     width: 100%;
     min-width: 150px;
-    min-height: 150px;
     margin: 10px;
     border: 1px solid rgb(45, 45, 45);
     box-shadow: 1px 1px 2px 0;
@@ -21,6 +20,7 @@
     padding-top: 10px;
     padding-left: 3%;
     padding-right: 3%;
+    min-height: 150px;
     padding-bottom: 10px;
     background: rgb(210, 210, 210);
     box-sizing: border-box;

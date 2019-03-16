@@ -35,4 +35,12 @@ export default class Lump {
     get isImage() {
         return this.name !== PNAMES && IMAGE_LUMPS.includes(this.type);
     }
+
+    get isPNAMES() {
+        return this.name === PNAMES;
+    }
+
+    get isTEXTUREx() {
+        return /TEXTURE[0-9a-zA-Z]$/.test(this.name);
+    }
 }

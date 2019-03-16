@@ -2,11 +2,10 @@ import React from 'react';
 
 import style from './WadLumpDetailDisplay.scss';
 
-import { PNAMES } from '../lib/constants';
-
 import Palettes from './LumpTypes/Palettes';
 import Colormaps from './LumpTypes/Colormaps';
 import PatchNames from './LumpTypes/PatchNames';
+import TextureNames from './LumpTypes/TextureNames';
 import ImageLump from './LumpTypes/ImageLump';
 
 export default ({ wad, lump }) => {
@@ -30,9 +29,19 @@ export default ({ wad, lump }) => {
         );
     }
     case 'patches': {
-        if (lump.name === PNAMES) {
+        if (lump.isPNAMES) {
             return (
                 <PatchNames lump={lump} />
+            );
+        }
+        return (
+            <ImageLump wad={wad} lump={lump} />
+        );
+    }
+    case 'textures': {
+        if (lump.isTEXTUREx) {
+            return (
+                <TextureNames lump={lump} />
             );
         }
         return (

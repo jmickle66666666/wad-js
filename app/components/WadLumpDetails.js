@@ -22,15 +22,6 @@ export default ({ lump, wad, focusOnLump }) => (
                     {' '}
                     {lump.sizeInBytes}
                 </div>
-                {lump.isImage && (
-                    <div className={style.wadLumpDetailsEntry}>
-                        Dimensions:
-                        {' '}
-                        {lump.width}
-                        &times;
-                        {lump.height}
-                    </div>
-                )}
                 <WadLumpDetailDisplay wad={wad} lump={lump} />
             </div>
         </div>
