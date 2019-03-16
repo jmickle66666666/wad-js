@@ -28,6 +28,8 @@ export const EXTENSIONS = {
     png: 'png',
 };
 
+// The value of constants which name contains the word "SIZE" is a number of bytes.
+
 export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
 
 export const VALID_WAD_TYPES = ['IWAD', 'PWAD'];
@@ -56,6 +58,8 @@ export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;
 
 export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME = 8;
 
+export const COLOR_COUNT_PER_PALETTE = 256;
+
 export const PALETTE_SIZE = 768;
 
 export const COLORMAP_SIZE = 256;
@@ -68,4 +72,6 @@ export const FLAT_DIMENSIONS = 64;
 
 export const IMAGE_DATA_HEADER_SIZE = 8;
 
-export const IMAGE_DATA_COLUMN_SPAN_HEADER_SIZE = 3;
+export const IMAGE_DATA_BOUNDARY = 255;
+
+export const TRANSPARENT_PIXEL = -1;

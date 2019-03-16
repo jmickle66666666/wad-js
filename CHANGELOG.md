@@ -1,3 +1,8 @@
+## v0.1.17: Image reader (patches)
+
+* Thanks to jmickle66666666's code, I was able to improve easily the logic to parse most images within WADs.
+* I've used this opportunity to refactor some code on the UI side and prepare for parsing sprites and textures.
+
 ## v0.1.16: Patch names
 
 * You can now consult the PNAMES lump to see a list of all the patches within the WAD.

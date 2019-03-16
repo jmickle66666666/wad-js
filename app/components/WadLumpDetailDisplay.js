@@ -7,7 +7,7 @@ import { PNAMES } from '../lib/constants';
 import Palettes from './LumpTypes/Palettes';
 import Colormaps from './LumpTypes/Colormaps';
 import PatchNames from './LumpTypes/PatchNames';
-import Flat from './LumpTypes/Flat';
+import ImageLump from './LumpTypes/ImageLump';
 
 export default ({ wad, lump }) => {
     switch (lump.type) {
@@ -26,7 +26,7 @@ export default ({ wad, lump }) => {
     }
     case 'flats': {
         return (
-            <Flat wad={wad} lump={lump} />
+            <ImageLump wad={wad} lump={lump} />
         );
     }
     case 'patches': {
@@ -35,7 +35,9 @@ export default ({ wad, lump }) => {
                 <PatchNames lump={lump} />
             );
         }
-        return null;
+        return (
+            <ImageLump wad={wad} lump={lump} />
+        );
     }
     }
 };
