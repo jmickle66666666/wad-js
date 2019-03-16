@@ -52,6 +52,8 @@ export const PNAMES = 'PNAMES';
 
 export const UNCATEGORIZED = 'uncategorized';
 
+export const IMAGE_LUMPS = ['patches', 'flats', 'sprites'];
+
 export const LUMP_INDEX_ENTRY_SIZE = 16;
 
 export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;

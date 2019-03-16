@@ -1,7 +1,7 @@
-## v0.1.17: Image reader (patches)
+## v0.1.17: Image reader
 
-* Thanks to jmickle66666666's code, I was able to improve easily the logic to parse most images within WADs.
-* I've used this opportunity to refactor some code on the UI side and prepare for parsing sprites and textures.
+* Thanks to jmickle66666666's code, I was able to improve easily the logic to parse most images within WADs. As a result, wadJS is now able to display sprites and patches.
+* I've used this opportunity to refactor some code on the UI side.
 
 ## v0.1.16: Patch names
 

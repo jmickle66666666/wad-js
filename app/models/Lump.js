@@ -1,4 +1,4 @@
-import { PNAMES } from '../lib/constants';
+import { PNAMES, IMAGE_LUMPS } from '../lib/constants';
 
 export default class Lump {
     setIndexData({
@@ -33,6 +33,6 @@ export default class Lump {
     }
 
     get isImage() {
-        return this.name !== PNAMES && ['flats', 'patches'].includes(this.type);
+        return this.name !== PNAMES && IMAGE_LUMPS.includes(this.type);
     }
 }

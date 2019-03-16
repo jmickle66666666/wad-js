@@ -652,6 +652,16 @@ export default class Wad {
 
                         break;
                     }
+                    case 'sprites': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+
+                        break;
+                    }
                     }
 
                     // we know the type of this lump because it belongs to a cluster

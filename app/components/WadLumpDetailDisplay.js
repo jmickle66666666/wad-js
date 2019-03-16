@@ -39,5 +39,10 @@ export default ({ wad, lump }) => {
             <ImageLump wad={wad} lump={lump} />
         );
     }
+    case 'sprites': {
+        return (
+            <ImageLump wad={wad} lump={lump} />
+        );
+    }
     }
 };
