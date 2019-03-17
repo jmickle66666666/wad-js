@@ -30,9 +30,13 @@ export const EXTENSIONS = {
 
 // The value of constants which name contains the word "SIZE" is a number of bytes.
 
+export const IWAD = 'IWAD';
+
+export const PWAD = 'PWAD';
+
 export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
 
-export const VALID_WAD_TYPES = ['IWAD', 'PWAD'];
+export const VALID_WAD_TYPES = [IWAD, PWAD];
 
 export const MAP_LUMPS = [
     'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES',

@@ -2,6 +2,8 @@
 
 Use the WAD Uploader to add files you want to inspect with wadJS. Supported file formats are `.wad`, `.zip`, and `.pk3`.
 
+Please note that you must upload at least one IWAD before uploading PWADs. Without an IWAD as a reference, the application will most likely not be able to map object references (such as palettes, colormaps, patches, etc.) within your PWADs, which would result in numerous errors.
+
 You can upload multiple files from your device.
 
 Alternatively, you can upload one file at a time from the Internet by entering a URL and also specify the name of the file. It is recommended to add the file extension to the file name (e.g., "doom1.wad") for clarity.
@@ -15,6 +17,8 @@ Additionally, all the files you upload to wadJS are kept in the memory of your d
 ## Uploaded WADs
 
 This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
+
+The WADs of the same type (IWADs a.k.a Internal Wads and PWADs a.k.a Patch Wads) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
 
 ## WAD Metadata
 

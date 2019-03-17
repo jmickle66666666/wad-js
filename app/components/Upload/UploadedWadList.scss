@@ -14,9 +14,14 @@
     flex-wrap: wrap;
 }
 
-.wadListRefresh {
-    height: 18px;
+.deleteWads {
+    height: 20px;
     width: 18px;
+    cursor: pointer; 
+}
+
+.wadListRefresh {
+    height: 16px;
     cursor: pointer;
 }
 

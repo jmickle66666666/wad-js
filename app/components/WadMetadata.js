@@ -19,7 +19,7 @@ export default ({
             <a href={`#/${wad.id}`}>
                 <h3 className={style.wadMetadataTitle} onClick={() => focusOnWad(false)}>
                         Metadata
-                    </h3>
+                </h3>
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
@@ -32,7 +32,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Filename:
-                            </div>
+                        </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -42,7 +42,7 @@ export default ({
                     </label>
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>Type:</div>
-                        <div className={style.wadMetadataValue}>{wad.wadType}</div>
+                        <div className={style.wadMetadataValue}>{wad.type}</div>
                     </div>
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>Lump count:</div>
@@ -65,7 +65,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Upload ID:
-                            </div>
+                        </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -89,10 +89,10 @@ export default ({
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from
-                            {' '}
+                                {' '}
                             <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
                                 .
-                        </div>
+                            </div>
                     )}
                 </div>
             </div>
