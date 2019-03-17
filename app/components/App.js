@@ -111,6 +111,7 @@ export default class App extends Component {
         freedoom1.readRemoteFile(
             '/public/freedoom1.wad',
             'freedoom1.wad',
+            {},
             this.addFreedoom,
             true,
         );
@@ -119,6 +120,7 @@ export default class App extends Component {
         freedoom2.readRemoteFile(
             '/public/freedoom2.wad',
             'freedoom2.wad',
+            {},
             this.addFreedoom,
             true,
         );
@@ -177,6 +179,14 @@ export default class App extends Component {
                 wads: updatedWads,
             });
         });
+    }
+
+    deleteWads = () => {
+        this.setState(() => ({
+            wads: {},
+            selectedWad: {},
+            selectedLump: {},
+        }));
     }
 
     deselectAll = () => {
@@ -309,7 +319,7 @@ export default class App extends Component {
 
     updateFilename = (name) => {
         const { selectedWad } = this.state;
-        const wad = { ...selectedWad };
+        const wad = selectedWad;
 
         if (name === '') {
             const error = 'WAD filename can not be empty.';
@@ -367,6 +377,7 @@ export default class App extends Component {
                     <Logo />
                     <div className={style.top}>
                         <WadUploader
+                            wads={wads}
                             addWad={this.addWad}
                             deselectAll={this.deselectAll}
                         />
@@ -375,6 +386,7 @@ export default class App extends Component {
                                 wads={wads}
                                 selectedWad={selectedWad}
                                 deleteWad={this.deleteWad}
+                                deleteWads={this.deleteWads}
                                 selectWad={this.selectWad}
                                 selectedLumpType={selectedLumpType}
                                 selectedLump={selectedLump}
