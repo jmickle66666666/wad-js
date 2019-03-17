@@ -2,8 +2,6 @@ import React from 'react';
 
 import style from './WadLumpTypes.scss';
 
-import { UNCATEGORIZED } from '../lib/constants';
-
 import Help from './Help';
 
 export default ({ wad, selectedLumpType, selectLumpType }) => (
@@ -18,7 +16,7 @@ export default ({ wad, selectedLumpType, selectLumpType }) => (
         </Help>
         <div className={style.wadListInner}>
             <div className={style.wadLumpTypes}>
-                {wad.lumpTypes.map(lumpType => (
+                {wad.lumpTypes && wad.lumpTypes.map(lumpType => (
                     <a
                         href={`#/${wad.id}/${selectedLumpType}`}
                         id={(selectedLumpType && selectedLumpType === lumpType && style.selectedLumpType) || null}
