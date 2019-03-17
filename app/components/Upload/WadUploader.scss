@@ -26,7 +26,8 @@
 }
 
 .uploaderLabel {
-    margin-right: 10px;
+    margin-right: 5px;
+    width: 95px;
 }
 
 .uploaderInput {
@@ -35,6 +36,10 @@
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: left;
+}
+
+.iWadInputInner {
+    flex: 1;
 }
 
 .remoteInputOuter {

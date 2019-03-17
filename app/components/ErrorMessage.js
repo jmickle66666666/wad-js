@@ -2,8 +2,8 @@ import React from 'react';
 
 import style from './ErrorMessage.scss';
 
-export default props => props.message && (
+export default ({ message }) => message && (
     <div className={style.error}>
-        {props.message}
+        {message}
     </div>
 );

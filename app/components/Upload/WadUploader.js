@@ -1,4 +1,7 @@
 import React, { Component, Fragment } from 'react';
+import moment from 'moment';
+
+import { getInternalWads } from '../../lib/wadUtils';
 
 import style from './WadUploader.scss';
 
@@ -7,9 +10,11 @@ import Wad from '../../models/Wad';
 import Help from '../Help';
 import ErrorMessage from '../ErrorMessage';
 import ErrorMessageList from '../ErrorMessageList';
+import WarningMessageList from '../WarningMessageList';
 
 export default class WadUploader extends Component {
     state = {
+        iwad: '',
         wads: {},
         remoteWadErrors: [],
         remoteWadUrl: '',
@@ -37,6 +42,19 @@ export default class WadUploader extends Component {
         }, 100);
     }
 
+    getIWadData = () => {
+        const { iwad } = this.state;
+        const { wads: uploadedWads } = this.props;
+        return uploadedWads[iwad] || {};
+    }
+
+    handleSelectIWad = (event) => {
+        const { value: iwad } = event.target;
+        this.setState(() => ({
+            iwad,
+        }));
+    }
+
     handleLocalWadUpload = (event) => {
         const wads = event.target.files;
 
@@ -49,6 +67,7 @@ export default class WadUploader extends Component {
             const wad = new Wad();
             wad.readLocalFile(
                 wads[i],
+                this.getIWadData(),
                 this.updateWad,
             );
         }
@@ -91,6 +110,7 @@ export default class WadUploader extends Component {
         wad.readRemoteFile(
             remoteWadUrl,
             remoteWadFilename,
+            this.getIWadData(),
             this.updateWad,
         );
 
@@ -122,14 +142,17 @@ export default class WadUploader extends Component {
 
     render() {
         const {
+            wads: uploadedWads,
             deselectAll,
         } = this.props;
         const {
+            iwad,
             wads,
             remoteWadErrors,
             remoteWadUrl,
             remoteWadFilename,
         } = this.state;
+        const iwads = getInternalWads(uploadedWads);
         return (
             <Fragment>
                 <span id="uploader" />
@@ -140,6 +163,31 @@ export default class WadUploader extends Component {
                         </a>
                     </Help>
                     <div className={style.uploaderInner}>
+                        <label htmlFor="iwadInput" className={style.uploaderInput}>
+                            <div className={style.uploaderLabel}>IWAD:</div>
+                            <select
+                                id="iwadInput"
+                                className={style.iWadInputInner}
+                                value={iwad}
+                                onChange={this.handleSelectIWad}
+                            >
+                                <option value="">
+                                    None
+                                </option>
+                                {
+                                    iwads.length > 0 && iwads.map(wad => (
+                                        <option key={wad.id} value={wad.id}>
+                                            {wad.name}
+                                            {' '}
+                                            (uploaded
+                                            {' '}
+                                            {moment(wad.uploadEndAt).format('M/D/YY [at] h:mma')}
+                                            )
+                                        </option>
+                                    ))
+                                }
+                            </select>
+                        </label>
                         <label htmlFor="localInput" className={style.uploaderInput}>
                             <div className={style.uploaderLabel}>From device:</div>
                             <input
@@ -196,6 +244,7 @@ export default class WadUploader extends Component {
                                         )
                                     }
                                     <ErrorMessageList errors={wad.errors} />
+                                    <WarningMessageList warnings={wad.warnings} />
                                 </div>
                             );
                         })}
