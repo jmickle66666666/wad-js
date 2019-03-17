@@ -8,6 +8,8 @@ import arrayToQuotedString from '../lib/arrayToQuotedString';
 import {
     VALID_FILE_FORMATS,
     VALID_WAD_TYPES,
+    IWAD,
+    PWAD,
     MAP_LUMPS,
     THINGS,
     PLAYPAL,
@@ -35,6 +37,31 @@ export default class Wad {
         this.lumps = {};
     }
 
+    getRelevantExternalResources(iwad) {
+        const errors = {};
+        const warnings = {};
+
+        if (!iwad.lumps) {
+            warnings.iwad_missing = 'This PWAD was not linked to an IWAD for missing resources. Graphic lumps might not be visible in the application if the WAD does not include its own palette.';
+            return { data: {}, errors, warnings };
+        }
+
+        let palettes = {};
+        try {
+            palettes = iwad.lumps.palettes.PLAYPAL;
+        } catch (error) {
+            errors.palettes = `An error occurred while parsing the palettes of IWAD '${iwad.name}': ${error} `;
+        }
+
+        const data = {
+            name: iwad.name,
+            id: iwad.id,
+            palettes,
+        };
+
+        return { data, errors, warnings };
+    }
+
     checkZipFile(blob) {
         const fileSignature = blob.getUint32(0, false).toString(16);
         const isZipped = fileSignature === '504b0304';
@@ -42,7 +69,7 @@ export default class Wad {
         return isZipped;
     }
 
-    unZipFile(blob, callback) {
+    unZipFile(blob, iwad, callback) {
         const zip = new JSZip();
 
         zip.loadAsync(blob)
@@ -71,7 +98,7 @@ export default class Wad {
                     .then((wad) => {
                         this.bytesLoaded = wad.byteLength;
                         this.size = wad.byteLength;
-                        this.processBlob(wad, callback);
+                        this.processBlob(wad, iwad, callback);
                     });
             })
             .catch((error) => {
@@ -81,14 +108,15 @@ export default class Wad {
             });
     }
 
-    processBlob(blob, callback) {
+    processBlob(blob, iwad, callback) {
         try {
+            let warnings = {};
             const data = new DataView(blob);
 
             this.checkZipFile(data);
 
             if (this.isZipped) {
-                this.unZipFile(blob, callback);
+                this.unZipFile(blob, iwad, callback);
                 return false;
             }
 
@@ -97,21 +125,47 @@ export default class Wad {
             this.uploadedWith = `${PROJECT} v${VERSION}`;
 
             const {
-                wadType,
+                type,
                 headerLumpCount,
                 indexAddress,
             } = this.readHeader(data);
 
-            if (!VALID_WAD_TYPES.includes(wadType)) {
-                const error = `'${wadType}' is not a valid WAD type. Expected type: ${arrayToQuotedString(VALID_WAD_TYPES)}.`;
+            if (!VALID_WAD_TYPES.includes(type)) {
+                const error = `'${type}' is not a valid WAD type. Expected type: ${arrayToQuotedString(VALID_WAD_TYPES)}.`;
                 this.errors.invalid_wad_signature = error;
                 callback(this);
 
                 return false;
             }
 
+            // ignore IWAD input
+            let externalIWad = {};
+            if (type === IWAD && iwad.name) {
+                console.warn(`An external IWAD '${iwad.name}' was provided but this WAD is also an IWAD. The external source will be ignored.`);
+            } else if (type === PWAD) {
+                const { data: iwadData, errors, warnings: iwadWarnings } = this.getRelevantExternalResources(iwad);
+
+                if (Object.keys(errors).length > 0) {
+                    this.errors = {
+                        ...this.errors,
+                        ...errors,
+                    };
+
+                    callback(this);
+                    return false;
+                }
+
+                warnings = {
+                    ...warnings,
+                    ...iwadWarnings,
+                };
+
+                externalIWad = iwadData;
+            }
+
             this.uploaded = true;
-            this.wadType = wadType;
+            this.warnings = warnings;
+            this.type = type;
             this.headerLumpCount = headerLumpCount;
             this.indexLumpCount = 0;
             this.indexAddress = indexAddress;
@@ -119,7 +173,7 @@ export default class Wad {
 
             callback(this);
 
-            this.readLumpIndex(blob, data, callback);
+            this.readLumpIndex(blob, data, externalIWad, callback);
 
             return true;
         } catch (error) {
@@ -131,7 +185,7 @@ export default class Wad {
         }
     }
 
-    initReader(callback) {
+    initReader(iwad, callback) {
         const reader = new FileReader();
         this.errors = {};
 
@@ -158,7 +212,7 @@ export default class Wad {
         reader.onload = (event) => {
             const { result } = event.target;
 
-            this.processBlob(result, callback);
+            this.processBlob(result, iwad, callback);
         };
 
         return reader;
@@ -553,7 +607,7 @@ export default class Wad {
         return name;
     }
 
-    readLumpIndex(blob, data, callback) {
+    readLumpIndex(blob, data, iwad, callback) {
         let lumps = {};
         let lumpType = '';
         let lumpClusterType = '';
@@ -571,7 +625,7 @@ export default class Wad {
         let indexLumpCount = 0;
         let lumpIndexAddress;
 
-        let paletteData = [];
+        let paletteData = iwad.palettes ? iwad.palettes.data[0] : [];
 
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
@@ -669,24 +723,19 @@ export default class Wad {
                     // start marker
                     if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
-                        console.info('Patch start marker found:', name);
                         lumpClusterType = 'patches';
                     } else if (/^F[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
-                        console.info('Flat start marker found:', name);
                         lumpClusterType = 'flats';
                     } else if (/^S[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
-                        console.info('Sprite start marker found:', name);
                         lumpClusterType = 'sprites';
                     } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                         // patch marker
-                        console.info('Sprite start marker found:', name);
                         lumpClusterType = 'colormaps';
                     }
                 } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
                     // end marker
-                    console.info('End marker found:', name);
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
@@ -765,6 +814,7 @@ export default class Wad {
         this.indexLumpCount = indexLumpCount;
         this.lumps = organizedLumps;
         this.processed = true;
+        this.iwad = iwad;
 
         callback(this);
         return true;
@@ -783,18 +833,18 @@ export default class Wad {
             wadTypeData.push(String.fromCharCode(data.getUint8(i)));
         }
 
-        const wadType = wadTypeData.join('');
+        const type = wadTypeData.join('');
         const headerLumpCount = data.getInt32(4, true);
         const indexAddress = data.getInt32(8, true);
 
         return {
-            wadType,
+            type,
             headerLumpCount,
             indexAddress,
         };
     }
 
-    readLocalFile(file, callback) {
+    readLocalFile(file, iwad, callback) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -802,7 +852,7 @@ export default class Wad {
         this.id = `${file.name}_${timestamp.unix()}`;
 
         if (VALID_FILE_FORMATS.includes(file.type)) {
-            const reader = this.initReader(callback);
+            const reader = this.initReader(iwad, callback);
             reader.readAsArrayBuffer(file);
         } else {
             const error = `"${file.type}" is not a supported file format. Expected MIME types: ${arrayToQuotedString(VALID_FILE_FORMATS)}.`;
@@ -811,7 +861,7 @@ export default class Wad {
         }
     }
 
-    readRemoteFile(url, filename, callback, unique = false) {
+    readRemoteFile(url, filename, iwad, callback, unique = false) {
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -825,7 +875,7 @@ export default class Wad {
                 this.bytesLoaded = result.byteLength;
                 this.size = result.byteLength;
 
-                this.processBlob(result, callback);
+                this.processBlob(result, iwad, callback);
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, { error });
@@ -837,41 +887,49 @@ export default class Wad {
         const {
             id,
             name,
-            wadType,
-            headerLumpCount,
-            indexLumpCount,
-            indexAddress,
-            indexOffset,
-            bytesLoaded,
+            type,
+            iwad,
             size,
-            errors,
+            bytesLoaded,
             uploadStartAt,
             uploadEndAt,
             uploadedWith,
             uploadedFrom,
+            headerLumpCount,
+            indexLumpCount,
+            indexAddress,
+            indexOffset,
             lumps,
+            errors,
+            warnings,
         } = wad;
 
         this.id = id;
         this.name = name;
-        this.wadType = wadType;
-        this.headerLumpCount = headerLumpCount;
-        this.indexLumpCount = indexLumpCount;
-        this.indexAddress = indexAddress;
-        this.indexOffset = indexOffset;
-        this.bytesLoaded = bytesLoaded;
+        this.type = type;
+        this.iwad = iwad;
         this.size = size;
-        this.errors = errors;
+        this.bytesLoaded = bytesLoaded;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.uploadedWith = uploadedWith;
         this.uploadedFrom = uploadedFrom;
+        this.headerLumpCount = headerLumpCount;
+        this.indexLumpCount = indexLumpCount;
+        this.indexAddress = indexAddress;
+        this.indexOffset = indexOffset;
         this.lumps = lumps;
+        this.errors = errors;
+        this.warnings = warnings;
     }
 
     get uploadedPercentage() {
         const progress = this.bytesLoaded / this.size * 100;
         return Number.isNaN(progress) ? '' : Math.ceil(progress);
+    }
+
+    get isPatchWad() {
+        return this.type === PWAD;
     }
 
     get lumpTypes() {

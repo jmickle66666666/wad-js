@@ -5,14 +5,20 @@ import style from './WadMetadata.scss';
 
 import Help from './Help';
 import ErrorMessageList from './ErrorMessageList';
+import WarningMessageList from './WarningMessageList';
 
 const versionError = uploadedWith => (uploadedWith !== `${PROJECT} v${VERSION}` && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest update and fix potential errors that may occur while manipulating the WAD data.`) || null;
+
+const buildIWadLink = (IWadId, selectedLumpType, selectedLump) => `#/${IWadId}${selectedLumpType ? `/${selectedLumpType}` : ''}${selectedLump.name ? `/${selectedLump.name}` : ''}`;
 
 export default ({
     wad,
     updateFilename,
     updateId,
     focusOnWad,
+    selectWad,
+    selectedLumpType,
+    selectedLump,
 }) => (
     <div className={style.wadMetadataOuter}>
         <Help id="wad-metadata" title="the metadata panel">
@@ -24,6 +30,7 @@ export default ({
         </Help>
         <div className={style.wadMetadataInner}>
             <ErrorMessageList errors={{ ...wad.errors, version_error: versionError(wad.uploadedWith) }} />
+            <WarningMessageList warnings={wad.warnings} />
             <a href={`#/${wad.id}`} onClick={() => focusOnWad(false)}>
                 <h4 className={style.wadMetadataSubtitle}>General</h4>
             </a>
@@ -42,8 +49,19 @@ export default ({
                     </label>
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>Type:</div>
-                        <div className={style.wadMetadataValue}>{wad.wadType}</div>
+                        <div className={style.wadMetadataValue}>{wad.type}</div>
                     </div>
+                    {wad.isPatchWad && (
+                        <div className={style.wadMetadataEntry}>
+                            <div className={style.wadMetadataLabel}>IWAD:</div>
+                            <div className={style.wadMetadataValue}>
+                                <a href={buildIWadLink(wad.iwad.id, selectedLumpType, selectedLump)} onClick={() => selectWad(wad.iwad.id)}>
+                                    {wad.iwad && wad.iwad.name}
+                                </a>
+
+                            </div>
+                        </div>
+                    )}
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>Lump count:</div>
                         <div className={style.wadMetadataValue}>{wad.headerLumpCount}</div>

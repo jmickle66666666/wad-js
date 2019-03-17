@@ -12,9 +12,13 @@ You can upload a file with the same name multiple times. This allows you to comp
 
 Additionally, all the files you upload to wadJS are kept in the memory of your device's browser. This means that you can leave the application or refresh the page without having to reuploaded all your files afterwards.
 
+Please note that it is usually necessary to use an IWAD as a reference when loading a PWAD, especially if the PWAD does not have data concerning the play palettes. If you do not link your PWADs to an IWAD, you might not be able to preview certain resources such as sprites, textures, patches, etc. If you link a PWAD to the incorrect IWAD, the colors of its graphic assets might be weird depending on the play palettes of the IWAD. To remedy to this issue, make sure that you upload the necessary IWAD first, and then select this IWAD when uploading PWADs.
+
 ## Uploaded WADs
 
 This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
+
+The WADs of the same type (IWADs a.k.a Internal Wads and PWADs a.k.a Patch Wads) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
 
 ## WAD Metadata
 

@@ -1,3 +1,7 @@
+## v0.1.18: IWADs and PWADs
+
+* Since we are diving into displaying graphical assets, it was time to make a distinction between Internal WADs and Patch WADs. The application now separates the two categories on the UI and allows users to link PWADs to already-uploaded IWAD. As a result, it will still be possible to display graphics from PWADs without any palettes data. Yay!
+
 ## v0.1.17: Image reader
 
 * Thanks to jmickle66666666's code, I was able to improve easily the logic to parse most images within WADs. As a result, wadJS is now able to display sprites and patches.
