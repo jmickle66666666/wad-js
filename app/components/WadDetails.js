@@ -10,6 +10,7 @@ export default ({
     selectedWad: wad,
     selectedLump,
     selectedLumpType,
+    selectWad,
     selectLump,
     selectLumpType,
     updateFilename,
@@ -25,8 +26,11 @@ export default ({
         </a>
         <WadMetadata
             wad={wad}
+            selectWad={selectWad}
             updateFilename={updateFilename}
             focusOnWad={focusOnWad}
+            selectedLump={selectedLump}
+            selectedLumpType={selectedLumpType}
         />
         <WadLumpTypes
             wad={wad}

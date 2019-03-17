@@ -54,6 +54,8 @@ export default class Wad {
         }
 
         const data = {
+            name: iwad.name,
+            id: iwad.id,
             palettes,
         };
 
@@ -860,9 +862,6 @@ export default class Wad {
     }
 
     readRemoteFile(url, filename, iwad, callback, unique = false) {
-        console.log('OI', {
-            url, filename, iwad, callback,
-        });
         const timestamp = moment().utc();
 
         this.uploadStartAt = timestamp.format();
@@ -889,16 +888,17 @@ export default class Wad {
             id,
             name,
             type,
-            headerLumpCount,
-            indexLumpCount,
-            indexAddress,
-            indexOffset,
-            bytesLoaded,
+            iwad,
             size,
+            bytesLoaded,
             uploadStartAt,
             uploadEndAt,
             uploadedWith,
             uploadedFrom,
+            headerLumpCount,
+            indexLumpCount,
+            indexAddress,
+            indexOffset,
             lumps,
             errors,
             warnings,
@@ -907,16 +907,17 @@ export default class Wad {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.headerLumpCount = headerLumpCount;
-        this.indexLumpCount = indexLumpCount;
-        this.indexAddress = indexAddress;
-        this.indexOffset = indexOffset;
-        this.bytesLoaded = bytesLoaded;
+        this.iwad = iwad;
         this.size = size;
+        this.bytesLoaded = bytesLoaded;
         this.uploadStartAt = uploadStartAt;
         this.uploadEndAt = uploadEndAt;
         this.uploadedWith = uploadedWith;
         this.uploadedFrom = uploadedFrom;
+        this.headerLumpCount = headerLumpCount;
+        this.indexLumpCount = indexLumpCount;
+        this.indexAddress = indexAddress;
+        this.indexOffset = indexOffset;
         this.lumps = lumps;
         this.errors = errors;
         this.warnings = warnings;
