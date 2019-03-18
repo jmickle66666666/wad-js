@@ -9,6 +9,8 @@ export default class Lump {
         size,
         width,
         height,
+        xOffset,
+        yOffset,
         count,
         data,
     }) {
@@ -19,6 +21,8 @@ export default class Lump {
         this.size = size;
         this.width = width;
         this.height = height;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
         this.count = count;
         this.data = data;
     }
