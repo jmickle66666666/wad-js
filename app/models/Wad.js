@@ -1,4 +1,5 @@
 import moment from 'moment';
+import axios from 'axios';
 import JSZip from 'jszip';
 
 import Lump from './Lump';
@@ -197,11 +198,15 @@ export default class Wad {
         };
 
         reader.onloadstart = () => {
+            // hack to force the browser to show the rocket animation
+            this.bytesLoaded = -1;
+            this.size = -100;
             this.errors = {};
+            callback(this);
         };
 
         reader.onprogress = (data) => {
-            if (this.size === undefined) {
+            if (this.size !== data.total) {
                 this.size = data.total;
             }
 
@@ -212,6 +217,7 @@ export default class Wad {
         };
 
         reader.onload = (event) => {
+            callback(this);
             const { result } = event.target;
 
             this.processBlob(result, iwad, callback);
@@ -765,42 +771,42 @@ export default class Wad {
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
-                    default: {
-                        break;
-                    }
-                    case 'colormaps': {
-                        parsedLumpData = this.readColormaps(lumpData, name);
-                        break;
-                    }
-                    case 'flats': {
-                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
-                        break;
-                    }
-                    case 'patches': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
-                    case 'sprites': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
+                            break;
+                        }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
@@ -912,13 +918,29 @@ export default class Wad {
         this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
         this.uploadedFrom = url;
 
-        fetch(url)
-            .then(response => response.arrayBuffer())
-            .then((result) => {
-                this.bytesLoaded = result.byteLength;
-                this.size = result.byteLength;
+        // hack to force the browser to show the rocket animation
+        this.bytesLoaded = -1;
+        this.size = -100;
+        callback(this);
 
-                this.processBlob(result, iwad, callback);
+        axios.get(url, {
+            responseType: 'arraybuffer',
+            onDownloadProgress: (data) => {
+                if (this.size !== data.total) {
+                    this.size = data.total;
+                }
+
+                if (data.lengthComputable) {
+                    this.bytesLoaded = data.loaded;
+                    callback(this);
+                }
+            },
+        })
+            .then((response) => {
+                this.bytesLoaded = response.data.byteLength;
+                this.size = response.data.byteLength;
+
+                this.processBlob(response.data, iwad, callback);
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, { error });
@@ -967,7 +989,11 @@ export default class Wad {
     }
 
     get uploadedPercentage() {
-        const progress = this.bytesLoaded / this.size * 100;
+        if (this.errorIds.length > 0) {
+            return 100;
+        }
+
+        const progress = (this.bytesLoaded / this.size) * 100;
         return Number.isNaN(progress) ? '' : Math.ceil(progress);
     }
 

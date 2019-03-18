@@ -1,9 +1,13 @@
+
 import React, { Component, Fragment } from 'react';
 import moment from 'moment';
+import posed from 'react-pose';
 
 import { getInternalWads } from '../../lib/wadUtils';
 
 import style from './WadUploader.scss';
+
+import rocket from '../../assets/rocket.png';
 
 import Wad from '../../models/Wad';
 
@@ -12,10 +16,17 @@ import ErrorMessage from '../ErrorMessage';
 import ErrorMessageList from '../ErrorMessageList';
 import WarningMessageList from '../WarningMessageList';
 
+const Rocket = posed.div({
+    loading: {
+        marginLeft: ({ uploadedPercentage }) => uploadedPercentage,
+    },
+});
+
 export default class WadUploader extends Component {
     state = {
         iwad: '',
-        wads: {},
+        wads: {
+        },
         remoteWadErrors: [],
         remoteWadUrl: '',
         remoteWadFilename: '',
@@ -34,12 +45,10 @@ export default class WadUploader extends Component {
             };
         });
 
-        setTimeout(() => {
-            if (wad.uploaded && wad.processed) {
-                const { addWad } = this.props;
-                addWad(wad);
-            }
-        }, 100);
+        if (wad.uploaded && wad.processed) {
+            const { addWad } = this.props;
+            addWad(wad);
+        }
     }
 
     getIWadData = () => {
@@ -226,9 +235,25 @@ export default class WadUploader extends Component {
                                     <div>{wad.name}</div>
                                     {
                                         wad.uploadedPercentage && (
-                                            <div className={style.loaded}>
-                                                {wad.uploadedPercentage}
-                                                % loaded
+                                            <div>
+                                                <div className={style.loadingContainer}>
+                                                    <div className={style.loaded}>
+                                                        {wad.uploadedPercentage}
+                                                        % loaded
+                                                    </div>
+                                                    <div className={style.rocketContainer}>
+                                                        <Rocket
+                                                            pose="loading"
+                                                            poseKey={wad.errorIds.length > 0 ? 100 : wad.uploadedPercentage}
+                                                            uploadedPercentage={`${wad.errorIds.length > 0 ? '100' : wad.uploadedPercentage}%`}
+                                                        >
+                                                            <img
+                                                                className={style.loadingRocket}
+                                                                src={rocket}
+                                                            />
+                                                        </Rocket>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )
                                     }
