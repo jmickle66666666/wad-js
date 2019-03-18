@@ -18,7 +18,9 @@ Please note that it is usually necessary to use an IWAD as a reference when load
 
 This list of uploaded WADs allows you to browse between the different WADs you have added to wadJS.
 
-The WADs of the same type (IWADs a.k.a Internal Wads and PWADs a.k.a Patch Wads) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
+The WADs of the same type (IWADs a.k.a Internal WADs and PWADs a.k.a Patch WADs) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
+
+Click on the trash icon next to the name of the WAD
 
 ## WAD Metadata
 
