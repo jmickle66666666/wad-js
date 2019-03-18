@@ -20,7 +20,7 @@ This list of uploaded WADs allows you to browse between the different WADs you h
 
 The WADs of the same type (IWADs a.k.a Internal WADs and PWADs a.k.a Patch WADs) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
 
-Click on the trash icon next to the name of the WAD
+Click on the trash icon next to the name of a WAD to remove it from the list. The trash icon above the list will remove all WADs from the application memory.
 
 ## WAD Metadata
 
