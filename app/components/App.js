@@ -11,7 +11,7 @@ import Header from './Header';
 import Logo from './Logo';
 import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
-import WadDetails from './WadDetails';
+import WadDetails from './WadExplorer/WadDetails';
 import BackToTop from './BackToTop';
 import ErrorMessage from './ErrorMessage';
 

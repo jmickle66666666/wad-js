@@ -1,11 +1,11 @@
 import React from 'react';
 
-import Palettes from './Lumps/Palettes';
-import Colormaps from './Lumps/Colormaps';
-import PatchNames from './Lumps/PatchNames';
-import TextureNames from './Lumps/TextureNames';
-import ImageLump from './Lumps/ImageLump';
-import Texture from './Lumps/Texture';
+import Palettes from '../Lumps/Palettes';
+import Colormaps from '../Lumps/Colormaps';
+import PatchNames from '../Lumps/PatchNames';
+import TextureNames from '../Lumps/TextureNames';
+import ImageLump from '../Lumps/ImageLump';
+import Texture from '../Lumps/Texture';
 
 export default ({ wad, lump }) => {
     switch (lump.type) {
