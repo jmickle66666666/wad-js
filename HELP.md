@@ -20,7 +20,7 @@ This list of uploaded WADs allows you to browse between the different WADs you h
 
 The WADs of the same type (IWADs a.k.a Internal Wads and PWADs a.k.a Patch Wads) are displayed in their own group. This allows for more clarity on your list of uploaded WADs.
 
-## WAD Metadata
+## WAD Name and Metadata
 
 On this panel, you can see some data about the WAD in general.
 

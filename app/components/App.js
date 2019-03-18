@@ -409,6 +409,7 @@ export default class App extends Component {
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
+                                deleteWad={this.deleteWad}
                                 updateFilename={this.updateFilename}
                                 focusOnWad={this.focusOnWad}
                                 focusOnLump={this.focusOnLump}
