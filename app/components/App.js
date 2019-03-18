@@ -50,6 +50,13 @@ export default class App extends Component {
         const { params } = match;
         const { wadName, lumpName, lumpType } = params;
 
+        if (window.location.hash.includes('#/uploader')) {
+            const uploader = document.getElementById('uploader');
+            if (uploader) {
+                uploader.scrollIntoView();
+            }
+        }
+
         if (wadName) {
             this.selectWad(wadName, true);
         }
