@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 
 import style from './WadDetails.scss';
 
-import Trash from '../icons/Trash';
+import Trash from '../../icons/Trash';
 
 import WadMetadata from './WadMetadata';
 import WadLumpTypes from './WadLumpTypes';

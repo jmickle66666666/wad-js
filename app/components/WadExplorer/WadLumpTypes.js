@@ -2,7 +2,7 @@ import React from 'react';
 
 import style from './WadLumpTypes.scss';
 
-import Help from './Help';
+import Help from '../Help';
 
 export default ({ wad, selectedLumpType, selectLumpType }) => (
     <div className={style.wadListOuter}>
