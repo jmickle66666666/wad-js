@@ -15,6 +15,8 @@ import {
     PLAYPAL,
     COLORMAP,
     PNAMES,
+    MUSIC_LUMPS,
+    DEMO_LUMPS,
     UNCATEGORIZED,
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
@@ -405,12 +407,28 @@ export default class Wad {
             const width = data.getUint16(address + 11);
             const height = data.getUint16(address + 13);
 
+            const patchCount = data.getUint16(address + 19);
+
+            const patches = [];
+
+            // that's not accurate
+            for (let j = 0; j < patchCount; j++) {
+                const patch = {
+                    xOffset: data.getUint16(address + 20 + j * 10),
+                    yOffset: data.getUint16(address + 20 + j * 10 + 2),
+                    patchIndex: data.getUint16(address + 20 + j * 10 + 4),
+                };
+                patches.push(patch);
+                // console.log({ name, patch });
+            }
+
             let size = 0;
             if (textureAddresses[i + 1]) {
                 size = textureAddresses[i + 1] - textureAddresses[i];
             } else {
                 size = textureLumpAddress - textureAddresses[i];
             }
+
 
             const texture = new Lump();
             texture.setIndexData({
@@ -420,6 +438,10 @@ export default class Wad {
                 width,
                 height,
                 type: 'textures',
+                data: {
+                    patchCount,
+                    patches,
+                },
             });
 
             textures[name] = texture;
@@ -717,6 +739,10 @@ export default class Wad {
                     };
 
                     console.log({ textureCount, textureNames, textures });
+                } else if (MUSIC_LUMPS.includes(name)) {
+                    lumpType = 'music';
+                } else if (DEMO_LUMPS.includes(name)) {
+                    lumpType = 'demos';
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -788,7 +814,24 @@ export default class Wad {
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
                     lumps[name] = lump;
                 } else {
-                    // unmarked lump
+                    // we didn't already guessed the type with a stronger method
+                    // detect the type of individual lumps based on a partial match on name
+                    if (!lumpType) {
+                        if (/D_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                            lumpType = 'music';
+                        } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
+                            lumpType = 'sounds';
+                        } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                            lumpType = 'menu';
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                        }
+                    }
+
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
                         data: parsedLumpData,

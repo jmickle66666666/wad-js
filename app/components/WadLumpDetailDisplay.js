@@ -1,12 +1,13 @@
 import React from 'react';
 
-import style from './WadLumpDetailDisplay.scss';
+import imageStyle from './LumpTypes/ImageLump.scss';
 
 import Palettes from './LumpTypes/Palettes';
 import Colormaps from './LumpTypes/Colormaps';
 import PatchNames from './LumpTypes/PatchNames';
 import TextureNames from './LumpTypes/TextureNames';
 import ImageLump from './LumpTypes/ImageLump';
+import Texture from './LumpTypes/Texture';
 
 export default ({ wad, lump }) => {
     switch (lump.type) {
@@ -45,12 +46,20 @@ export default ({ wad, lump }) => {
             );
         }
         return (
-            <ImageLump wad={wad} lump={lump} />
+            <Texture wad={wad} lump={lump} />
         );
     }
     case 'sprites': {
         return (
             <ImageLump wad={wad} lump={lump} />
+        );
+    }
+    case 'menu': {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
         );
     }
     }

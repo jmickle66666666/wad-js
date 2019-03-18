@@ -31,18 +31,20 @@ export const EXTENSIONS = {
 // The value of constants which name contains the word "SIZE" is a number of bytes.
 
 export const IWAD = 'IWAD';
-
 export const PWAD = 'PWAD';
+export const VALID_WAD_TYPES = [IWAD, PWAD];
 
 export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
 
-export const VALID_WAD_TYPES = [IWAD, PWAD];
-
 export const MAP_LUMPS = [
-    'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP', 'BEHAVIOR', 'ZNODES',
+    'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP',
+    // Hexen only
+    'BEHAVIOR',
+    // Universal Doom Map Format only
+    'ZNODES',
 ];
 
-export const OPENGL_LUMPS = [
+export const OPENGL_MAP_LUMPS = [
     'GL_VERT', 'GL_SEGS', 'GL_SSECT', 'GL_NODES', 'GL_PVS',
 ];
 
@@ -54,9 +56,23 @@ export const COLORMAP = 'COLORMAP';
 
 export const PNAMES = 'PNAMES';
 
+export const MUSIC_LUMPS = [
+    'GENMIDI',
+    'DMXGUS',
+    'DMXGUSC',
+    // Hexen only
+    'SNDINFO',
+];
+
+export const DEMO_LUMPS = [
+    'DEMO1',
+    'DEMO2',
+    'DEMO3',
+];
+
 export const UNCATEGORIZED = 'uncategorized';
 
-export const IMAGE_LUMPS = ['patches', 'flats', 'sprites'];
+export const IMAGE_LUMPS = ['patches', 'flats', 'sprites', 'menu'];
 
 export const LUMP_INDEX_ENTRY_SIZE = 16;
 
