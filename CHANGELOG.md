@@ -1,3 +1,7 @@
+## v0.1.19: The magic rocket
+
+* Very important update. Would probably be considered MVP, but it was a lot of fun to code: I added a little animation while uploading WADs to the application. Don't be surprise if you see a rocket crossing your screen when you add your favorite WAD :)
+
 ## v0.1.18: IWADs and PWADs
 
 * Since we are diving into displaying graphical assets, it was time to make a distinction between Internal WADs and Patch WADs. The application now separates the two categories on the UI and allows users to link PWADs to already-uploaded IWAD. As a result, it will still be possible to display graphics from PWADs without any palettes data. Yay!

@@ -51,9 +51,27 @@
     flex-direction: column;
 }
 
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+}
+
 .loaded {
     margin-top: 10px;
-    margin-bottom: 10px;
+}
+
+.rocketContainer {
+    margin-top: -20px;
+    text-align: left;
+    overflow: hidden;
+}
+
+.loadingRocket {
+    height: 20px;
+}
+
+.processed {
+    margin-top: 6px;
 }
 
 .uploaderFeedback {

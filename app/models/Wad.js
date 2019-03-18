@@ -1,4 +1,5 @@
 import moment from 'moment';
+import axios from 'axios';
 import JSZip from 'jszip';
 
 import Lump from './Lump';
@@ -15,6 +16,8 @@ import {
     PLAYPAL,
     COLORMAP,
     PNAMES,
+    MUSIC_LUMPS,
+    DEMO_LUMPS,
     UNCATEGORIZED,
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
@@ -195,11 +198,15 @@ export default class Wad {
         };
 
         reader.onloadstart = () => {
+            // hack to force the browser to show the rocket animation
+            this.bytesLoaded = -1;
+            this.size = -100;
             this.errors = {};
+            callback(this);
         };
 
         reader.onprogress = (data) => {
-            if (this.size === undefined) {
+            if (this.size !== data.total) {
                 this.size = data.total;
             }
 
@@ -210,6 +217,7 @@ export default class Wad {
         };
 
         reader.onload = (event) => {
+            callback(this);
             const { result } = event.target;
 
             this.processBlob(result, iwad, callback);
@@ -405,12 +413,28 @@ export default class Wad {
             const width = data.getUint16(address + 11);
             const height = data.getUint16(address + 13);
 
+            const patchCount = data.getUint16(address + 19);
+
+            const patches = [];
+
+            // that's not accurate
+            for (let j = 0; j < patchCount; j++) {
+                const patch = {
+                    xOffset: data.getUint16(address + 20 + j * 10),
+                    yOffset: data.getUint16(address + 20 + j * 10 + 2),
+                    patchIndex: data.getUint16(address + 20 + j * 10 + 4),
+                };
+                patches.push(patch);
+                // console.log({ name, patch });
+            }
+
             let size = 0;
             if (textureAddresses[i + 1]) {
                 size = textureAddresses[i + 1] - textureAddresses[i];
             } else {
                 size = textureLumpAddress - textureAddresses[i];
             }
+
 
             const texture = new Lump();
             texture.setIndexData({
@@ -420,6 +444,10 @@ export default class Wad {
                 width,
                 height,
                 type: 'textures',
+                data: {
+                    patchCount,
+                    patches,
+                },
             });
 
             textures[name] = texture;
@@ -717,6 +745,10 @@ export default class Wad {
                     };
 
                     console.log({ textureCount, textureNames, textures });
+                } else if (MUSIC_LUMPS.includes(name)) {
+                    lumpType = 'music';
+                } else if (DEMO_LUMPS.includes(name)) {
+                    lumpType = 'demos';
                 }
 
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
@@ -739,42 +771,42 @@ export default class Wad {
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
-                    default: {
-                        break;
-                    }
-                    case 'colormaps': {
-                        parsedLumpData = this.readColormaps(lumpData, name);
-                        break;
-                    }
-                    case 'flats': {
-                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
-                        break;
-                    }
-                    case 'patches': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
-                    case 'sprites': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
+                            break;
+                        }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
@@ -788,7 +820,24 @@ export default class Wad {
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
                     lumps[name] = lump;
                 } else {
-                    // unmarked lump
+                    // we didn't already guessed the type with a stronger method
+                    // detect the type of individual lumps based on a partial match on name
+                    if (!lumpType) {
+                        if (/D_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                            lumpType = 'music';
+                        } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
+                            lumpType = 'sounds';
+                        } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                            lumpType = 'menu';
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                        }
+                    }
+
                     const lumpIndexDataWithType = {
                         ...lumpIndexData,
                         data: parsedLumpData,
@@ -869,13 +918,29 @@ export default class Wad {
         this.id = unique ? filename : `${filename}_${timestamp.unix()}`;
         this.uploadedFrom = url;
 
-        fetch(url)
-            .then(response => response.arrayBuffer())
-            .then((result) => {
-                this.bytesLoaded = result.byteLength;
-                this.size = result.byteLength;
+        // hack to force the browser to show the rocket animation
+        this.bytesLoaded = -1;
+        this.size = -100;
+        callback(this);
 
-                this.processBlob(result, iwad, callback);
+        axios.get(url, {
+            responseType: 'arraybuffer',
+            onDownloadProgress: (data) => {
+                if (this.size !== data.total) {
+                    this.size = data.total;
+                }
+
+                if (data.lengthComputable) {
+                    this.bytesLoaded = data.loaded;
+                    callback(this);
+                }
+            },
+        })
+            .then((response) => {
+                this.bytesLoaded = response.data.byteLength;
+                this.size = response.data.byteLength;
+
+                this.processBlob(response.data, iwad, callback);
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, { error });
@@ -924,7 +989,11 @@ export default class Wad {
     }
 
     get uploadedPercentage() {
-        const progress = this.bytesLoaded / this.size * 100;
+        if (this.errorIds.length > 0) {
+            return 100;
+        }
+
+        const progress = (this.bytesLoaded / this.size) * 100;
         return Number.isNaN(progress) ? '' : Math.ceil(progress);
     }
 
