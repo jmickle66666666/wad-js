@@ -188,13 +188,13 @@ export default class Wad {
         }
     }
 
-    initReader(iwad, callback) {
+    initReader(file, iwad, callback) {
         const reader = new FileReader();
         this.errors = {};
 
         reader.onerror = (error) => {
             this.errors.read_error = error;
-            callback(this);
+            callback(this, file.type === 'application/json');
         };
 
         reader.onloadstart = () => {
@@ -202,7 +202,7 @@ export default class Wad {
             this.bytesLoaded = -1;
             this.size = -100;
             this.errors = {};
-            callback(this);
+            callback(this, file.type === 'application/json');
         };
 
         reader.onprogress = (data) => {
@@ -212,15 +212,27 @@ export default class Wad {
 
             if (data.lengthComputable) {
                 this.bytesLoaded = data.loaded;
-                callback(this);
+                callback(this, file.type === 'application/json');
             }
         };
 
         reader.onload = (event) => {
-            callback(this);
+            callback(this, file.type === 'application/json');
             const { result } = event.target;
 
-            this.processBlob(result, iwad, callback);
+            if (file.type === 'application/json') {
+                const json = JSON.parse(result);
+                if (Array.isArray(json)) {
+                    console.error('This is a multi-WAD JSON file. WORK IN PROGRESS :)');
+                } else {
+                    this.uploaded = true;
+                    this.processed = true;
+                    callback(this, file.type === 'application/json', true);
+                    this.restore({ ...json });
+                }
+            } else {
+                this.processBlob(result, iwad, callback);
+            }
         };
 
         return reader;
@@ -771,42 +783,42 @@ export default class Wad {
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
-                        default: {
-                            break;
-                        }
-                        case 'colormaps': {
-                            parsedLumpData = this.readColormaps(lumpData, name);
-                            break;
-                        }
-                        case 'flats': {
-                            const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
-                            break;
-                        }
-                        case 'patches': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                    default: {
+                        break;
+                    }
+                    case 'colormaps': {
+                        parsedLumpData = this.readColormaps(lumpData, name);
+                        break;
+                    }
+                    case 'flats': {
+                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+                        break;
+                    }
+                    case 'patches': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
 
-                            break;
-                        }
-                        case 'sprites': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                        break;
+                    }
+                    case 'sprites': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
 
-                            break;
-                        }
+                        break;
+                    }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
@@ -901,8 +913,12 @@ export default class Wad {
         this.id = `${file.name}_${timestamp.unix()}`;
 
         if (VALID_FILE_FORMATS.includes(file.type)) {
-            const reader = this.initReader(iwad, callback);
-            reader.readAsArrayBuffer(file);
+            const reader = this.initReader(file, iwad, callback);
+            if (file.type === 'application/json') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
         } else {
             const error = `"${file.type}" is not a supported file format. Expected MIME types: ${arrayToQuotedString(VALID_FILE_FORMATS)}.`;
             this.errors.invalid_mime = error;
@@ -1023,5 +1039,40 @@ export default class Wad {
         const convertedSize = this.size / 1024 / 1024;
         const truncatedSize = convertedSize.toFixed(1);
         return `${truncatedSize} MB`;
+    }
+
+    get json() {
+        const relevantProperties = {
+            id: this.id,
+            name: this.name,
+            type: this.type,
+            iwad: this.iwad,
+            size: this.size,
+            bytesLoaded: this.bytesLoaded,
+            uploadStartAt: this.uploadStartAt,
+            uploadEndAt: this.uploadEndAt,
+            uploadedWith: this.uploadedWith,
+            uploadedFrom: this.uploadedFrom,
+            headerLumpCount: this.headerLumpCount,
+            indexLumpCount: this.indexLumpCount,
+            indexAddress: this.indexAddress,
+            indexOffset: this.indexOffset,
+            lumps: this.lumps,
+            errors: this.errors,
+            warnings: this.warnings,
+        };
+
+        return relevantProperties;
+    }
+
+    get downloadJson() {
+        const relevantProperties = this.json;
+        const stringified = JSON.stringify(relevantProperties);
+        const blob = new Blob([stringified], {
+            type: 'application/json',
+        });
+
+        const objectURL = URL.createObjectURL(blob);
+        return objectURL;
     }
 }
