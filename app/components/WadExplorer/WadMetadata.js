@@ -3,9 +3,9 @@ import moment from 'moment';
 
 import style from './WadMetadata.scss';
 
-import Help from './Help';
-import ErrorMessageList from './ErrorMessageList';
-import WarningMessageList from './WarningMessageList';
+import Help from '../Help';
+import ErrorMessageList from '../ErrorMessageList';
+import WarningMessageList from '../WarningMessageList';
 
 const versionError = uploadedWith => (uploadedWith !== `${PROJECT} v${VERSION}` && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest update and fix potential errors that may occur while manipulating the WAD data.`) || null;
 
@@ -25,7 +25,7 @@ export default ({
             <a href={`#/${wad.id}`}>
                 <h3 className={style.wadMetadataTitle} onClick={() => focusOnWad(false)}>
                         Metadata
-                    </h3>
+                </h3>
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
@@ -39,7 +39,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Filename:
-                            </div>
+                        </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -83,7 +83,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Upload ID:
-                            </div>
+                        </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -107,10 +107,10 @@ export default ({
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from
-                            {' '}
+                                {' '}
                             <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
                                 .
-                        </div>
+                            </div>
                     )}
                 </div>
             </div>

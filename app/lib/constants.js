@@ -34,7 +34,19 @@ export const IWAD = 'IWAD';
 export const PWAD = 'PWAD';
 export const VALID_WAD_TYPES = [IWAD, PWAD];
 
-export const VALID_FILE_FORMATS = ['', 'application/x-doom', 'application/zip'];
+export const SUPPORTED_FORMATS = [
+    '.wad',
+    '.zip',
+    '.pk3',
+    '.json',
+];
+
+export const VALID_FILE_FORMATS = [
+    '',
+    'application/x-doom',
+    'application/zip',
+    'application/json',
+];
 
 export const MAP_LUMPS = [
     'THINGS', 'LINEDEFS', 'SIDEDEFS', 'VERTEXES', 'SEGS', 'TEXTMAP', 'SSECTORS', 'NODES', 'SECTORS', 'REJECT', 'BLOCKMAP',
@@ -67,7 +79,8 @@ export const MUSIC_LUMPS = [
 export const DEMO_LUMPS = [
     'DEMO1',
     'DEMO2',
-    'DEMO3',
+    'DEMO3', ,
+    'DEMO4',
 ];
 
 export const UNCATEGORIZED = 'uncategorized';

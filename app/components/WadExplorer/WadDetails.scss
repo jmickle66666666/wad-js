@@ -1,0 +1,33 @@
+.wadDetailsTitling {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 35px;
+}
+
+.wadDetailsTitle {
+    color: rgb(240, 240, 240);
+    text-align: center;
+    cursor: pointer;
+}
+
+.wadDetailsAnchor {
+    margin-top: -62px;
+    position: absolute;
+}
+
+.deleteWad {
+    height: 20px;
+    width: 18px;
+    margin-left: 7px;
+    margin-right: 7px;
+    cursor: pointer; 
+}
+
+.exportWad {
+    height: 20px;
+    width: 16px;
+    margin-left: 7px;
+    margin-right: 7px;
+    cursor: pointer; 
+}

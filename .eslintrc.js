@@ -15,6 +15,7 @@ module.exports = {
         "indent": ["error", 4],
         "no-plusplus": 0,
         "class-methods-use-this": 0,
+        "react/sort-comp": 0,
     },
     parser: "babel-eslint"
 };
