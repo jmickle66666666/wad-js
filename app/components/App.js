@@ -35,15 +35,14 @@ export default class App extends Component {
     }
 
     async componentDidMount() {
-        const wads = await this.getSavedWads();
-
+        const wads = await this.getWadsFromLocalMemory();
         this.setState(() => ({
             wads,
         }));
 
         const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
-            this.preUploadFreedoom();
+            // this.preUploadFreedoom();
         }
 
         const { match } = this.props;
@@ -70,7 +69,8 @@ export default class App extends Component {
         }
     }
 
-    async getSavedWads() {
+
+    async getWadsFromLocalMemory() {
         const savedWads = await localStorageManager.get('wads');
 
         if (!savedWads) {
@@ -113,6 +113,10 @@ export default class App extends Component {
         return wads;
     }
 
+    async saveWadsInLocalMemory(wads) {
+        return localStorageManager.set('wads', wads);
+    }
+
     preUploadFreedoom = () => {
         const freedoom1 = new Wad();
         freedoom1.readRemoteFile(
@@ -149,7 +153,7 @@ export default class App extends Component {
                 [wad.id]: wad,
             };
 
-            localStorageManager.set('wads', updatedWads);
+            this.saveWadsInLocalMemory(updatedWads);
 
             return ({
                 wads: updatedWads,
@@ -196,15 +200,7 @@ export default class App extends Component {
         }));
     }
 
-    deselectAll = () => {
-        document.title = `${prefixWindowtitle}`;
-        this.setState(() => ({
-            selectedWad: {},
-            selectedLump: {},
-        }));
-    }
-
-    selectWad = (wadId, init) => {
+    selectWad = async (wadId, init) => {
         this.setState((prevState) => {
             const selectedWad = prevState.wads[wadId];
             if (!selectedWad) {
@@ -295,6 +291,14 @@ export default class App extends Component {
         });
     }
 
+    deselectAll = () => {
+        document.title = `${prefixWindowtitle}`;
+        this.setState(() => ({
+            selectedWad: {},
+            selectedLump: {},
+        }));
+    }
+
     focusOnWad = (keepState = true) => {
         const element = document.getElementById('wadDetails');
         if (element) {
@@ -316,12 +320,19 @@ export default class App extends Component {
     }
 
     updateSelectedWadFromList = (updatedWad) => {
-        this.setState(prevState => ({
-            wads: {
+        this.setState(async (prevState) => {
+            const wads = {
                 ...prevState.wads,
-                [updatedWad.id]: updatedWad,
-            },
-        }));
+                [updatedWad.id]: { ...updatedWad },
+            };
+
+            const result = await this.saveWadsInLocalMemory(wads);
+
+            return {
+                wads,
+                selectedWad: updatedWad,
+            };
+        });
     }
 
     updateFilename = (name) => {
@@ -336,10 +347,6 @@ export default class App extends Component {
             wad.name = name;
             this.updateSelectedWadFromList(wad);
         }
-
-        this.setState(() => ({
-            selectedWad: wad,
-        }));
     }
 
     componentDidCatch(error, info) {
@@ -392,11 +399,11 @@ export default class App extends Component {
                             <UploadedWadList
                                 wads={wads}
                                 selectedWad={selectedWad}
-                                deleteWad={this.deleteWad}
-                                deleteWads={this.deleteWads}
-                                selectWad={this.selectWad}
                                 selectedLumpType={selectedLumpType}
                                 selectedLump={selectedLump}
+                                selectWad={this.selectWad}
+                                deleteWad={this.deleteWad}
+                                deleteWads={this.deleteWads}
                             />
                         )}
                     </div>
