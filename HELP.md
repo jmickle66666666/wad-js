@@ -22,7 +22,7 @@ The WADs of the same type (IWADs a.k.a Internal WADs and PWADs a.k.a Patch WADs)
 
 Click on the trash icon next to the name of a WAD to remove it from the list. The trash icon above the list will remove all WADs from the application memory.
 
-## WAD Metadata
+## WAD Name and Metadata
 
 On this panel, you can see some data about the WAD in general.
 
