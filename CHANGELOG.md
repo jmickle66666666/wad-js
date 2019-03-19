@@ -1,3 +1,7 @@
+## v0.1.20: JSON Export/Import
+
+* wadJS is now capable of exporting the processed WAD files to JSON. This will be helpful to create quick copies of a WAD without compiling it. It will also be instrumental in sharing these assets in a lightweight format among users or to help debug errors in the application! :)
+
 ## v0.1.19: The magic rocket
 
 * Very important update. Would probably be considered MVP, but it was a lot of fun to code: I added a little animation while uploading WADs to the application. Don't be surprise if you see a rocket crossing your screen when you add your favorite WAD :)
