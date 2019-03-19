@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import moment from 'moment';
 import posed from 'react-pose';
 
+import { SUPPORTED_FORMATS } from '../../lib/constants';
 import { getInternalWads } from '../../lib/wadUtils';
 
 import style from './WadUploader.scss';
@@ -33,21 +34,23 @@ export default class WadUploader extends Component {
         untouchedFilename: true,
     }
 
-    updateWad = (wad) => {
-        this.setState((prevState) => {
-            const updatedWads = {
-                ...prevState.wads,
-                [wad.id]: wad,
-            };
+    updateWad = (wad, isJSON, completeJSONImport) => {
+        if (!isJSON || completeJSONImport) {
+            this.setState((prevState) => {
+                const updatedWads = {
+                    ...prevState.wads,
+                    [wad.id]: wad,
+                };
 
-            return {
-                wads: updatedWads,
-            };
-        });
+                return {
+                    wads: updatedWads,
+                };
+            });
 
-        if (wad.uploaded && wad.processed) {
-            const { addWad } = this.props;
-            addWad(wad);
+            if (wad.uploaded && wad.processed) {
+                const { addWad } = this.props;
+                addWad(wad);
+            }
         }
     }
 
@@ -203,7 +206,7 @@ export default class WadUploader extends Component {
                                 id="localInput"
                                 type="file"
                                 onInput={this.handleLocalWadUpload}
-                                accept=".wad,.zip,.pk3"
+                                accept={SUPPORTED_FORMATS.join(',')}
                                 multiple
                             />
                         </label>
@@ -227,7 +230,11 @@ export default class WadUploader extends Component {
                                 <button type="button" onClick={this.handleRemoteWadUpload}>Upload from URL</button>
                             </div>
                         </label>
-                        <div>Supported formats: .wad, .zip, .pk3</div>
+                        <div>
+                            Supported formats:
+                            {' '}
+                            {SUPPORTED_FORMATS.join(', ')}
+                        </div>
                         {Object.keys(wads).length > 0 && Object.keys(wads).map((wadKey) => {
                             const wad = wads[wadKey];
                             return (
