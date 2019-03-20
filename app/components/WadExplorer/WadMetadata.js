@@ -25,7 +25,7 @@ export default ({
             <a href={`#/${wad.id}`}>
                 <h3 className={style.wadMetadataTitle} onClick={() => focusOnWad(false)}>
                         Metadata
-                </h3>
+                    </h3>
             </a>
         </Help>
         <div className={style.wadMetadataInner}>
@@ -39,7 +39,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Filename:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -83,7 +83,7 @@ export default ({
                     <label htmlFor="filename" className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                                 Upload ID:
-                        </div>
+                            </div>
                         <input
                             id="filename"
                             className={style.wadMetadataValue}
@@ -91,38 +91,38 @@ export default ({
                             onChange={event => updateId(event.target.value)}
                         />
                     </label>
-                    <div className={style.wadMetadataEntry}>
-                        <div className={style.wadMetadataLabel}>Imported on:</div>
-                        <div className={style.wadMetadataValue}>
-                            <small>{moment(wad.importedAt).format('M/D/YYYY h:mm a')}</small>
+                    {wad.importedAt && (
+                        <div className={style.wadMetadataEntry}>
+                            <div className={style.wadMetadataLabel}>Imported on:</div>
+                            <div className={style.wadMetadataValue}>
+                                <small>{moment(wad.importedAt).format('M/D/YYYY h:mm a')}</small>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
                             {wad.importedAt ? 'First upload' : 'Uploaded'}
                             {' '}
                                 on:
-                        </div>
+                            </div>
                         <div className={style.wadMetadataValue}>
                             <small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small>
 
                         </div>
                     </div>
-                    {wad.importedAt && (
-                        <div className={style.wadMetadataEntry}>
-                            <div className={style.wadMetadataLabel}>Uploaded with:</div>
-                            <div className={style.wadMetadataValue}>
-                                {wad.uploadedWith}
-                            </div>
+                    <div className={style.wadMetadataEntry}>
+                        <div className={style.wadMetadataLabel}>Uploaded with:</div>
+                        <div className={style.wadMetadataValue}>
+                            {wad.uploadedWith}
                         </div>
-                    )}
+                    </div>
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from
-                                {' '}
+                            {' '}
                             <a href={wad.uploadedFrom}>{wad.uploadedFrom}</a>
                                 .
-                            </div>
+                        </div>
                     )}
                 </div>
             </div>
