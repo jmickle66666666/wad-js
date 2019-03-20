@@ -35,7 +35,8 @@ export default class WadUploader extends Component {
     }
 
     updateWad = (wad, isJSON, completeJSONImport) => {
-        if (!isJSON || completeJSONImport) {
+        const { addWad } = this.props;
+        if (!isJSON) {
             this.setState((prevState) => {
                 const updatedWads = {
                     ...prevState.wads,
@@ -48,9 +49,31 @@ export default class WadUploader extends Component {
             });
 
             if (wad.uploaded && wad.processed) {
-                const { addWad } = this.props;
                 addWad(wad);
             }
+        } else if (isJSON && !completeJSONImport) {
+            this.setState((prevState) => {
+                const updatedWads = {
+                    ...prevState.wads,
+                    [wad.id]: wad,
+                };
+
+                return {
+                    wads: updatedWads,
+                };
+            });
+        } else if (isJSON && completeJSONImport) {
+            this.setState((prevState) => {
+                const updatedWads = {
+                    ...prevState.wads,
+                    [wad.tempId]: wad,
+                };
+
+                return {
+                    wads: updatedWads,
+                };
+            });
+            addWad(wad, isJSON);
         }
     }
 

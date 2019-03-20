@@ -65,7 +65,7 @@ export default class WadDetails extends Component {
                     {(download && (
                         <a
                             id="selectedJsonDownload"
-                            href={wad.downloadJson}
+                            href={wad.jsonObjectURL}
                             download={`${wad.id}.json`}
                         />
                     )) || null}

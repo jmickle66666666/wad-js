@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import moment from 'moment';
 
 import style from './App.scss';
 
 import Wad from '../models/Wad';
-import Lump from '../models/Lump';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
 
@@ -16,12 +16,6 @@ import BackToTop from './BackToTop';
 import ErrorMessage from './ErrorMessage';
 
 const localStorageManager = new LocalStorageManager();
-
-const { NODE_ENV } = process.env;
-
-if (NODE_ENV === 'development') {
-    document.title += ' [dev]';
-}
 
 const prefixWindowtitle = document.title;
 
@@ -83,24 +77,6 @@ export default class App extends Component {
             // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
-
-            const lumps = {};
-            Object.keys(wad.lumps).map((lumpType) => {
-                const lumpTypes = {};
-                Object.keys(wad.lumps[lumpType]).map((lumpName) => {
-                    // Lump instances must be re-instantiated
-                    const lump = new Lump();
-                    lump.setIndexData(wad.lumps[lumpType][lumpName]);
-                    lumpTypes[lumpName] = lump;
-                    return null;
-                });
-                lumps[lumpType] = lumpTypes;
-
-                return null;
-            });
-
-            wad.lumps = lumps;
-
             return wad;
         });
 
@@ -146,7 +122,11 @@ export default class App extends Component {
         }
     }
 
-    addWad = (wad) => {
+    addWad = (wad, isJSON) => {
+        if (isJSON) {
+            wad.deleteTempId();
+        }
+
         this.setState((prevState) => {
             const updatedWads = {
                 ...prevState.wads,
@@ -193,6 +173,7 @@ export default class App extends Component {
     }
 
     deleteWads = () => {
+        localStorageManager.set('wads', {});
         this.setState(() => ({
             wads: {},
             selectedWad: {},
@@ -350,7 +331,21 @@ export default class App extends Component {
     }
 
     componentDidCatch(error, info) {
+        document.title = `${prefixWindowtitle} / oops!`;
         this.setState(() => ({ displayError: { error, info } }));
+    }
+
+    getWADsAsObjectURL = () => {
+        const { wads } = this.state;
+        const wadIds = Object.keys(wads);
+        const mappedWads = wadIds.map(wadId => wads[wadId]);
+        const stringified = JSON.stringify(mappedWads);
+        const blob = new Blob([stringified], {
+            type: 'application/json',
+        });
+
+        const objectURL = URL.createObjectURL(blob);
+        return objectURL;
     }
 
     render() {
@@ -363,20 +358,54 @@ export default class App extends Component {
         } = this.state;
 
         if (displayError.error) {
-            const { message, lineNumber, columnNumber } = displayError.error;
-            const error = `Error: ${message} (${lineNumber}:${columnNumber})`;
             return (
                 <div className={style.app}>
                     <Header />
                     <div className={style.errorScreenOuter}>
                         <div className={style.errorScreenInner}>
-                            <ErrorMessage message={error} />
-                            <div>
+                            <div className={style.errorMessage}>
+                                <h2>An error occurred :(</h2>
+                                Please
+                                {' '}
+                                <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href={this.getWADsAsObjectURL()}
+                                    download={`wadjs_error_${moment().utc().format('YYYY_MM_DD_HH_mm_ss')}.json`}
+                                >
+                                    download this file
+                                </a>
+                                {' '}
+                                and use it with the message below to
+                                {' '}
+                                <a target="_blank" rel="noopener noreferrer" href={ISSUES}>report the issue</a>
+                                {' '}
+                                on GitHub.
+                            </div>
+                            <code>
+                                Error:
+                                {' '}
+                                {displayError.error.message}
+                                <br />
+                                <br />
+                                {displayError.error.stack && displayError.error.stack.split('\n').map((stack, index) => (
+                                    <Fragment key={index}>
+                                        {stack.replace('webpack-internal:///', '').replace('@', ' @ ')}
+                                        <br />
+                                    </Fragment>
+                                ))}
+                                {displayError.info.componentStack && displayError.info.componentStack.split('\n').map((stack, index) => (
+                                    <Fragment key={index}>
+                                        {stack}
+                                        <br />
+                                    </Fragment>
+                                ))}
+                                <br />
                                 URL:
                                 {' '}
                                 {document.location.href}
-                            </div>
-                            <a href="/">Click here to reload the app.</a>
+                            </code>
+                            <a className={style.errorBackLink} href="/">Reload the app.</a>
                         </div>
                     </div>
                     <BackToTop focusOnWad={this.focusOnWad} />
