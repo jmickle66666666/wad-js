@@ -47,7 +47,7 @@ h4 {
 .errorScreenOuter {
     display: flex;
     max-width: 1200px;
-    height: 90vh;
+    min-height: 90vh;
     margin: auto;
     justify-content: center;
     align-items: center;
@@ -57,7 +57,6 @@ h4 {
     background: rgb(210, 210, 210);
     border-radius: 20px;
     padding: 20px;
-    text-align: center;
 
     a {
         color: rgb(140, 140, 140);
@@ -67,4 +66,16 @@ h4 {
             text-decoration: none;
         }
     }
+}
+
+.errorMessage {
+    color: rgb(180, 30, 30);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.errorBackLink {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
 }
