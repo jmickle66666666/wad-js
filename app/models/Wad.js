@@ -223,19 +223,18 @@ export default class Wad {
             if (file.type === 'application/json') {
                 const json = JSON.parse(result);
                 if (Array.isArray(json)) {
-                    console.error('This is a multi-WAD JSON file. WORK IN PROGRESS :)');
+                    this.readJSON(json, callback);
                 } else {
-                    this.bytesLoaded = this.size;
-                    this.uploaded = true;
+                    const error = 'Unexpected object. JSON object should be an array.';
+                    this.errors.invalid_json = error;
                     callback(this, file.type === 'application/json');
-                    this.restore({ ...json, tempId: this.id, importedAt: moment().utc().format() });
-                    this.processed = true;
-                    this.uploadedWith = `${PROJECT} v${VERSION}`;
-                    callback(this, file.type === 'application/json', true);
+                    return false;
                 }
             } else {
                 this.processBlob(result, iwad, callback);
             }
+
+            return true;
         };
 
         return reader;
@@ -670,8 +669,13 @@ export default class Wad {
 
         let paletteData = iwad.palettes ? iwad.palettes.data[0] : [];
 
+        this.indexLumpCount = 500;
+        callback(this);
+
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
+
+
             lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
             let mapLump = false;
 
@@ -959,12 +963,50 @@ export default class Wad {
                 this.bytesLoaded = response.data.byteLength;
                 this.size = response.data.byteLength;
 
+                try {
+                    const json = JSON.parse(new TextDecoder().decode(response.data));
+                    this.readJSON(json, callback);
+                    return true;
+                    // eslint-disable-next-line
+                } catch (error) {
+                    console.error({ error, data: response.data });
+                }
+
+                this.errors = {};
                 this.processBlob(response.data, iwad, callback);
+                return true;
             })
             .catch((error) => {
                 console.error(`An error occurred while uploading '${filename}'.`, { error });
                 this.errors.upload_error = error.message;
+                callback(this);
+                return false;
             });
+    }
+
+    readJSON(json, callback) {
+        for (let i = 0; i < json.length; i++) {
+            if (i === 0) {
+                this.bytesLoaded = this.size;
+                this.uploaded = true;
+                callback(this, true);
+                this.restore({ ...json[i], tempId: this.id, importedAt: moment().utc().format() });
+                this.processed = true;
+                this.uploadedWith = `${PROJECT} v${VERSION}`;
+                callback(this, true, true);
+            } else {
+                const newWad = new Wad();
+                newWad.restore(json[i]);
+                newWad.importedAt = moment().utc().format();
+                newWad.uploaded = true;
+                newWad.processed = true;
+                callback(newWad);
+            }
+        }
+    }
+
+    deleteTempId() {
+        this.tempId = undefined;
     }
 
     restore(wad) {
@@ -1027,8 +1069,39 @@ export default class Wad {
         this.lumps = instantiatedLumps;
     }
 
-    deleteTempId() {
-        this.tempId = undefined;
+    get json() {
+        const relevantProperties = {
+            id: this.id,
+            name: this.name,
+            type: this.type,
+            iwad: this.iwad,
+            size: this.size,
+            bytesLoaded: this.bytesLoaded,
+            uploadStartAt: this.uploadStartAt,
+            uploadEndAt: this.uploadEndAt,
+            uploadedWith: this.uploadedWith,
+            uploadedFrom: this.uploadedFrom,
+            headerLumpCount: this.headerLumpCount,
+            indexLumpCount: this.indexLumpCount,
+            indexAddress: this.indexAddress,
+            indexOffset: this.indexOffset,
+            lumps: this.lumps,
+            errors: this.errors,
+            warnings: this.warnings,
+        };
+
+        return relevantProperties;
+    }
+
+    get jsonObjectURL() {
+        const relevantProperties = this.json;
+        const stringified = JSON.stringify([relevantProperties]);
+        const blob = new Blob([stringified], {
+            type: 'application/json',
+        });
+
+        const objectURL = URL.createObjectURL(blob);
+        return objectURL;
     }
 
     get uploadedPercentage() {
@@ -1066,40 +1139,5 @@ export default class Wad {
         const convertedSize = this.size / 1024 / 1024;
         const truncatedSize = convertedSize.toFixed(1);
         return `${truncatedSize} MB`;
-    }
-
-    get json() {
-        const relevantProperties = {
-            id: this.id,
-            name: this.name,
-            type: this.type,
-            iwad: this.iwad,
-            size: this.size,
-            bytesLoaded: this.bytesLoaded,
-            uploadStartAt: this.uploadStartAt,
-            uploadEndAt: this.uploadEndAt,
-            uploadedWith: this.uploadedWith,
-            uploadedFrom: this.uploadedFrom,
-            headerLumpCount: this.headerLumpCount,
-            indexLumpCount: this.indexLumpCount,
-            indexAddress: this.indexAddress,
-            indexOffset: this.indexOffset,
-            lumps: this.lumps,
-            errors: this.errors,
-            warnings: this.warnings,
-        };
-
-        return relevantProperties;
-    }
-
-    get downloadJson() {
-        const relevantProperties = this.json;
-        const stringified = JSON.stringify(relevantProperties);
-        const blob = new Blob([stringified], {
-            type: 'application/json',
-        });
-
-        const objectURL = URL.createObjectURL(blob);
-        return objectURL;
     }
 }
