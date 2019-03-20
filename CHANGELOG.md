@@ -1,3 +1,10 @@
+## v0.1.21: JSON Export/Import (2)
+
+* Fix bug where the file would not appear in the list of uploaded file immediately.
+* Refactor the handling of lump instances when restoring WAD files from a JSON object.
+* Allow to import multiple JSON files.
+* Invite user to report bugs when errors occur.
+
 ## v0.1.20: JSON Export/Import
 
 * wadJS is now capable of exporting the processed WAD files to JSON. This will be helpful to create quick copies of a WAD without compiling it. It will also be instrumental in sharing these assets in a lightweight format among users or to help debug errors in the application! :)
