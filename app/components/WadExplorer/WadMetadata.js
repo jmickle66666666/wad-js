@@ -92,18 +92,30 @@ export default ({
                         />
                     </label>
                     <div className={style.wadMetadataEntry}>
-                        <div className={style.wadMetadataLabel}>Uploaded on:</div>
+                        <div className={style.wadMetadataLabel}>Imported on:</div>
+                        <div className={style.wadMetadataValue}>
+                            <small>{moment(wad.importedAt).format('M/D/YYYY h:mm a')}</small>
+                        </div>
+                    </div>
+                    <div className={style.wadMetadataEntry}>
+                        <div className={style.wadMetadataLabel}>
+                            {wad.importedAt ? 'First upload' : 'Uploaded'}
+                            {' '}
+                                on:
+                        </div>
                         <div className={style.wadMetadataValue}>
                             <small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small>
 
                         </div>
                     </div>
-                    <div className={style.wadMetadataEntry}>
-                        <div className={style.wadMetadataLabel}>Uploaded with:</div>
-                        <div className={style.wadMetadataValue}>
-                            {wad.uploadedWith}
+                    {wad.importedAt && (
+                        <div className={style.wadMetadataEntry}>
+                            <div className={style.wadMetadataLabel}>Uploaded with:</div>
+                            <div className={style.wadMetadataValue}>
+                                {wad.uploadedWith}
+                            </div>
                         </div>
-                    </div>
+                    )}
                     {wad.uploadedFrom && (
                         <div className={style.wadMetadataCentered}>
                                 Uploaded from

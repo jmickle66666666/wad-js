@@ -225,10 +225,13 @@ export default class Wad {
                 if (Array.isArray(json)) {
                     console.error('This is a multi-WAD JSON file. WORK IN PROGRESS :)');
                 } else {
+                    this.bytesLoaded = this.size;
                     this.uploaded = true;
+                    callback(this, file.type === 'application/json');
+                    this.restore({ ...json, tempId: this.id, importedAt: moment().utc().format() });
                     this.processed = true;
+                    this.uploadedWith = `${PROJECT} v${VERSION}`;
                     callback(this, file.type === 'application/json', true);
-                    this.restore({ ...json });
                 }
             } else {
                 this.processBlob(result, iwad, callback);
@@ -967,6 +970,7 @@ export default class Wad {
     restore(wad) {
         const {
             id,
+            tempId,
             name,
             type,
             iwad,
@@ -976,6 +980,7 @@ export default class Wad {
             uploadEndAt,
             uploadedWith,
             uploadedFrom,
+            importedAt,
             headerLumpCount,
             indexLumpCount,
             indexAddress,
@@ -986,6 +991,7 @@ export default class Wad {
         } = wad;
 
         this.id = id;
+        this.tempId = tempId;
         this.name = name;
         this.type = type;
         this.iwad = iwad;
@@ -995,13 +1001,34 @@ export default class Wad {
         this.uploadEndAt = uploadEndAt;
         this.uploadedWith = uploadedWith;
         this.uploadedFrom = uploadedFrom;
+        this.importedAt = importedAt;
         this.headerLumpCount = headerLumpCount;
         this.indexLumpCount = indexLumpCount;
         this.indexAddress = indexAddress;
         this.indexOffset = indexOffset;
-        this.lumps = lumps;
         this.errors = errors;
         this.warnings = warnings;
+
+        // Lump instances must be re-instantiated
+        const instantiatedLumps = {};
+        Object.keys(lumps).map((lumpType) => {
+            const lumpTypes = {};
+            Object.keys(lumps[lumpType]).map((lumpName) => {
+                const lump = new Lump();
+                lump.setIndexData(wad.lumps[lumpType][lumpName]);
+                lumpTypes[lumpName] = lump;
+                return null;
+            });
+            instantiatedLumps[lumpType] = lumpTypes;
+
+            return null;
+        });
+
+        this.lumps = instantiatedLumps;
+    }
+
+    deleteTempId() {
+        this.tempId = undefined;
     }
 
     get uploadedPercentage() {

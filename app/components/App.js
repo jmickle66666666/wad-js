@@ -83,24 +83,6 @@ export default class App extends Component {
             // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
-
-            const lumps = {};
-            Object.keys(wad.lumps).map((lumpType) => {
-                const lumpTypes = {};
-                Object.keys(wad.lumps[lumpType]).map((lumpName) => {
-                    // Lump instances must be re-instantiated
-                    const lump = new Lump();
-                    lump.setIndexData(wad.lumps[lumpType][lumpName]);
-                    lumpTypes[lumpName] = lump;
-                    return null;
-                });
-                lumps[lumpType] = lumpTypes;
-
-                return null;
-            });
-
-            wad.lumps = lumps;
-
             return wad;
         });
 
@@ -146,7 +128,11 @@ export default class App extends Component {
         }
     }
 
-    addWad = (wad) => {
+    addWad = (wad, isJSON) => {
+        if (isJSON) {
+            wad.deleteTempId();
+        }
+
         this.setState((prevState) => {
             const updatedWads = {
                 ...prevState.wads,
