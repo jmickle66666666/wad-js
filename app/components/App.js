@@ -179,6 +179,7 @@ export default class App extends Component {
     }
 
     deleteWads = () => {
+        localStorageManager.set('wads', {});
         this.setState(() => ({
             wads: {},
             selectedWad: {},
