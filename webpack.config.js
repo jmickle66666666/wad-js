@@ -58,7 +58,7 @@ module.exports = (env, argv) => ({
     },
     plugins: [
         new HtmlWebPackPlugin({
-            template: 'app/templates/index.html',
+            template: isProduction(argv) ? 'app/templates/index.html' : 'app/templates/index-without-ga.html',
             filename: isProduction(argv) ? '../index.html' : 'index.html',
         }),
         new webpack.DefinePlugin({
@@ -68,4 +68,5 @@ module.exports = (env, argv) => ({
             REPO: JSON.stringify(info.homepage),
         }),
     ],
+    devtool: 'cheap-module-eval-source-map',
 });
