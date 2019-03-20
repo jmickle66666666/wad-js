@@ -79,7 +79,7 @@ export default class UploadedWadList extends Component {
                         <a
                             id="allJsonDownload"
                             href={this.renderBlob()}
-                            download={`wads_${moment().format('YYYY_MM_DD_HH_mm_SS')}.json`}
+                            download={`wads_${moment().format('YYYY_MM_DD_HH_mm_ss')}.json`}
                         />
                     )) || null}
                     <div
