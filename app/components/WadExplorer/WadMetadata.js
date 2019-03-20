@@ -7,7 +7,7 @@ import Help from '../Help';
 import ErrorMessageList from '../ErrorMessageList';
 import WarningMessageList from '../WarningMessageList';
 
-const versionError = uploadedWith => (uploadedWith !== `${PROJECT} v${VERSION}` && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest update and fix potential errors that may occur while manipulating the WAD data.`) || null;
+const versionError = uploadedWith => (uploadedWith !== `${PROJECT} v${VERSION}` && `This WAD was uploaded with a different version of ${PROJECT}. Consider re-uploading the file with v${VERSION} to apply the latest updates and fix potential errors that may occur while manipulating the WAD data.`) || null;
 
 const buildIWadLink = (IWadId, selectedLumpType, selectedLump) => `#/${IWadId}${selectedLumpType ? `/${selectedLumpType}` : ''}${selectedLump.name ? `/${selectedLump.name}` : ''}`;
 
@@ -91,19 +91,9 @@ export default ({
                             onChange={event => updateId(event.target.value)}
                         />
                     </label>
-                    {wad.importedAt && (
-                        <div className={style.wadMetadataEntry}>
-                            <div className={style.wadMetadataLabel}>Imported on:</div>
-                            <div className={style.wadMetadataValue}>
-                                <small>{moment(wad.importedAt).format('M/D/YYYY h:mm a')}</small>
-                            </div>
-                        </div>
-                    )}
                     <div className={style.wadMetadataEntry}>
                         <div className={style.wadMetadataLabel}>
-                            {wad.importedAt ? 'First upload' : 'Uploaded'}
-                            {' '}
-                                on:
+                                Uploaded on:
                             </div>
                         <div className={style.wadMetadataValue}>
                             <small>{moment(wad.uploadEndAt).format('M/D/YYYY h:mm a')}</small>

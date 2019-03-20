@@ -790,42 +790,42 @@ export default class Wad {
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
-                    default: {
-                        break;
-                    }
-                    case 'colormaps': {
-                        parsedLumpData = this.readColormaps(lumpData, name);
-                        break;
-                    }
-                    case 'flats': {
-                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
-                        break;
-                    }
-                    case 'patches': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
-                    case 'sprites': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
-                        };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                        break;
-                    }
+                            break;
+                        }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
@@ -990,15 +990,23 @@ export default class Wad {
                 this.bytesLoaded = this.size;
                 this.uploaded = true;
                 callback(this, true);
-                this.restore({ ...json[i], tempId: this.id, importedAt: moment().utc().format() });
+                this.restore({
+                    ...json[i],
+                    uploadStartAt: this.uploadStartAt,
+                    uploadEndAt: this.uploadEndAt,
+                    tempId: this.id,
+                });
                 this.processed = true;
                 this.uploadedWith = `${PROJECT} v${VERSION}`;
                 callback(this, true, true);
             } else {
                 const newWad = new Wad();
-                newWad.restore(json[i]);
-                newWad.importedAt = moment().utc().format();
                 newWad.uploaded = true;
+                newWad.restore({
+                    ...json[i],
+                    uploadStartAt: this.uploadStartAt,
+                    uploadEndAt: this.uploadEndAt,
+                });
                 newWad.processed = true;
                 callback(newWad);
             }
@@ -1007,6 +1015,11 @@ export default class Wad {
 
     deleteTempId() {
         this.tempId = undefined;
+    }
+
+    replaceId() {
+        const timestamp = moment().utc();
+        this.id = `${this.name}_${timestamp.unix()}`;
     }
 
     restore(wad) {
