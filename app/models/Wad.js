@@ -651,7 +651,6 @@ export default class Wad {
 
     readLumpIndex(blob, data, iwad, callback) {
         let lumps = {};
-        let lumpType = '';
         let lumpClusterType = '';
         let nonMapLumps = 0;
 
@@ -660,27 +659,25 @@ export default class Wad {
             dataLumps: {},
         };
 
-        let patchNames = [];
-
-        let parsedLumpData = {};
-
         let indexLumpCount = 0;
-        let lumpIndexAddress;
-
         let paletteData = iwad.palettes ? iwad.palettes.data[0] : [];
-
-        this.indexLumpCount = 500;
-        callback(this);
+        let patchNames = [];
 
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
 
-
-            lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
+            let parsedLumpData = {};
+            let lumpType;
+            let originalFormat;
             let mapLump = false;
 
+            const lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
             const address = data.getInt32(lumpIndexAddress, true);
-            const size = data.getInt32(lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE, true);
+
+            const size = data.getInt32(
+                lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
+                true,
+            );
 
             const name = this.readLumpName(lumpIndexAddress, data);
 
@@ -790,42 +787,42 @@ export default class Wad {
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
-                        default: {
-                            break;
-                        }
-                        case 'colormaps': {
-                            parsedLumpData = this.readColormaps(lumpData, name);
-                            break;
-                        }
-                        case 'flats': {
-                            const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
-                            break;
-                        }
-                        case 'patches': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                    default: {
+                        break;
+                    }
+                    case 'colormaps': {
+                        parsedLumpData = this.readColormaps(lumpData, name);
+                        break;
+                    }
+                    case 'flats': {
+                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
+                        break;
+                    }
+                    case 'patches': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
 
-                            break;
-                        }
-                        case 'sprites': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                        break;
+                    }
+                    case 'sprites': {
+                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                        parsedLumpData = image;
+                        lumpIndexData = {
+                            ...lumpIndexData,
+                            ...metadata,
+                        };
 
-                            break;
-                        }
+                        break;
+                    }
                     }
 
                     // we know the type of this lump because it belongs to a cluster
@@ -844,6 +841,8 @@ export default class Wad {
                     if (!lumpType) {
                         if (/D_[0-9a-zA-Z_]{1,}$/.test(name)) {
                             lumpType = 'music';
+                            originalFormat = 'MUS';
+                            parsedLumpData = lumpData;
                         } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
                             lumpType = 'sounds';
                         } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
@@ -861,13 +860,11 @@ export default class Wad {
                         ...lumpIndexData,
                         data: parsedLumpData,
                         type: lumpType || UNCATEGORIZED,
+                        originalFormat,
                     };
 
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
                     lumps[name] = lump;
-
-                    // lump type applies to a single lump
-                    lumpType = '';
                 }
             }
         }
@@ -968,9 +965,7 @@ export default class Wad {
                     this.readJSON(json, callback);
                     return true;
                     // eslint-disable-next-line
-                } catch (error) {
-                    console.error({ error, data: response.data });
-                }
+                } catch (error) { }
 
                 this.errors = {};
                 this.processBlob(response.data, iwad, callback);
