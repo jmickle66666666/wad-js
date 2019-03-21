@@ -79,7 +79,7 @@ export const MUSIC_LUMPS = [
 export const DEMO_LUMPS = [
     'DEMO1',
     'DEMO2',
-    'DEMO3', ,
+    'DEMO3',
     'DEMO4',
 ];
 
