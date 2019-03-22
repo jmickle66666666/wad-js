@@ -10,6 +10,7 @@ const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.
 export default ({
     lump,
     selectedLump,
+    midi,
     wad,
     selectLump,
     selectedLumpType,
@@ -33,6 +34,7 @@ export default ({
                             />
                         </div>
                     )}
+                    <div>{midi ? 'Loaded' : 'Loading...'}</div>
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>

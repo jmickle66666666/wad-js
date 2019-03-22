@@ -4,6 +4,7 @@ export default class Lump {
     setIndexData({
         name,
         type,
+        originalFormat,
         index,
         address,
         size,
@@ -13,9 +14,11 @@ export default class Lump {
         yOffset,
         count,
         data,
+        midi,
     }) {
         this.name = name;
         this.type = type;
+        this.originalFormat = originalFormat;
         this.index = index;
         this.address = address;
         this.size = size;
@@ -25,6 +28,7 @@ export default class Lump {
         this.yOffset = yOffset;
         this.count = count;
         this.data = data;
+        this.midi = midi;
     }
 
     get sizeInBytes() {

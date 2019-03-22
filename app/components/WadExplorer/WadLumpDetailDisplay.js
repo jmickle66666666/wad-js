@@ -7,6 +7,7 @@ import PatchNames from '../Lumps/PatchNames';
 import TextureNames from '../Lumps/TextureNames';
 import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
+import Music from '../Lumps/Music';
 
 export default ({ wad, lump }) => {
     switch (lump.type) {
@@ -64,6 +65,11 @@ export default ({ wad, lump }) => {
                 wad={wad}
                 lump={lump}
             />
+        );
+    }
+    case 'music': {
+        return (
+            <Music wad={wad} lump={lump} />
         );
     }
     }

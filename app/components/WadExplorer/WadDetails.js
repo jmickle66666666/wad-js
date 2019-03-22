@@ -32,9 +32,9 @@ export default class WadDetails extends Component {
     render() {
         const {
             selectedWad: wad,
-            selectedWadObjectURL,
             selectedLump,
             selectedLumpType,
+            midis,
             selectWad,
             selectLump,
             selectLumpType,
@@ -42,8 +42,10 @@ export default class WadDetails extends Component {
             updateFilename,
             focusOnWad,
             focusOnLump,
+            updateSelectedWadFromList,
         } = this.props;
         const { download } = this.state;
+        console.log({ midis });
         return (
             <Fragment>
                 <span id="wadDetails" className={style.wadDetailsAnchor} />
@@ -99,9 +101,11 @@ export default class WadDetails extends Component {
                             wad={wad}
                             selectedLump={selectedLump}
                             selectedLumpType={selectedLumpType}
+                            midis={selectedLumpType === 'music' && midis}
                             selectLump={selectLump}
                             focusOnWad={focusOnWad}
                             focusOnLump={focusOnLump}
+                            updateSelectedWadFromList={updateSelectedWadFromList}
                         />
                     )
                 }

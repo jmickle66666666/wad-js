@@ -40,6 +40,18 @@ export default class Wad {
         this.lumps = {};
     }
 
+    updateLump(lumpData, type) {
+        const lump = new Lump();
+        lump.setIndexData(lumpData);
+        this.lumps = {
+            ...this.lumps,
+            [type]: {
+                ...this.lumps[type],
+                [lump.name]: lump,
+            },
+        };
+    }
+
     getRelevantExternalResources(iwad) {
         const errors = {};
         const warnings = {};
