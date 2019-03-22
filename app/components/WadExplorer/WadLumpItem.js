@@ -35,11 +35,7 @@ export default ({
                             />
                         </div>
                     )}
-                    {lump.isMus && (
-                        <div>
-                            {midi ? <Midi midi={midi} /> : 'Loading...'}
-                        </div>
-                    )}
+                    {lump.isMus && <Midi midi={midi} />}
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>

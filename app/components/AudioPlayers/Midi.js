@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import style from './Midi.scss';
 
+import ErrorMessage from '../ErrorMessage';
+
 export default class Midi extends Component {
     state = { playing: false }
 
@@ -22,11 +24,25 @@ export default class Midi extends Component {
     }
 
     render() {
+        const { midi } = this.props;
         const { playing } = this.state;
-        return (
-            <div className={style.playerButton}>
-                {playing ? <span onClick={this.pause}>⏹️️</span> : <span onClick={this.play}>▶️</span>}
-            </div>
-        );
+
+        console.log({ midi });
+
+        if (midi) {
+            return (
+                <div className={style.playerButton}>
+                    {playing ? <span onClick={this.pause}>⏹️️</span> : <span onClick={this.play}>▶️</span>}
+                </div>
+            );
+        }
+
+        if (midi === false) {
+            return (
+                <ErrorMessage message="Could not convert MUS to MIDI." />
+            );
+        }
+
+        return 'Loading...';
     }
 }
