@@ -97,7 +97,6 @@ export default class App extends Component {
     }
 
     convertAllMusToMidi({ wad }) {
-        console.log('Converting...');
         this.startMidiConverterWorker();
 
         const musLumpIds = Object.keys(wad.lumps.music);
@@ -475,7 +474,6 @@ export default class App extends Component {
             );
         }
 
-        console.log({ midis });
         return (
             <div className={style.app}>
                 <Header />

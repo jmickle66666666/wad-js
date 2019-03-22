@@ -45,7 +45,6 @@ export default class WadDetails extends Component {
             updateSelectedWadFromList,
         } = this.props;
         const { download } = this.state;
-        console.log({ midis });
         return (
             <Fragment>
                 <span id="wadDetails" className={style.wadDetailsAnchor} />

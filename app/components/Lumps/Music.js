@@ -1,7 +1,14 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
-export default ({ wad, lump }) => (
+import Midi from '../AudioPlayers/Midi';
+
+export default ({ wad, lump, midi }) => (
     <div>
-        {!lump.midi ? 'Loading...' : 'Loaded.'}
+
+        {lump.isMus && (
+            <div>
+                {midi ? <Midi midi={midi} /> : 'Loading...'}
+            </div>
+        )}
     </div>
 );

@@ -9,7 +9,7 @@ import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
 import Music from '../Lumps/Music';
 
-export default ({ wad, lump }) => {
+export default ({ wad, lump, midi }) => {
     switch (lump.type) {
     default: {
         return null;
@@ -69,7 +69,11 @@ export default ({ wad, lump }) => {
     }
     case 'music': {
         return (
-            <Music wad={wad} lump={lump} />
+            <Music
+                wad={wad}
+                lump={lump}
+                midi={midi}
+            />
         );
     }
     }
