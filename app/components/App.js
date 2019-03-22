@@ -107,7 +107,6 @@ export default class App extends Component {
         });
 
         musTracks.map((lump) => {
-            console.log(lump);
             this.supervisor.midiConverter.worker.postMessage({
                 wadId: wad.id,
                 lumpId: lump.name,
@@ -136,6 +135,7 @@ export default class App extends Component {
             // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
+            this.convertAllMusToMidi({ wad });
             return wad;
         });
 
