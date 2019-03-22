@@ -1,8 +1,7 @@
 onmessage = (message) => {
-    console.log(message.data);
     const { wadId, lumpId, data } = message.data;
 
-    console.log(`Converting '${lumpId}' from MUS to MIDI...`);
+    console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
 
     // MUS event codes
     const mus_releasekey = 0x00;
@@ -52,7 +51,7 @@ onmessage = (message) => {
             0x00, 0x00, // MIDI type (0)
             0x00, 0x01, // Number of tracks
             0x00, 0x46, // Resolution
-            'M'.charCodeAt(0), 'T'.charCodeAt(0), 'r'.charCodeAt(0), 'k'.charCodeAt(0), // Start of track
+        'M'.charCodeAt(0), 'T'.charCodeAt(0), 'r'.charCodeAt(0), 'k'.charCodeAt(0), // Start of track
             0x00, 0x00, 0x00, 0x00, // Placeholder for track length
         ];
 
@@ -367,77 +366,77 @@ onmessage = (message) => {
                 channel = getMIDIChannel(eventdescriptor & 0x0F);
                 mus_event = eventdescriptor & 0x70;
                 switch (mus_event) {
-                case mus_releasekey:
-                    // console.log('mus_releasekey');
-                    key = getMusByte8();
+                    case mus_releasekey:
+                        // console.log('mus_releasekey');
+                        key = getMusByte8();
 
-                    writeReleaseKey(channel, key);
+                        writeReleaseKey(channel, key);
 
-                    break;
+                        break;
 
-                case mus_presskey:
-                    key = getMusByte8();
+                    case mus_presskey:
+                        key = getMusByte8();
 
-                    if (key & 0x80) {
-                        channelvelocities[channel] = getMusByte8();
+                        if (key & 0x80) {
+                            channelvelocities[channel] = getMusByte8();
 
-                        channelvelocities[channel] &= 0x7F;
+                            channelvelocities[channel] &= 0x7F;
 
-                        // console.log('mus_presskey: '+key+ ' ' + channelvelocities[channel]);
-                    } else {
-                        // console.log('mus_presskey: '+key);
-                    }
+                            // console.log('mus_presskey: '+key+ ' ' + channelvelocities[channel]);
+                        } else {
+                            // console.log('mus_presskey: '+key);
+                        }
 
-                    writePressKey(channel, key, channelvelocities[channel]);
+                        writePressKey(channel, key, channelvelocities[channel]);
 
-                    break;
+                        break;
 
-                case mus_pitchwheel:
-                    // console.log('mus_pitchwheel');
-                    key = getMusByte8();
+                    case mus_pitchwheel:
+                        // console.log('mus_pitchwheel');
+                        key = getMusByte8();
 
-                    writePitchWheel(channel, key * 64);
+                        writePitchWheel(channel, key * 64);
 
-                    break;
+                        break;
 
-                case mus_systemevent:
-                    // console.log('mus_systemevent');
-                    controllernumber = getMusByte8();
+                    case mus_systemevent:
+                        // console.log('mus_systemevent');
+                        controllernumber = getMusByte8();
 
-                    if (controllernumber < 10 || controllernumber > 14) {
-                        console.error(`Controller number inaccurate 10-14: ${controllernumber}`);
-                        return false;
-                    }
-
-                    writeChangeController_Valueless(channel, controller_map[controllernumber]);
-
-                    break;
-
-                case mus_changecontroller:
-                    controllernumber = getMusByte8();
-                    controllervalue = getMusByte8();
-                    // console.log('mus_changecontroller: ' +controllernumber+' '+controllervalue);
-                    if (controllernumber == 0) {
-                        writeChangePatch(channel, controllervalue);
-                    } else {
-                        if (controllernumber < 1 || controllernumber > 9) {
-                            console.error(`Controller number inaccurate: ${controllernumber}`);
+                        if (controllernumber < 10 || controllernumber > 14) {
+                            console.error(`Controller number inaccurate 10-14: ${controllernumber}`);
                             return false;
                         }
 
-                        writeChangeController_Valued(channel, controller_map[controllernumber], controllervalue);
-                    }
+                        writeChangeController_Valueless(channel, controller_map[controllernumber]);
 
-                    break;
+                        break;
 
-                case mus_scoreend:
-                    // console.log('mus_scoreend');
-                    hitscoreend = 1;
-                    break;
+                    case mus_changecontroller:
+                        controllernumber = getMusByte8();
+                        controllervalue = getMusByte8();
+                        // console.log('mus_changecontroller: ' +controllernumber+' '+controllervalue);
+                        if (controllernumber == 0) {
+                            writeChangePatch(channel, controllervalue);
+                        } else {
+                            if (controllernumber < 1 || controllernumber > 9) {
+                                console.error(`Controller number inaccurate: ${controllernumber}`);
+                                return false;
+                            }
 
-                default:
-                    // console.log('eventdescriptor default: '+eventdescriptor + ' ' + (eventdescriptor & 0x80));
-                    return false;
+                            writeChangeController_Valued(channel, controller_map[controllernumber], controllervalue);
+                        }
+
+                        break;
+
+                    case mus_scoreend:
+                        // console.log('mus_scoreend');
+                        hitscoreend = 1;
+                        break;
+
+                    default:
+                        // console.log('eventdescriptor default: '+eventdescriptor + ' ' + (eventdescriptor & 0x80));
+                        return false;
                 }
                 if ((eventdescriptor & 0x80) != 0) {
                     // console.log('delay count');
@@ -483,6 +482,6 @@ onmessage = (message) => {
         status: 'done',
         wadId,
         lumpId,
-        midi: btoa(masterOutput),
+        midi: masterOutput,
     });
 };
