@@ -4,7 +4,9 @@ import style from './WadLumpDetails.scss';
 
 import WadLumpDetailDisplay from './WadLumpDetailDisplay';
 
-export default ({ lump, wad, focusOnLump }) => (
+export default ({
+ lump, wad, midi, focusOnLump 
+}) => (
     <Fragment>
         <span id="lumpDetails" className={style.wadLumpDetailsAnchor} />
         <div className={style.wadLumpDetailsOuter}>
@@ -22,7 +24,11 @@ export default ({ lump, wad, focusOnLump }) => (
                     {' '}
                     {lump.sizeInBytes}
                 </div>
-                <WadLumpDetailDisplay wad={wad} lump={lump} />
+                <WadLumpDetailDisplay
+                    wad={wad}
+                    lump={lump}
+                    midi={midi}
+                />
             </div>
         </div>
     </Fragment>

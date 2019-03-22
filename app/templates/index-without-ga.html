@@ -10,5 +10,20 @@
     </head>
     <body>
         <section id="app"></section>
+        <script>
+        let midiPlayerLoaded = false;
+        document.onclick = loadMidiPlayer;
+
+        function loadMidiPlayer() {
+            if (!midiPlayerLoaded) {
+                const script = document.createElement('script');
+                script.src = "/public/midi/midi.js";
+                document.getElementsByTagName('head')[0].appendChild(script);
+
+                midiPlayerLoaded = true;
+                document.onclick = null;
+            }
+        }
+        </script>
     </body>
 </html>

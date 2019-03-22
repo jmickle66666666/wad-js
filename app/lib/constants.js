@@ -30,6 +30,14 @@ export const EXTENSIONS = {
 
 // The value of constants which name contains the word "SIZE" is a number of bytes.
 
+export const WORKER_PATH_PREFIX = './public/workers/';
+
+export const WORKER_MIDI_CONVERTER = 'midiConverter';
+
+export const WORKER_FILES = [
+    WORKER_MIDI_CONVERTER,
+];
+
 export const IWAD = 'IWAD';
 export const PWAD = 'PWAD';
 export const VALID_WAD_TYPES = [IWAD, PWAD];
@@ -79,7 +87,7 @@ export const MUSIC_LUMPS = [
 export const DEMO_LUMPS = [
     'DEMO1',
     'DEMO2',
-    'DEMO3', ,
+    'DEMO3',
     'DEMO4',
 ];
 

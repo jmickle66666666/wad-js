@@ -40,6 +40,18 @@ export default class Wad {
         this.lumps = {};
     }
 
+    updateLump(lumpData, type) {
+        const lump = new Lump();
+        lump.setIndexData(lumpData);
+        this.lumps = {
+            ...this.lumps,
+            [type]: {
+                ...this.lumps[type],
+                [lump.name]: lump,
+            },
+        };
+    }
+
     getRelevantExternalResources(iwad) {
         const errors = {};
         const warnings = {};
@@ -651,7 +663,6 @@ export default class Wad {
 
     readLumpIndex(blob, data, iwad, callback) {
         let lumps = {};
-        let lumpType = '';
         let lumpClusterType = '';
         let nonMapLumps = 0;
 
@@ -660,27 +671,25 @@ export default class Wad {
             dataLumps: {},
         };
 
-        let patchNames = [];
-
-        let parsedLumpData = {};
-
         let indexLumpCount = 0;
-        let lumpIndexAddress;
-
         let paletteData = iwad.palettes ? iwad.palettes.data[0] : [];
-
-        this.indexLumpCount = 500;
-        callback(this);
+        let patchNames = [];
 
         for (let i = 0; i < this.headerLumpCount; i++) {
             indexLumpCount++;
 
-
-            lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
+            let parsedLumpData = {};
+            let lumpType;
+            let originalFormat;
             let mapLump = false;
 
+            const lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
             const address = data.getInt32(lumpIndexAddress, true);
-            const size = data.getInt32(lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE, true);
+
+            const size = data.getInt32(
+                lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
+                true,
+            );
 
             const name = this.readLumpName(lumpIndexAddress, data);
 
@@ -844,6 +853,8 @@ export default class Wad {
                     if (!lumpType) {
                         if (/D_[0-9a-zA-Z_]{1,}$/.test(name)) {
                             lumpType = 'music';
+                            originalFormat = 'MUS';
+                            parsedLumpData = lumpData;
                         } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
                             lumpType = 'sounds';
                         } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
@@ -861,13 +872,11 @@ export default class Wad {
                         ...lumpIndexData,
                         data: parsedLumpData,
                         type: lumpType || UNCATEGORIZED,
+                        originalFormat,
                     };
 
                     const lump = this.createLumpIndex(lumpIndexDataWithType);
                     lumps[name] = lump;
-
-                    // lump type applies to a single lump
-                    lumpType = '';
                 }
             }
         }
@@ -968,9 +977,7 @@ export default class Wad {
                     this.readJSON(json, callback);
                     return true;
                     // eslint-disable-next-line
-                } catch (error) {
-                    console.error({ error, data: response.data });
-                }
+                } catch (error) { }
 
                 this.errors = {};
                 this.processBlob(response.data, iwad, callback);
@@ -990,15 +997,23 @@ export default class Wad {
                 this.bytesLoaded = this.size;
                 this.uploaded = true;
                 callback(this, true);
-                this.restore({ ...json[i], tempId: this.id, importedAt: moment().utc().format() });
+                this.restore({
+                    ...json[i],
+                    uploadStartAt: this.uploadStartAt,
+                    uploadEndAt: this.uploadEndAt,
+                    tempId: this.id,
+                });
                 this.processed = true;
                 this.uploadedWith = `${PROJECT} v${VERSION}`;
                 callback(this, true, true);
             } else {
                 const newWad = new Wad();
-                newWad.restore(json[i]);
-                newWad.importedAt = moment().utc().format();
                 newWad.uploaded = true;
+                newWad.restore({
+                    ...json[i],
+                    uploadStartAt: this.uploadStartAt,
+                    uploadEndAt: this.uploadEndAt,
+                });
                 newWad.processed = true;
                 callback(newWad);
             }
@@ -1007,6 +1022,11 @@ export default class Wad {
 
     deleteTempId() {
         this.tempId = undefined;
+    }
+
+    replaceId() {
+        const timestamp = moment().utc();
+        this.id = `${this.name}_${timestamp.unix()}`;
     }
 
     restore(wad) {
