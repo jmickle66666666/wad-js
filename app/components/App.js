@@ -72,7 +72,6 @@ export default class App extends Component {
     }
 
     saveConvertedMidi = (payload) => {
-        console.log('MIDI Converter Worker is done. ', { payload });
         const { wadId, lumpId, midi } = payload.data;
         this.setState((prevState) => {
             const { midis } = prevState;
