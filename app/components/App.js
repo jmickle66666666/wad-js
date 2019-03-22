@@ -5,6 +5,7 @@ import style from './App.scss';
 
 import Wad from '../models/Wad';
 
+import { WORKER_MIDI_CONVERTER } from '../lib/constants';
 import LocalStorageManager from '../lib/LocalStorageManager';
 
 import Header from './Header';
@@ -13,7 +14,7 @@ import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
 import WadDetails from './WadExplorer/WadDetails';
 import BackToTop from './BackToTop';
-import ErrorMessage from './ErrorMessage';
+import Supervisor from '../models/Supervisor';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -25,8 +26,11 @@ export default class App extends Component {
         selectedWad: {},
         selectedLump: {},
         selectedLumpType: '',
+        midis: {},
         displayError: {},
     }
+
+    supervisor = new Supervisor()
 
     async componentDidMount() {
         const wads = await this.getWadsFromLocalMemory();
@@ -63,6 +67,59 @@ export default class App extends Component {
         }
     }
 
+    workerError(error) {
+        console.error('A worker errored out.', { error });
+    }
+
+    saveConvertedMidi = (payload) => {
+        console.log('MIDI Converter Worker is done. ', { payload });
+        const { wadId, lumpId, midi } = payload.data;
+        this.setState((prevState) => {
+            const { midis } = prevState;
+            const wadMidis = midis[wadId];
+            return {
+                midis: {
+                    ...midis,
+                    [wadId]: {
+                        ...wadMidis,
+                        [lumpId]: midi,
+                    },
+                },
+            };
+        });
+    }
+
+    startMidiConverterWorker() {
+        this.supervisor.midiConverter.worker.terminate();
+        this.supervisor.midiConverter.restart();
+        this.supervisor.midiConverter.worker.onmessage = this.saveConvertedMidi;
+        this.supervisor.midiConverter.worker.onerror = this.workerError;
+    }
+
+    convertAllMusToMidi({ wad }) {
+        this.startMidiConverterWorker();
+
+        const musLumpIds = Object.keys(wad.lumps.music);
+        const musTracks = musLumpIds.map(musLumpId => wad.lumps.music[musLumpId]).filter((musLump) => {
+            const alreadyExists = this.state.midis[wad.id] && this.state.midis[wad.id][musLump.name];
+            return musLump.originalFormat === 'MUS' && !alreadyExists;
+        });
+
+        musTracks.map((lump) => {
+            this.supervisor.midiConverter.worker.postMessage({
+                wadId: wad.id,
+                lumpId: lump.name,
+                data: lump.data,
+            });
+            return null;
+        });
+    }
+
+    convertMusToMidi({ wadId, lumpId, data }) {
+        this.startMidiConverterWorker();
+        this.supervisor.midiConverter.worker.postMessage({ wadId, lumpId, data });
+    }
+
 
     async getWadsFromLocalMemory() {
         const savedWads = await localStorageManager.get('wads');
@@ -77,6 +134,7 @@ export default class App extends Component {
             // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
+            this.convertAllMusToMidi({ wad });
             return wad;
         });
 
@@ -134,6 +192,8 @@ export default class App extends Component {
             };
 
             this.saveWadsInLocalMemory(updatedWads);
+
+            this.convertAllMusToMidi({ wad });
 
             return ({
                 wads: updatedWads,
@@ -355,6 +415,7 @@ export default class App extends Component {
             selectedWad,
             selectedLump,
             selectedLumpType,
+            midis,
         } = this.state;
 
         if (displayError.error) {
@@ -442,11 +503,13 @@ export default class App extends Component {
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
+                                midis={midis[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
                                 deleteWad={this.deleteWad}
                                 updateFilename={this.updateFilename}
+                                updateSelectedWadFromList={this.updateSelectedWadFromList}
                                 focusOnWad={this.focusOnWad}
                                 focusOnLump={this.focusOnLump}
                             />

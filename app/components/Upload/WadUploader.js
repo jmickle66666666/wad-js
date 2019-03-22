@@ -37,6 +37,11 @@ export default class WadUploader extends Component {
     updateWad = (wad, isJSON, completeJSONImport) => {
         const { addWad } = this.props;
         if (!isJSON) {
+            const { wads: uploadedWads } = this.props;
+            if (uploadedWads[wad.id]) {
+                wad.replaceId();
+            }
+
             this.setState((prevState) => {
                 const updatedWads = {
                     ...prevState.wads,
@@ -63,6 +68,11 @@ export default class WadUploader extends Component {
                 };
             });
         } else if (isJSON && completeJSONImport) {
+            const { wads: uploadedWads } = this.props;
+            if (uploadedWads[wad.id]) {
+                wad.replaceId();
+            }
+
             this.setState((prevState) => {
                 const updatedWads = {
                     ...prevState.wads,

@@ -4,12 +4,14 @@ import React from 'react';
 import style from './WadLumpItem.scss';
 
 import WadLumpDetails from './WadLumpDetails';
+import Midi from '../AudioPlayers/Midi';
 
 const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.name === lump.name;
 
 export default ({
     lump,
     selectedLump,
+    midi,
     wad,
     selectLump,
     selectedLumpType,
@@ -33,6 +35,11 @@ export default ({
                             />
                         </div>
                     )}
+                    {lump.isMus && (
+                        <div>
+                            {midi ? <Midi midi={midi} /> : 'Loading...'}
+                        </div>
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>
@@ -43,6 +50,7 @@ export default ({
         <WadLumpDetails
             lump={lump}
             wad={wad}
+            midi={midi}
             focusOnLump={focusOnLump}
         />
     );

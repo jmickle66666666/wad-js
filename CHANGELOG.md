@@ -1,3 +1,8 @@
+## v0.1.22: Web Workers, MUS and MIDI
+
+* You can now play WAD songs as MIDIs (if compatible; MP3 are not handled yet). This one was a little bit of a doozy. As I chose to use the localForage library instead of the localStorage API, I ran into more size limitations when I worked on parsing Doom original music data (MUS). As a result, I decided to let web workers handle the conversion of these music lumps into MIDI files. Works like a charm. Could use some optimization. The only, significant downside is that these MIDI files have to be regenerated every time the user reloads the page.
+* Thanks to jmickle66666666 for writing the code to handle the conversion from MUS to MIDI. I unhesitatingly implemented his code into wadJS and am very, very grateful for the time I was able to save this way!
+
 ## v0.1.21: JSON Export/Import (2)
 
 * Fix bug where the file would not appear in the list of uploaded file immediately.
