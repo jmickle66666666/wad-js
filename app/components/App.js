@@ -26,6 +26,7 @@ export default class App extends Component {
         selectedWad: {},
         selectedLump: {},
         selectedLumpType: '',
+        selectedMidi: {},
         midis: {},
         displayError: {},
     }
@@ -331,6 +332,62 @@ export default class App extends Component {
         });
     }
 
+    selectMidi = ({
+        midiURL,
+        lump,
+        wadId,
+    }) => {
+        if (typeof MIDIjs === 'undefined') {
+            return;
+        }
+
+        this.setState((prevState) => {
+            MIDIjs.player_callback = (event) => {
+                console.log('player_callback', { event });
+                console.log(MIDIjs.get_audio_status());
+            };
+
+            MIDIjs.message_callback = (message) => {
+                console.log('message_callback', { message });
+            };
+
+            MIDIjs.play(midiURL);
+
+            console.log(MIDIjs.get_audio_status());
+
+            const selectedMidi = {
+                data: midiURL,
+                lumpName: lump.name,
+                lumpType: lump.type,
+                wadId,
+                startedAt: moment().utc().unix(),
+            };
+
+            return {
+                selectedMidi,
+            };
+        });
+    }
+
+    stopMidi = () => {
+        if (typeof MIDIjs === 'undefined') {
+            return;
+        }
+
+        this.setState((prevState) => {
+            MIDIjs.stop();
+
+            const selectedMidi = {
+                ...prevState.selectMidi,
+                startedAt: 0,
+            };
+
+            return {
+                selectedMidi,
+            };
+        });
+    }
+
     deselectAll = () => {
         document.title = `${prefixWindowtitle}`;
         this.setState(() => ({
@@ -414,6 +471,7 @@ export default class App extends Component {
             selectedWad,
             selectedLump,
             selectedLumpType,
+            selectedMidi,
             midis,
         } = this.state;
 
@@ -502,10 +560,13 @@ export default class App extends Component {
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
+                                selectedMidi={selectedMidi}
                                 midis={midis[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
+                                selectMidi={this.selectMidi}
+                                stopMidi={this.stopMidi}
                                 deleteWad={this.deleteWad}
                                 updateFilename={this.updateFilename}
                                 updateSelectedWadFromList={this.updateSelectedWadFromList}

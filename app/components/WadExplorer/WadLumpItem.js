@@ -10,11 +10,14 @@ const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.
 
 export default ({
     lump,
-    selectedLump,
     midi,
     wad,
-    selectLump,
+    selectedLump,
     selectedLumpType,
+    selectedMidi,
+    selectLump,
+    selectMidi,
+    stopMidi,
     focusOnLump,
 }) => {
     if (!isSelectedLump({ selectedLump, lump })) {
@@ -35,7 +38,17 @@ export default ({
                             />
                         </div>
                     )}
-                    {lump.isMus && <Midi midi={midi} />}
+                    {lump.isMus && (
+                        <Midi
+                            midi={midi}
+                            lump={lump}
+                            wad={wad}
+                            selectedMidi={selectedMidi}
+                            selectMidi={selectMidi}
+                            stopMidi={stopMidi}
+
+                        />
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>
@@ -47,6 +60,9 @@ export default ({
             lump={lump}
             wad={wad}
             midi={midi}
+            selectedMidi={selectedMidi}
+            selectMidi={selectMidi}
+            stopMidi={stopMidi}
             focusOnLump={focusOnLump}
         />
     );
