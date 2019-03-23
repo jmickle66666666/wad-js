@@ -118,3 +118,9 @@ export const IMAGE_DATA_HEADER_SIZE = 8;
 export const IMAGE_DATA_BOUNDARY = 255;
 
 export const TRANSPARENT_PIXEL = -1;
+
+export const MUS_HEADER = 'MUS';
+
+export const MIDI_HEADER_SIZE = 4;
+
+export const MIDI_HEADER = 'MThd';
