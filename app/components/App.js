@@ -510,8 +510,50 @@ export default class App extends Component {
         });
     }
 
+    selectFirstMidi = ({ midis }) => {
+        const { wads, selectedMidi } = this.state;
+
+        if (selectedMidi.name) {
+            return;
+        }
+
+        const wadIds = Object.keys(midis);
+
+        if (wadIds.length > 0) {
+            const firstWadId = wadIds[0];
+            const midiIds = Object.keys(midis[firstWadId]);
+            if (midiIds.length > 0) {
+                const firstMidiId = midiIds[0];
+                const firstMidiData = midis[firstWadId][firstMidiId];
+                const wad = wads[firstWadId];
+                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
+
+                if (!lump) {
+                    return;
+                }
+
+                this.setState(() => {
+                    const newlySelectedMidi = {
+                        data: URL.createObjectURL(new Blob([firstMidiData])),
+                        lumpName: lump.name,
+                        lumpType: lump.type,
+                        wadId: firstWadId,
+                        startedAt: 0,
+                        time: 0,
+                    };
+
+                    return {
+                        selectedMidi: newlySelectedMidi,
+                        preselectedMidi: true,
+                    };
+                });
+            }
+        }
+    }
+
     initMidiPlayer = () => {
         MIDIjs.player_callback = this.updateMidiTimePlayer;
+        MIDIjs.initialized = true;
     }
 
     updateMidiTimePlayer = ({ time }) => {
@@ -531,61 +573,28 @@ export default class App extends Component {
         }));
     }
 
-    selectFirstMidi = ({ midis }) => {
-        const { wads, selectedMidi } = this.state;
-
-        if (selectedMidi.name) {
-            return;
-        }
-
-        const wadIds = Object.keys(midis);
-
-        if (wadIds.length > 0) {
-            const firstWadId = wadIds[0];
-            const midiIds = Object.keys(midis[firstWadId]);
-            if (midiIds.length > 0) {
-                const firstMidiId = midiIds[0];
-                const firstMidiData = midis[firstWadId][firstMidiId];
-                const wad = wads[firstWadId];
-                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
-
-                console.log(wads, firstWadId);
-                if (!lump) {
-                    return;
-                }
-
-                this.setState(() => {
-                    const newlySelectedMidi = {
-                        data: firstMidiData,
-                        lumpName: lump.name,
-                        lumpType: lump.type,
-                        wadId: firstWadId,
-                        startedAt: 0,
-                        time: 0,
-                    };
-
-                    return {
-                        selectedMidi: newlySelectedMidi,
-                        preselectedMidi: true,
-                    };
-                });
-            }
-        }
-    }
-
     selectMidi = ({
         midiURL,
         lump,
         wadId,
+        lastRetry,
     }) => {
-        if (typeof MIDIjs === 'undefined') {
+        if (typeof MIDIjs === 'undefined' && !lastRetry) {
+            console.error('MIDIjs not initialized. Retry in 1 second.');
+            setTimeout(() => this.selectMidi({
+                midiURL,
+                lump,
+                wadId,
+                lastRetry: true,
+            }), 1000);
             return;
         }
 
-        this.initMidiPlayer();
-        MIDIjs.play(midiURL);
+        if (!MIDIjs.initialized) {
+            this.initMidiPlayer();
+        }
 
-        console.log(MIDIjs.get_audio_status());
+        MIDIjs.play(midiURL);
 
         this.setState(() => {
             const selectedMidi = {
@@ -595,6 +604,7 @@ export default class App extends Component {
                 wadId,
                 startedAt: moment().utc().unix(),
                 time: 0,
+                paused: false,
             };
 
             return {
@@ -603,25 +613,70 @@ export default class App extends Component {
         });
     }
 
-    startMidi = ({ midiURL }) => {
-        if (typeof MIDIjs === 'undefined') {
+    resumeMidi = (lastRetry) => {
+        if (typeof MIDIjs === 'undefined' && !lastRetry) {
+            console.error('MIDIjs not initialized. Retry in 1 second.');
+            setTimeout(() => this.startMidi(true), 1000);
             return;
         }
 
-        this.initMidiPlayer();
-        MIDIjs.play(midiURL);
+        if (!MIDIjs.initialized) {
+            this.initMidiPlayer();
+        }
+
+        let time = 0;
+        const { selectedMidi } = this.state;
+        if (selectedMidi.paused) {
+            MIDIjs.resume();
+            time = selectedMidi.time;
+        } else {
+            MIDIjs.play(selectedMidi.data);
+        }
 
         this.setState(prevState => ({
             selectedMidi: {
                 ...prevState.selectedMidi,
                 startedAt: moment().utc().unix(),
-                time: 0,
+                time,
+                paused: false,
             },
         }));
     }
 
-    stopMidi = () => {
-        if (typeof MIDIjs === 'undefined') {
+    pauseMidi = (lastRetry) => {
+        if (typeof MIDIjs === 'undefined' && !lastRetry) {
+            console.error('MIDIjs not initialized. Retry in 1 second.');
+            setTimeout(() => this.pauseMidi(true), 1000);
+            return;
+        }
+
+        this.setState((prevState) => {
+            MIDIjs.pause();
+
+            const selectedMidi = {
+                ...prevState.selectedMidi,
+                paused: true,
+            };
+
+            return {
+                selectedMidi,
+            };
+        });
+    }
+
+    stopMidi = (lastRetry) => {
+        if (typeof MIDIjs === 'undefined' && !lastRetry) {
+            console.error('MIDIjs not initialized. Retry in 1 second.');
+            setTimeout(() => this.stopMidi(true), 1000);
+            return;
+        }
+
+        if (!MIDIjs.initialized) {
+            this.initMidiPlayer();
+        }
+
+        const { selectedMidi: prevSelectedMidi } = this.state;
+        if (prevSelectedMidi.time === 0) {
             return;
         }
 
@@ -631,6 +686,7 @@ export default class App extends Component {
             const selectedMidi = {
                 ...prevState.selectedMidi,
                 startedAt: 0,
+                time: 0,
             };
 
             return {
@@ -837,7 +893,8 @@ export default class App extends Component {
                     {selectedMidi.lumpName && (
                         <PortablePlayer
                             selectedMidi={selectedMidi}
-                            startMidi={this.startMidi}
+                            resumeMidi={this.resumeMidi}
+                            pauseMidi={this.pauseMidi}
                             stopMidi={this.stopMidi}
                         />
                     )}
