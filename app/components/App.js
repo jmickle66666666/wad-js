@@ -258,7 +258,7 @@ export default class App extends Component {
             const updatedWadQueue = {};
             for (let i = 0; i < wadQueueIds.length; i++) {
                 const lumpName = wadQueueIds[i];
-                if (lumpId !== 'D_RUNNIN' && wadId !== 'doom1.wad_1553329586' && lumpName !== lumpId) {
+                if (lumpName !== lumpId) {
                     updatedWadQueue[lumpName] = { ...midis.queue[wadId][lumpName] };
                 }
             }
