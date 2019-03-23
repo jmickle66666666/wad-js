@@ -2,13 +2,24 @@ import React from 'react';
 
 import Midi from '../AudioPlayers/Midi';
 
-export default ({ wad, lump, midi }) => (
+export default ({
+    wad,
+    lump,
+    midi,
+    selectedMidi,
+    selectMidi,
+    stopMidi,
+}) => (
     <div>
-
         {lump.isMus && (
-            <div>
-                {midi ? <Midi midi={midi} /> : 'Loading...'}
-            </div>
+            <Midi
+                wad={wad}
+                lump={lump}
+                midi={midi}
+                selectedMidi={selectedMidi}
+                selectMidi={selectMidi}
+                stopMidi={stopMidi}
+            />
         )}
     </div>
 );

@@ -5,7 +5,6 @@ import style from './App.scss';
 
 import Wad from '../models/Wad';
 
-import { WORKER_MIDI_CONVERTER } from '../lib/constants';
 import LocalStorageManager from '../lib/LocalStorageManager';
 
 import Header from './Header';
@@ -13,7 +12,9 @@ import Logo from './Logo';
 import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
 import WadDetails from './WadExplorer/WadDetails';
+import PortablePlayer from './AudioPlayers/PortablePlayer';
 import BackToTop from './BackToTop';
+
 import Supervisor from '../models/Supervisor';
 
 const localStorageManager = new LocalStorageManager();
@@ -26,6 +27,8 @@ export default class App extends Component {
         selectedWad: {},
         selectedLump: {},
         selectedLumpType: '',
+        selectedMidi: {},
+        preselectedMidi: false,
         midis: {},
         displayError: {},
     }
@@ -72,7 +75,6 @@ export default class App extends Component {
     }
 
     saveConvertedMidi = (payload) => {
-        console.log('MIDI Converter Worker is done. ', { payload });
         const { wadId, lumpId, midi } = payload.data;
         this.setState((prevState) => {
             const { midis } = prevState;
@@ -86,6 +88,12 @@ export default class App extends Component {
                     },
                 },
             };
+        }, () => {
+            const { preselectedMidi } = this.state;
+            if (!preselectedMidi) {
+                const { midis } = this.state;
+                this.selectFirstMidi({ midis });
+            }
         });
     }
 
@@ -332,6 +340,134 @@ export default class App extends Component {
         });
     }
 
+    initMidiPlayer = () => {
+        MIDIjs.player_callback = this.updateMidiTimePlayer;
+    }
+
+    updateMidiTimePlayer = ({ time }) => {
+        const roundedDownTime = Math.ceil(time);
+
+        const { selectedMidi: { time: previousTime = 0 } } = this.state;
+        // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
+        if (roundedDownTime <= previousTime) {
+            return;
+        }
+
+        this.setState(prevState => ({
+            selectedMidi: {
+                ...prevState.selectedMidi,
+                time: roundedDownTime,
+            },
+        }));
+    }
+
+    selectFirstMidi = ({ midis }) => {
+        const { wads, selectedMidi } = this.state;
+
+        if (selectedMidi.name) {
+            return;
+        }
+
+        const wadIds = Object.keys(midis);
+
+        if (wadIds.length > 0) {
+            const firstWadId = wadIds[0];
+            const midiIds = Object.keys(midis[firstWadId]);
+            if (midiIds.length > 0) {
+                const firstMidiId = midiIds[0];
+                const firstMidiData = midis[firstWadId][firstMidiId];
+                const wad = wads[firstWadId];
+                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
+
+                if (!lump) {
+                    return;
+                }
+
+                this.setState(() => {
+                    const newlySelectedMidi = {
+                        data: firstMidiData,
+                        lumpName: lump.name,
+                        lumpType: lump.type,
+                        wadId: firstWadId,
+                        startedAt: 0,
+                        time: 0,
+                    };
+
+                    return {
+                        selectedMidi: newlySelectedMidi,
+                        preselectedMidi: true,
+                    };
+                });
+            }
+        }
+    }
+
+    selectMidi = ({
+        midiURL,
+        lump,
+        wadId,
+    }) => {
+        if (typeof MIDIjs === 'undefined') {
+            return;
+        }
+
+        this.initMidiPlayer();
+        MIDIjs.play(midiURL);
+
+        console.log(MIDIjs.get_audio_status());
+
+        this.setState(() => {
+            const selectedMidi = {
+                data: midiURL,
+                lumpName: lump.name,
+                lumpType: lump.type,
+                wadId,
+                startedAt: moment().utc().unix(),
+                time: 0,
+            };
+
+            return {
+                selectedMidi,
+            };
+        });
+    }
+
+    startMidi = ({ midiURL }) => {
+        if (typeof MIDIjs === 'undefined') {
+            return;
+        }
+
+        this.initMidiPlayer();
+        MIDIjs.play(midiURL);
+
+        this.setState(prevState => ({
+            selectedMidi: {
+                ...prevState.selectedMidi,
+                startedAt: moment().utc().unix(),
+                time: 0,
+            },
+        }));
+    }
+
+    stopMidi = () => {
+        if (typeof MIDIjs === 'undefined') {
+            return;
+        }
+
+        this.setState((prevState) => {
+            MIDIjs.stop();
+
+            const selectedMidi = {
+                ...prevState.selectedMidi,
+                startedAt: 0,
+            };
+
+            return {
+                selectedMidi,
+            };
+        });
+    }
+
     deselectAll = () => {
         document.title = `${prefixWindowtitle}`;
         this.setState(() => ({
@@ -415,6 +551,7 @@ export default class App extends Component {
             selectedWad,
             selectedLump,
             selectedLumpType,
+            selectedMidi,
             midis,
         } = this.state;
 
@@ -503,10 +640,13 @@ export default class App extends Component {
                                 selectedWad={selectedWad}
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
+                                selectedMidi={selectedMidi}
                                 midis={midis[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
+                                selectMidi={this.selectMidi}
+                                stopMidi={this.stopMidi}
                                 deleteWad={this.deleteWad}
                                 updateFilename={this.updateFilename}
                                 updateSelectedWadFromList={this.updateSelectedWadFromList}
@@ -515,7 +655,23 @@ export default class App extends Component {
                             />
                         )}
                 </div>
-                <BackToTop focusOnWad={this.focusOnWad} />
+                <div className={style.helper}>
+                    {selectedWad.name && (
+                        <div className={style.selectedWadOuter}>
+                            <div className={style.selectedWadInner}>
+                                {selectedWad.name}
+                            </div>
+                        </div>
+                    )}
+                    {selectedMidi.lumpName && (
+                        <PortablePlayer
+                            selectedMidi={selectedMidi}
+                            startMidi={this.startMidi}
+                            stopMidi={this.stopMidi}
+                        />
+                    )}
+                    <BackToTop focusOnWad={this.focusOnWad} />
+                </div>
             </div>
         );
     }
