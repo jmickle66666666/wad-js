@@ -1,3 +1,7 @@
+## v0.1.24: MIDI conversion queue
+
+* Now that we have a nice-looking MIDI player, it was time to tackle a better way to send tasks to our MIDI-conversion worker. Once a WAD is uploaded, the app will look for MUS lumps in it and add them to a queue that is processed by the worker. The worker will check for more lumps to convert after it is done with the current one until the queue is empty. Next, I'm hoping to prioritize the wad and lumps that are currently being displayed on the screen.
+
 ## v0.1.23: MIDI player
 
 * It was time to make playing MIDI convenient, so I added a little widget at the bottom of the screen to help always have a look at what's playing. That way, you can browse away from your WAD MIDIs and still be able to silence or restart the song you are currently playing.

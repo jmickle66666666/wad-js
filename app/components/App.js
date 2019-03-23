@@ -29,7 +29,10 @@ export default class App extends Component {
         selectedLumpType: '',
         selectedMidi: {},
         preselectedMidi: false,
-        midis: {},
+        midis: {
+            queue: {},
+            converted: {},
+        },
         displayError: {},
     }
 
@@ -39,7 +42,11 @@ export default class App extends Component {
         const wads = await this.getWadsFromLocalMemory();
         this.setState(() => ({
             wads,
-        }));
+        }), () => {
+            const { wads } = this.state;
+            const wadIds = Object.keys(wads || {});
+            wadIds.map(wadId => this.addToMidiConversionQueue({ wad: wads[wadId] }));
+        });
 
         const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
@@ -74,29 +81,6 @@ export default class App extends Component {
         console.error('A worker errored out.', { error });
     }
 
-    saveConvertedMidi = (payload) => {
-        const { wadId, lumpId, midi } = payload.data;
-        this.setState((prevState) => {
-            const { midis } = prevState;
-            const wadMidis = midis[wadId];
-            return {
-                midis: {
-                    ...midis,
-                    [wadId]: {
-                        ...wadMidis,
-                        [lumpId]: midi,
-                    },
-                },
-            };
-        }, () => {
-            const { preselectedMidi } = this.state;
-            if (!preselectedMidi) {
-                const { midis } = this.state;
-                this.selectFirstMidi({ midis });
-            }
-        });
-    }
-
     startMidiConverterWorker() {
         this.supervisor.midiConverter.worker.terminate();
         this.supervisor.midiConverter.restart();
@@ -104,30 +88,217 @@ export default class App extends Component {
         this.supervisor.midiConverter.worker.onerror = this.workerError;
     }
 
-    convertAllMusToMidi({ wad }) {
-        this.startMidiConverterWorker();
+    getnextMusInQueue = ({ wadId }) => {
+        const { midis: { queue } } = this.state;
 
-        const musLumpIds = Object.keys(wad.lumps.music);
-        const musTracks = musLumpIds.map(musLumpId => wad.lumps.music[musLumpId]).filter((musLump) => {
-            const alreadyExists = this.state.midis[wad.id] && this.state.midis[wad.id][musLump.name];
-            return musLump.originalFormat === 'MUS' && !alreadyExists;
-        });
+        let nextLump = {};
 
-        musTracks.map((lump) => {
-            this.supervisor.midiConverter.worker.postMessage({
-                wadId: wad.id,
-                lumpId: lump.name,
-                data: lump.data,
+
+        const currentWadQueueIds = Object.keys(queue[wadId] || {});
+
+        console.log({ currentWadQueueIds });
+
+        if (currentWadQueueIds.length > 0) {
+            nextLump = queue[wadId][currentWadQueueIds[0]];
+            return {
+                nextLump,
+                nextWadId: wadId,
+            };
+        }
+
+        const wadIds = Object.keys(queue);
+
+        console.log({ wadIds, queue });
+
+        let foundLumps = false;
+        let j = 0;
+        while (!foundLumps) {
+            if (j === wadIds.length) {
+                break;
+            }
+
+            const nextWadId = wadIds[j];
+            const nextWadQueue = queue[nextWadId];
+            const nextWadQueueIds = Object.keys(nextWadQueue);
+
+            console.log({ nextWadQueueIds });
+
+            if (nextWadQueueIds.length > 0) {
+                foundLumps = true;
+                const nextLumpId = nextWadQueueIds[0];
+                return {
+                    nextLump: nextWadQueue[nextLumpId],
+                    nextWadId,
+                };
+            }
+
+            j++;
+        }
+
+        console.log('MIDI conversion queue is empty.');
+        return { done: true };
+    }
+
+    addToMidiConversionQueue({ wad }) {
+        const musicLumpIds = Object.keys(wad.lumps.music);
+        const musTracks = musicLumpIds
+            .map(musLumpId => wad.lumps.music[musLumpId])
+            .filter((musLump) => {
+                const { midis } = this.state;
+                const alreadyExists = (
+                    midis.converted[wad.id]
+                    && midis.converted[wad.id][musLump.name]
+                );
+                return musLump.originalFormat === 'MUS' && !alreadyExists;
             });
-            return null;
+
+        const musLumps = {};
+        for (let i = 0; i < musTracks.length; i++) {
+            const lump = musTracks[i];
+            musLumps[lump.name] = { ...lump };
+        }
+
+        if (musTracks.length > 0) {
+            const { done } = this.getnextMusInQueue({ wadId: wad.id });
+            if (done) {
+                const firstLump = { ...musTracks[0] };
+                this.startMidiConverterWorker();
+                this.supervisor.midiConverter.worker.postMessage({
+                    wadId: wad.id,
+                    lumpId: firstLump.name,
+                    data: firstLump.data,
+                });
+            }
+        }
+
+        const midiTracks = musicLumpIds
+            .map(musLumpId => wad.lumps.music[musLumpId])
+            .filter((musLump) => {
+                const { midis } = this.state;
+                const alreadyExists = (
+                    midis.converted[wad.id]
+                    && midis.converted[wad.id][musLump.name]
+                );
+                return musLump.originalFormat === 'MIDI' && !alreadyExists;
+            });
+
+        const midiLumps = {};
+        for (let i = 0; i < midiTracks.length; i++) {
+            const lump = midiTracks[i];
+            const { data: midi } = lump;
+            midiLumps[lump.name] = midi;
+        }
+
+
+        this.setState((prevState) => {
+            const { midis } = prevState;
+            const wadMidis = midis.queue[wad.id];
+            return {
+                midis: {
+                    ...midis,
+                    queue: {
+                        ...midis.queue,
+                        [wad.id]: {
+                            ...wadMidis,
+                            ...musLumps,
+                        },
+                    },
+                    converted: {
+                        ...midis.converted,
+                        [wad.id]: {
+                            ...wadMidis,
+                            ...midiLumps,
+                        },
+                    },
+                },
+            };
+        }, () => {
+            const { preselectedMidi, midis: { converted: midis } } = this.state;
+            if (!preselectedMidi && midiTracks.length > 0) {
+                this.selectFirstMidi({ midis });
+            }
         });
     }
 
-    convertMusToMidi({ wadId, lumpId, data }) {
-        this.startMidiConverterWorker();
-        this.supervisor.midiConverter.worker.postMessage({ wadId, lumpId, data });
-    }
+    saveConvertedMidi = (payload) => {
+        const { wadId, lumpId, midi } = payload.data;
 
+        // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
+        if (!midi) {
+            this.setState((prevState) => {
+                const { midis } = prevState;
+                const wadQueueIds = Object.keys(midis.queue[wadId] || {});
+                const updatedWadQueue = {};
+                for (let i = 0; i < wadQueueIds.length; i++) {
+                    const lumpName = wadQueueIds[i];
+                    if (lumpName !== lumpId) {
+                        updatedWadQueue[lumpName] = { ...midis.queue[wadId][lumpName] };
+                    }
+                }
+
+                return {
+                    midis: {
+                        ...midis,
+                        queue: {
+                            ...midis.queue,
+                            [wadId]: {
+                                ...updatedWadQueue,
+                            },
+                        },
+                    },
+                };
+            });
+        }
+
+        // it worked
+        this.setState((prevState) => {
+            const { midis } = prevState;
+            const wadConverted = midis.converted[wadId];
+            const wadQueueIds = Object.keys(midis.queue[wadId] || {});
+            const updatedWadQueue = {};
+            for (let i = 0; i < wadQueueIds.length; i++) {
+                const lumpName = wadQueueIds[i];
+                if (lumpId !== 'D_RUNNIN' && wadId !== 'doom1.wad_1553329586' && lumpName !== lumpId) {
+                    updatedWadQueue[lumpName] = { ...midis.queue[wadId][lumpName] };
+                }
+            }
+
+            return {
+                midis: {
+                    ...midis,
+                    queue: {
+                        ...midis.queue,
+                        [wadId]: {
+                            ...updatedWadQueue,
+                        },
+                    },
+                    converted: {
+                        ...midis.converted,
+                        [wadId]: {
+                            ...wadConverted,
+                            [lumpId]: midi,
+                        },
+                    },
+                },
+            };
+        }, () => {
+            const { nextLump, nextWadId, done } = this.getnextMusInQueue({ wadId });
+
+            if (!done) {
+                this.supervisor.midiConverter.worker.postMessage({
+                    wadId: nextWadId,
+                    lumpId: nextLump.name,
+                    data: nextLump.data,
+                });
+            }
+
+            const { preselectedMidi } = this.state;
+            if (!preselectedMidi) {
+                const { midis: { converted: midis } } = this.state;
+                this.selectFirstMidi({ midis });
+            }
+        });
+    }
 
     async getWadsFromLocalMemory() {
         const savedWads = await localStorageManager.get('wads');
@@ -142,7 +313,6 @@ export default class App extends Component {
             // Wad instances must be re-instantiated
             const wad = new Wad();
             wad.restore(wadData);
-            this.convertAllMusToMidi({ wad });
             return wad;
         });
 
@@ -201,12 +371,10 @@ export default class App extends Component {
 
             this.saveWadsInLocalMemory(updatedWads);
 
-            this.convertAllMusToMidi({ wad });
-
             return ({
                 wads: updatedWads,
             });
-        });
+        }, () => this.addToMidiConversionQueue({ wad }));
     }
 
     deleteWad = (wadId) => {
@@ -289,6 +457,8 @@ export default class App extends Component {
                     this.focusOnWad();
                 }, 100);
             }
+
+            // TODO: convert mus in the selected wad if any
         });
     }
 
@@ -328,7 +498,7 @@ export default class App extends Component {
 
     selectLumpType = (lumpType) => {
         this.setState((prevState) => {
-            if (!prevState.selectedWad) {
+            if (!prevState.selectedWad.name) {
                 return {};
             }
 
@@ -379,6 +549,7 @@ export default class App extends Component {
                 const wad = wads[firstWadId];
                 const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
 
+                console.log(wads, firstWadId);
                 if (!lump) {
                     return;
                 }
@@ -641,7 +812,7 @@ export default class App extends Component {
                                 selectedLump={selectedLump}
                                 selectedLumpType={selectedLumpType}
                                 selectedMidi={selectedMidi}
-                                midis={midis[selectedWad.id]}
+                                midis={midis.converted[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}

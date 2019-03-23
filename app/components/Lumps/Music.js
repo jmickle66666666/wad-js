@@ -11,7 +11,7 @@ export default ({
     stopMidi,
 }) => (
     <div>
-        {lump.isMus && (
+        {lump.convertsToMidi && (
             <Midi
                 wad={wad}
                 lump={lump}

@@ -38,7 +38,7 @@ export default ({
                             />
                         </div>
                     )}
-                    {lump.isMus && (
+                    {lump.convertsToMidi && (
                         <Midi
                             midi={midi}
                             lump={lump}

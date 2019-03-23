@@ -44,8 +44,8 @@ export default class Lump {
         return this.name !== PNAMES && IMAGE_LUMPS.includes(this.type);
     }
 
-    get isMus() {
-        return this.originalFormat === 'MUS';
+    get convertsToMidi() {
+        return this.originalFormat === 'MUS' || this.originalFormat === 'MIDI';
     }
 
     get isPNAMES() {

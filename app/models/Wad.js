@@ -32,6 +32,9 @@ import {
     IMAGE_DATA_HEADER_SIZE,
     IMAGE_DATA_BOUNDARY,
     TRANSPARENT_PIXEL,
+    MUS_HEADER,
+    MIDI_HEADER_SIZE,
+    MIDI_HEADER,
 } from '../lib/constants';
 
 export default class Wad {
@@ -629,6 +632,17 @@ export default class Wad {
         };
     }
 
+    readMusicHeader(data) {
+        const header = [];
+        for (let i = 0; i < MIDI_HEADER_SIZE; i++) {
+            header.push(String.fromCharCode(data.getUint8(i)));
+        }
+
+        console.log({ header });
+
+        return header.join('');
+    }
+
     organizeLumps(lumps) {
         const organizedLumps = {};
 
@@ -855,7 +869,14 @@ export default class Wad {
                         // D_* (Doom) and MUS_* (Heretic)
                         if (/D_[0-9a-zA-Z_]{1,}$/.test(name) || /MUS_[0-9a-zA-Z_]{1,}$/.test(name)) {
                             lumpType = 'music';
-                            originalFormat = 'MUS';
+
+                            const musicHeader = this.readMusicHeader(lumpData);
+                            if (musicHeader === MIDI_HEADER) {
+                                originalFormat = 'MIDI';
+                            } else if (musicHeader.includes(MUS_HEADER)) {
+                                originalFormat = 'MUS';
+                            }
+
                             parsedLumpData = lumpData;
                             // DS* (DMX) and DP* (speaker)
                         } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
