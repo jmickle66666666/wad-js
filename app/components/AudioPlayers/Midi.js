@@ -12,17 +12,41 @@ const midiIsPlaying = ({ selectedMidi, wad, lump }) => (
 );
 
 export default ({
+    globalPlayer,
     midi,
     lump,
     wad,
     selectedMidi,
     selectMidi,
+    startMidi,
     stopMidi,
+    customClass,
+    children,
 }) => {
-    const midiURL = URL.createObjectURL(new Blob([midi]));
+    if (globalPlayer) {
+        const midiURL = URL.createObjectURL(new Blob([selectedMidi.data]));
+        return (
+            <div className={style.playerButton}>
+                {
+                    selectedMidi.startedAt
+                        ? (
+                            <div className={customClass} onClick={stopMidi}>
+                                <span>⏹️️</span>
+                                {children}
+                            </div>
+                        ) : (
+                            <div className={customClass} onClick={() => startMidi({ midiURL })}>
+                                <span>▶️</span>
+                                {children}
+                            </div>
+                        )
+                }
+            </div>
+        );
+    }
 
+    const midiURL = URL.createObjectURL(new Blob([midi]));
     if (midi) {
-        console.log({ selectedMidi, wad, lump });
         return (
             <div className={style.playerButton}>
                 {
@@ -57,9 +81,11 @@ export default ({
 
     if (midi === false) {
         return (
-            <ErrorMessage message="Could not convert MUS to MIDI." />
+            <div>
+                <ErrorMessage message="Could not convert MUS to MIDI." />
+            </div>
         );
     }
 
-    return 'Loading...';
+    return <div className={style.loading}>Loading...</div>;
 };
