@@ -9,7 +9,14 @@ import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
 import Music from '../Lumps/Music';
 
-export default ({ wad, lump, midi }) => {
+export default ({
+    wad,
+    lump,
+    midi,
+    selectedMidi,
+    selectMidi,
+    stopMidi,
+}) => {
     switch (lump.type) {
     default: {
         return null;
@@ -73,6 +80,9 @@ export default ({ wad, lump, midi }) => {
                 wad={wad}
                 lump={lump}
                 midi={midi}
+                selectedMidi={selectedMidi}
+                selectMidi={selectMidi}
+                stopMidi={stopMidi}
             />
         );
     }

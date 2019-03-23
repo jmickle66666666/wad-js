@@ -34,10 +34,13 @@ export default class WadDetails extends Component {
             selectedWad: wad,
             selectedLump,
             selectedLumpType,
+            selectedMidi,
             midis,
             selectWad,
             selectLump,
             selectLumpType,
+            selectMidi,
+            stopMidi,
             deleteWad,
             updateFilename,
             focusOnWad,
@@ -100,8 +103,11 @@ export default class WadDetails extends Component {
                             wad={wad}
                             selectedLump={selectedLump}
                             selectedLumpType={selectedLumpType}
+                            selectedMidi={selectedMidi}
                             midis={selectedLumpType === 'music' && midis}
                             selectLump={selectLump}
+                            selectMidi={selectMidi}
+                            stopMidi={stopMidi}
                             focusOnWad={focusOnWad}
                             focusOnLump={focusOnLump}
                             updateSelectedWadFromList={updateSelectedWadFromList}

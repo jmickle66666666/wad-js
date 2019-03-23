@@ -758,6 +758,7 @@ export default class Wad {
                     patchNames = pNames;
                 } else if (patchNames.includes(name)) {
                     lumpType = 'patches';
+                    // TEXTURE*
                 } else if (/TEXTURE[0-9a-zA-Z]$/.test(name)) {
                     lumpType = 'textures';
                     const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
@@ -772,30 +773,30 @@ export default class Wad {
                         ...textures,
                     };
 
-                    console.log({ textureCount, textureNames, textures });
+                    // console.log({ textureCount, textureNames, textures });
                 } else if (MUSIC_LUMPS.includes(name)) {
                     lumpType = 'music';
                 } else if (DEMO_LUMPS.includes(name)) {
                     lumpType = 'demos';
                 }
 
+                // *_START
                 if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
-                    // start marker
+                    // P*_START
                     if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        // patch marker
                         lumpClusterType = 'patches';
+                        // F*_START
                     } else if (/^F[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        // patch marker
                         lumpClusterType = 'flats';
+                        // S*_START
                     } else if (/^S[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        // patch marker
                         lumpClusterType = 'sprites';
+                        // C*_START (Boom)
                     } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        // patch marker
                         lumpClusterType = 'colormaps';
                     }
+                    // *_END
                 } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
-                    // end marker
                     lumpClusterType = '';
                 } else if (lumpClusterType) {
                     switch (lumpClusterType) {
@@ -851,12 +852,15 @@ export default class Wad {
                     // we didn't already guessed the type with a stronger method
                     // detect the type of individual lumps based on a partial match on name
                     if (!lumpType) {
-                        if (/D_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                        // D_* (Doom) and MUS_* (Heretic)
+                        if (/D_[0-9a-zA-Z_]{1,}$/.test(name) || /MUS_[0-9a-zA-Z_]{1,}$/.test(name)) {
                             lumpType = 'music';
                             originalFormat = 'MUS';
                             parsedLumpData = lumpData;
+                            // DS* (DMX) and DP* (speaker)
                         } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
                             lumpType = 'sounds';
+                            // M_*
                         } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
                             lumpType = 'menu';
                             const { image, metadata } = this.readImageData(lumpData, name, paletteData);

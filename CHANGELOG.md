@@ -1,3 +1,9 @@
+## v0.1.23: MIDI player
+
+* It was time to make playing MIDI convenient, so I added a little widget at the bottom of the screen to help always have a look at what's playing. That way, you can browse away from your WAD MIDIs and still be able to silence or restart the song you are currently playing.
+* Also did some minor changes to make the error component more resilient (it won't blow up the app if no error was provided to the component).
+* I added some comments in the code when it comes to parsing lumps.
+
 ## v0.1.22: Web Workers, MUS and MIDI
 
 * You can now play WAD songs as MIDIs (if compatible; MP3 are not handled yet). This one was a little bit of a doozy. As I chose to use the localForage library instead of the localStorage API, I ran into more size limitations when I worked on parsing Doom original music data (MUS). As a result, I decided to let web workers handle the conversion of these music lumps into MIDI files. Works like a charm. Could use some optimization. The only, significant downside is that these MIDI files have to be regenerated every time the user reloads the page.

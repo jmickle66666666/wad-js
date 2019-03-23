@@ -5,7 +5,13 @@ import style from './WadLumpDetails.scss';
 import WadLumpDetailDisplay from './WadLumpDetailDisplay';
 
 export default ({
- lump, wad, midi, focusOnLump 
+    lump,
+    wad,
+    midi,
+    selectedMidi,
+    selectMidi,
+    stopMidi,
+    focusOnLump,
 }) => (
     <Fragment>
         <span id="lumpDetails" className={style.wadLumpDetailsAnchor} />
@@ -15,19 +21,22 @@ export default ({
             </h4>
             <div className={style.wadLumpDetailsInner}>
                 <div className={style.wadLumpDetailsEntry}>
-                    Type:
-                    {' '}
+                        Type:
+                        {' '}
                     {lump.type}
                 </div>
                 <div className={style.wadLumpDetailsEntry}>
-                    Size:
-                    {' '}
+                        Size:
+                        {' '}
                     {lump.sizeInBytes}
                 </div>
                 <WadLumpDetailDisplay
                     wad={wad}
                     lump={lump}
                     midi={midi}
+                    selectedMidi={selectedMidi}
+                    selectMidi={selectMidi}
+                    stopMidi={stopMidi}
                 />
             </div>
         </div>
