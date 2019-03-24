@@ -1,3 +1,5 @@
+## v0.1.26
+
 ## v0.1.25: MIDI playback adjustments
 
 * I upgraded the MIDIjs script. As a result, I was able to implement more playback functionalities. Namely, pause and resume. I decided to add this behavior to the "portable" MIDI player that appears at the bottom of the screen, to keep the MIDI lumps simple.

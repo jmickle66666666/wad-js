@@ -3,6 +3,9 @@ import moment from 'moment';
 
 import style from './App.scss';
 
+import MidiConverter from '../workers/midiConverter';
+import LumpParser from '../workers/lumpParser';
+
 import Wad from '../models/Wad';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
@@ -14,8 +17,6 @@ import UploadedWadList from './Upload/UploadedWadList';
 import WadDetails from './WadExplorer/WadDetails';
 import PortablePlayer from './AudioPlayers/PortablePlayer';
 import BackToTop from './BackToTop';
-
-import Supervisor from '../models/Supervisor';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -36,7 +37,9 @@ export default class App extends Component {
         displayError: {},
     }
 
-    supervisor = new Supervisor()
+    midiConverter = new MidiConverter()
+
+    lumpParser = new LumpParser()
 
     async componentDidMount() {
         const wads = await this.getWadsFromLocalMemory();
@@ -82,10 +85,9 @@ export default class App extends Component {
     }
 
     startMidiConverterWorker() {
-        this.supervisor.midiConverter.worker.terminate();
-        this.supervisor.midiConverter.restart();
-        this.supervisor.midiConverter.worker.onmessage = this.saveConvertedMidi;
-        this.supervisor.midiConverter.worker.onerror = this.workerError;
+        this.midiConverter = new MidiConverter();
+        this.midiConverter.onmessage = this.saveConvertedMidi;
+        this.midiConverter.onerror = this.workerError;
     }
 
     getnextMusInQueue = ({ wadId }) => {
@@ -163,7 +165,7 @@ export default class App extends Component {
             if (done) {
                 const firstLump = { ...musTracks[0] };
                 this.startMidiConverterWorker();
-                this.supervisor.midiConverter.worker.postMessage({
+                this.midiConverter.postMessage({
                     wadId: wad.id,
                     lumpId: firstLump.name,
                     data: firstLump.data,
@@ -285,7 +287,7 @@ export default class App extends Component {
             const { nextLump, nextWadId, done } = this.getnextMusInQueue({ wadId });
 
             if (!done) {
-                this.supervisor.midiConverter.worker.postMessage({
+                this.midiConverter.postMessage({
                     wadId: nextWadId,
                     lumpId: nextLump.name,
                     data: nextLump.data,
@@ -522,6 +524,7 @@ export default class App extends Component {
         if (wadIds.length > 0) {
             const firstWadId = wadIds[0];
             const midiIds = Object.keys(midis[firstWadId]);
+
             if (midiIds.length > 0) {
                 const firstMidiId = midiIds[0];
                 const firstMidiData = midis[firstWadId][firstMidiId];
@@ -541,6 +544,8 @@ export default class App extends Component {
                         startedAt: 0,
                         time: 0,
                     };
+
+                    console.log({ newlySelectedMidi });
 
                     return {
                         selectedMidi: newlySelectedMidi,
