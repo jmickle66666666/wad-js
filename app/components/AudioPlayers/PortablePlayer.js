@@ -21,13 +21,15 @@ const convertToDisplayTime = (time) => {
 
 export default ({
     selectedMidi,
-    startMidi,
+    resumeMidi,
+    pauseMidi,
     stopMidi,
 }) => (
     <Midi
         globalPlayer
         selectedMidi={selectedMidi}
-        startMidi={startMidi}
+        resumeMidi={resumeMidi}
+        pauseMidi={pauseMidi}
         stopMidi={stopMidi}
         customClass={style.player}
     >
@@ -37,7 +39,7 @@ export default ({
         <Fragment>
             <div className={style.dataBlock}>
                     -
-            </div>
+                </div>
             <div className={style.dataBlock}>
                 {convertToDisplayTime(selectedMidi.time)}
             </div>
