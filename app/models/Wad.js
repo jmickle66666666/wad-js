@@ -35,6 +35,16 @@ import {
     MUS_HEADER,
     MIDI_HEADER_SIZE,
     MIDI_HEADER,
+    INTERMISSION,
+    INTERMISSION_LUMPS,
+    STATUS_BAR_LUMPS,
+    STATUS_BAR,
+    SBARINFO,
+    MAPINFO,
+    MAP,
+    MENU_SCREENS,
+    MENU,
+    INTERMISSION_SCREEN,
 } from '../lib/constants';
 
 export default class Wad {
@@ -293,7 +303,7 @@ export default class Wad {
 
             updatedMap.nameLump = {
                 ...mapNameLump,
-                type: 'maps',
+                type: MAP,
             };
         }
 
@@ -638,8 +648,6 @@ export default class Wad {
             header.push(String.fromCharCode(data.getUint8(i)));
         }
 
-        console.log({ header });
-
         return header.join('');
     }
 
@@ -690,219 +698,261 @@ export default class Wad {
         let patchNames = [];
 
         for (let i = 0; i < this.headerLumpCount; i++) {
-            indexLumpCount++;
+            try {
+                indexLumpCount++;
 
-            let parsedLumpData = {};
-            let lumpType;
-            let originalFormat;
-            let mapLump = false;
+                let parsedLumpData = {};
+                let lumpType;
+                let originalFormat;
+                let mapLump = false;
 
-            const lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
-            const address = data.getInt32(lumpIndexAddress, true);
+                const lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
+                const address = data.getInt32(lumpIndexAddress, true);
 
-            const size = data.getInt32(
-                lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
-                true,
-            );
-
-            const name = this.readLumpName(lumpIndexAddress, data);
-
-            let lumpIndexData = {
-                index: i,
-                address,
-                size,
-                name,
-            };
-
-            const lumpData = new DataView(blob, address, size);
-
-            // map-related operations
-            if (MAP_LUMPS.includes(name)) {
-                mapLump = true;
-
-                const {
-                    updatedNonMapLumps,
-                    updatedMap,
-                    updatedLumps,
-                } = this.handleMapLumpEntry(
-                    map,
-                    lumps,
-                    lumpIndexData,
-                    callback,
+                const size = data.getInt32(
+                    lumpIndexAddress + LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
+                    true,
                 );
 
-                nonMapLumps = updatedNonMapLumps;
-                map = { ...updatedMap };
-                lumps = { ...updatedLumps };
-            } else if (map.nameLump.name !== '') {
-                const {
-                    updatedNonMapLumps,
-                    updatedMap,
-                    updatedLumps,
-                } = this.handleLastMapLumpEntry(
-                    map,
-                    lumps,
-                    nonMapLumps,
-                );
+                const name = this.readLumpName(lumpIndexAddress, data);
 
-                nonMapLumps = updatedNonMapLumps;
-                map = { ...updatedMap };
-                lumps = { ...updatedLumps };
-            }
+                let lumpIndexData = {
+                    index: i,
+                    address,
+                    size,
+                    name,
+                };
 
-            // non-map lumps
-            if (!mapLump) {
-                if (name === PLAYPAL) {
-                    lumpType = 'palettes';
-                    parsedLumpData = this.readPalettes(lumpData);
-                    // shortcut to access palette #0 when parsing graphics into Data URLs
-                    [paletteData] = parsedLumpData;
-                } else if (name === COLORMAP) {
-                    lumpType = 'colormaps';
-                    parsedLumpData = this.readColormaps(lumpData, name);
-                } else if (name === PNAMES) {
-                    lumpType = 'patches';
-                    const { patchCount, patchNames: pNames } = this.readPatchNames(lumpData);
-                    parsedLumpData = pNames;
-                    lumpIndexData = {
-                        ...lumpIndexData,
-                        count: patchCount,
-                    };
+                const lumpData = new DataView(blob, address, size);
 
-                    patchNames = pNames;
-                } else if (patchNames.includes(name)) {
-                    lumpType = 'patches';
-                    // TEXTURE*
-                } else if (/TEXTURE[0-9a-zA-Z]$/.test(name)) {
-                    lumpType = 'textures';
-                    const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
-                    parsedLumpData = textureNames;
-                    lumpIndexData = {
-                        ...lumpIndexData,
-                        count: textureCount,
-                    };
+                // map-related operations
+                if (MAP_LUMPS.includes(name)) {
+                    mapLump = true;
 
-                    lumps = {
-                        ...lumps,
-                        ...textures,
-                    };
+                    const {
+                        updatedNonMapLumps,
+                        updatedMap,
+                        updatedLumps,
+                    } = this.handleMapLumpEntry(
+                        map,
+                        lumps,
+                        lumpIndexData,
+                        callback,
+                    );
 
-                    // console.log({ textureCount, textureNames, textures });
-                } else if (MUSIC_LUMPS.includes(name)) {
-                    lumpType = 'music';
-                } else if (DEMO_LUMPS.includes(name)) {
-                    lumpType = 'demos';
+                    nonMapLumps = updatedNonMapLumps;
+                    map = { ...updatedMap };
+                    lumps = { ...updatedLumps };
+                } else if (map.nameLump.name !== '') {
+                    const {
+                        updatedNonMapLumps,
+                        updatedMap,
+                        updatedLumps,
+                    } = this.handleLastMapLumpEntry(
+                        map,
+                        lumps,
+                        nonMapLumps,
+                    );
+
+                    nonMapLumps = updatedNonMapLumps;
+                    map = { ...updatedMap };
+                    lumps = { ...updatedLumps };
                 }
 
-                // *_START
-                if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
-                    // P*_START
-                    if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        lumpClusterType = 'patches';
-                        // F*_START
-                    } else if (/^F[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        lumpClusterType = 'flats';
-                        // S*_START
-                    } else if (/^S[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        lumpClusterType = 'sprites';
-                        // C*_START (Boom)
-                    } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
-                        lumpClusterType = 'colormaps';
-                    }
-                    // *_END
-                } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
-                    lumpClusterType = '';
-                } else if (lumpClusterType) {
-                    switch (lumpClusterType) {
-                    default: {
-                        break;
-                    }
-                    case 'colormaps': {
+                // non-map lumps
+                if (!mapLump) {
+                    if (name === PLAYPAL) {
+                        lumpType = 'palettes';
+                        parsedLumpData = this.readPalettes(lumpData);
+                        // shortcut to access palette #0 when parsing graphics into Data URLs
+                        [paletteData] = parsedLumpData;
+                    } else if (name === COLORMAP) {
+                        lumpType = 'colormaps';
                         parsedLumpData = this.readColormaps(lumpData, name);
-                        break;
-                    }
-                    case 'flats': {
-                        const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                        parsedLumpData = image;
+                    } else if (name === PNAMES) {
+                        lumpType = 'patches';
+                        const { patchCount, patchNames: pNames } = this.readPatchNames(lumpData);
+                        parsedLumpData = pNames;
                         lumpIndexData = {
                             ...lumpIndexData,
-                            ...metadata,
+                            count: patchCount,
                         };
-                        break;
-                    }
-                    case 'patches': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
+
+                        patchNames = pNames;
+                    } else if (patchNames.includes(name)) {
+                        lumpType = 'patches';
+                        // TEXTURE*
+                    } else if (/TEXTURE[0-9a-zA-Z]$/.test(name)) {
+                        lumpType = 'textures';
+                        const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
+                        parsedLumpData = textureNames;
                         lumpIndexData = {
                             ...lumpIndexData,
-                            ...metadata,
+                            count: textureCount,
                         };
 
-                        break;
-                    }
-                    case 'sprites': {
-                        const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                        parsedLumpData = image;
-                        lumpIndexData = {
-                            ...lumpIndexData,
-                            ...metadata,
+                        lumps = {
+                            ...lumps,
+                            ...textures,
                         };
 
-                        break;
+                        // console.log({ textureCount, textureNames, textures });
+                    } else if (MUSIC_LUMPS.includes(name)) {
+                        lumpType = 'music';
+                    } else if (DEMO_LUMPS.includes(name)) {
+                        lumpType = 'demos';
                     }
-                    }
 
-                    // we know the type of this lump because it belongs to a cluster
-                    // lump cluster type is meant to be applied to a group of consecutive lumps
-                    const lumpIndexDataWithType = {
-                        ...lumpIndexData,
-                        data: parsedLumpData,
-                        type: lumpClusterType,
-                    };
-
-                    const lump = this.createLumpIndex(lumpIndexDataWithType);
-                    lumps[name] = lump;
-                } else {
-                    // we didn't already guessed the type with a stronger method
-                    // detect the type of individual lumps based on a partial match on name
-                    if (!lumpType) {
-                        // D_* (Doom) and MUS_* (Heretic)
-                        if (/D_[0-9a-zA-Z_]{1,}$/.test(name) || /MUS_[0-9a-zA-Z_]{1,}$/.test(name)) {
-                            lumpType = 'music';
-
-                            const musicHeader = this.readMusicHeader(lumpData);
-                            if (musicHeader === MIDI_HEADER) {
-                                originalFormat = 'MIDI';
-                            } else if (musicHeader.includes(MUS_HEADER)) {
-                                originalFormat = 'MUS';
-                            }
-
-                            parsedLumpData = lumpData;
-                            // DS* (DMX) and DP* (speaker)
-                        } else if (/DS[0-9a-zA-Z]{1,}$/.test(name) || /DP[0-9a-zA-Z]{1,}$/.test(name)) {
-                            lumpType = 'sounds';
-                            // M_*
-                        } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
-                            lumpType = 'menu';
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                    // *_START
+                    if (/[0-9a-zA-Z]{0,2}_START$/.test(name)) {
+                        // P*_START
+                        if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                            lumpClusterType = 'patches';
+                            // F*_START
+                        } else if (/^F[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                            lumpClusterType = 'flats';
+                            // S*_START
+                        } else if (/^S[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                            lumpClusterType = 'sprites';
+                            // C*_START (Boom)
+                        } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
+                            lumpClusterType = 'colormaps';
                         }
+                        // *_END
+                    } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
+                        lumpClusterType = '';
+                    } else if (lumpClusterType) {
+                        switch (lumpClusterType) {
+                            default: {
+                                break;
+                            }
+                            case 'colormaps': {
+                                parsedLumpData = this.readColormaps(lumpData, name);
+                                break;
+                            }
+                            case 'flats': {
+                                const { image, metadata } = this.readFlat(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                                break;
+                            }
+                            case 'patches': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+
+                                break;
+                            }
+                            case 'sprites': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+
+                                break;
+                            }
+                        }
+
+                        // we know the type of this lump because it belongs to a cluster
+                        // lump cluster type is meant to be applied to a group of consecutive lumps
+                        const lumpIndexDataWithType = {
+                            ...lumpIndexData,
+                            data: parsedLumpData,
+                            type: lumpClusterType,
+                        };
+
+                        const lump = this.createLumpIndex(lumpIndexDataWithType);
+                        lumps[name] = lump;
+                    } else {
+                        // we didn't already guessed the type with a stronger method
+                        // detect the type of individual lumps based on a partial match on name
+                        if (!lumpType) {
+                            // D_* (Doom) and MUS_* (Heretic)
+                            if (/D_[0-9a-zA-Z_]{1,}$/.test(name) || /MUS_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                lumpType = 'music';
+
+                                const musicHeader = this.readMusicHeader(lumpData);
+                                if (musicHeader === MIDI_HEADER) {
+                                    originalFormat = 'MIDI';
+                                } else if (musicHeader.includes(MUS_HEADER)) {
+                                    originalFormat = 'MUS';
+                                }
+
+                                parsedLumpData = lumpData;
+                                // DS* (DMX) and DP* (speaker)
+                            } else if (/DS[0-9a-zA-Z_]{1,}$/.test(name) || /DP[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                lumpType = 'sounds';
+                                // M_*
+                            } else if (/M_[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                lumpType = MENU;
+                                const { image, metadata } = this.readImageData(
+                                    lumpData, name, paletteData,
+                                );
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                            } else if (INTERMISSION_LUMPS.test(name) || name === INTERMISSION_SCREEN) {
+                                lumpType = INTERMISSION;
+                                const { image, metadata } = this.readImageData(
+                                    lumpData, name, paletteData,
+                                );
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                            } else if (STATUS_BAR_LUMPS.test(name)) {
+                                lumpType = STATUS_BAR;
+                                const { image, metadata } = this.readImageData(
+                                    lumpData, name, paletteData,
+                                );
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                            } else if (name === SBARINFO) {
+                                lumpType = STATUS_BAR;
+                            } else if (MAPINFO.includes(name)) {
+                                lumpType = MAP;
+                            } else if (MENU_SCREENS.includes(name)) {
+                                lumpType = MENU;
+                                const { image, metadata } = this.readImageData(
+                                    lumpData, name, paletteData,
+                                );
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                            }
+                        }
+
+                        const lumpIndexDataWithType = {
+                            ...lumpIndexData,
+                            data: parsedLumpData,
+                            type: lumpType || UNCATEGORIZED,
+                            originalFormat,
+                        };
+
+                        const lump = this.createLumpIndex(lumpIndexDataWithType);
+                        lumps[name] = lump;
                     }
-
-                    const lumpIndexDataWithType = {
-                        ...lumpIndexData,
-                        data: parsedLumpData,
-                        type: lumpType || UNCATEGORIZED,
-                        originalFormat,
-                    };
-
-                    const lump = this.createLumpIndex(lumpIndexDataWithType);
-                    lumps[name] = lump;
                 }
+            } catch (error) {
+                const lumpIndexAddress = this.indexOffset + i * LUMP_INDEX_ENTRY_SIZE;
+                const name = this.readLumpName(lumpIndexAddress, data);
+                console.error(`An error occurred while processing lump '${name}'.`, { error });
             }
         }
 
