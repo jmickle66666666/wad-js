@@ -1,6 +1,6 @@
 {
     "name": "wadjs",
-    "version": "0.1.25",
+    "version": "0.1.26",
     "author": {
         "name": "jmickle66666666"
     },
@@ -31,6 +31,7 @@
         "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.5",
         "browserify": "^13.3.0",
+        "clean-webpack-plugin": "^2.0.1",
         "css-loader": "^2.1.0",
         "eslint": "^5.15.1",
         "eslint-config-airbnb": "^17.1.0",
@@ -52,7 +53,8 @@
         "url-loader": "^1.1.2",
         "webpack": "^4.29.6",
         "webpack-cli": "^3.2.3",
-        "webpack-dev-server": "^3.2.1"
+        "webpack-dev-server": "^3.2.1",
+        "worker-loader": "^2.0.0"
     },
     "dependencies": {
         "axios": "^0.18.0",
