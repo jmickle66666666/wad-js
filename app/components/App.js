@@ -4,7 +4,7 @@ import moment from 'moment';
 import style from './App.scss';
 
 import MidiConverter from '../workers/midiConverter';
-import LumpParser from '../workers/lumpParser';
+import MapParser from '../workers/mapParser';
 
 import Wad from '../models/Wad';
 
@@ -39,7 +39,7 @@ export default class App extends Component {
 
     midiConverter = new MidiConverter()
 
-    lumpParser = new LumpParser()
+    mapParser = new MapParser();
 
     async componentDidMount() {
         const wads = await this.getWadsFromLocalMemory();
