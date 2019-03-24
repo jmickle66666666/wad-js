@@ -124,3 +124,38 @@ export const MUS_HEADER = 'MUS';
 export const MIDI_HEADER_SIZE = 4;
 
 export const MIDI_HEADER = 'MThd';
+
+
+export const MIDI_HEADER_DATA = [
+    'M'.charCodeAt(0), 'T'.charCodeAt(0), 'h'.charCodeAt(0), 'd'.charCodeAt(0), // Main header
+    0x00, 0x00, 0x00, 0x06, // Header size
+    0x00, 0x00, // MIDI type (0)
+    0x00, 0x01, // Number of tracks
+    0x00, 0x46, // Resolution
+    'M'.charCodeAt(0), 'T'.charCodeAt(0), 'r'.charCodeAt(0), 'k'.charCodeAt(0), // Start of track
+    0x00, 0x00, 0x00, 0x00, // Placeholder for track length
+];
+
+export const MUS_NUM_CHANNELS = 16;
+export const MUS_PERCUSSION_CHANNEL = 15;
+export const MIDI_PERCUSSION_CHANNEL = 9;
+export const MIDI_TRACKLENGTH_OFS = 18;
+
+export const MIDI_CONTROLLER_MAP = [
+    0x00, 0x20, 0x01, 0x07, 0x0A, 0x0B, 0x5B, 0x5D, 0x40, 0x43, 0x78, 0x7B, 0x7E, 0x7F, 0x79,
+];
+
+// MUS event codes
+export const MUS_RELEASE_KEY = 0x00;
+export const MUS_PRESS_KEY = 0x10;
+export const MUS_PITCH_WHEEL = 0x20;
+export const MUS_SYSTEM_EVENT = 0x30;
+export const MUS_CHANGE_CONTROLLER = 0x40;
+export const MUS_SCORE_END = 0x60;
+
+// MIDI event codes
+export const MIDI_RELEASE_KEY = 0x80;
+export const MIDI_PRESS_KEY = 0x90;
+export const MIDI_CHANGE_CONTROLLER = 0xB0;
+export const MIDI_CHANGE_PATCH = 0xC0;
+export const MIDI_PITCH_WHEEL = 0xE0;

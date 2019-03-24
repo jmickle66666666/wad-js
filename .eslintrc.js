@@ -16,6 +16,7 @@ module.exports = {
         "no-plusplus": 0,
         "class-methods-use-this": 0,
         "react/sort-comp": 0,
+        "no-bitwise": 0,
     },
     parser: "babel-eslint"
 };
