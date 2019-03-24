@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import style from './Midi.scss';
 
-import ErrorMessage from '../ErrorMessage';
+import ErrorMessage from '../Messages/ErrorMessage';
 
 const midiIsPlaying = ({ selectedMidi, wad, lump }) => (
     selectedMidi

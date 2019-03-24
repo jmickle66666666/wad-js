@@ -13,9 +13,9 @@ import rocket from '../../assets/rocket.png';
 import Wad from '../../models/Wad';
 
 import Help from '../Help';
-import ErrorMessage from '../ErrorMessage';
-import ErrorMessageList from '../ErrorMessageList';
-import WarningMessageList from '../WarningMessageList';
+import ErrorMessage from '../Messages/ErrorMessage';
+import ErrorMessageList from '../Messages/ErrorMessageList';
+import WarningMessageList from '../Messages/WarningMessageList';
 
 const Rocket = posed.div({
     loading: {
