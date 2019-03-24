@@ -6,6 +6,7 @@ import ErrorMessage from '../ErrorMessage';
 
 const midiIsPlaying = ({ selectedMidi, wad, lump }) => (
     selectedMidi
+    && !selectedMidi.paused
     && selectedMidi.startedAt
     && selectedMidi.wadId === wad.id
     && selectedMidi.lumpName === lump.name
@@ -18,29 +19,33 @@ export default ({
     wad,
     selectedMidi,
     selectMidi,
-    startMidi,
+    resumeMidi,
+    pauseMidi,
     stopMidi,
     customClass,
     children,
 }) => {
     if (globalPlayer) {
-        const midiURL = URL.createObjectURL(new Blob([selectedMidi.data]));
         return (
             <div className={style.playerButton}>
-                {
-                    selectedMidi.startedAt
-                        ? (
-                            <div className={customClass} onClick={stopMidi}>
-                                <span>⏹️️</span>
-                                {children}
-                            </div>
-                        ) : (
-                            <div className={customClass} onClick={() => startMidi({ midiURL })}>
-                                <span>▶️</span>
-                                {children}
-                            </div>
-                        )
-                }
+                <div className={customClass}>
+                    {
+                        selectedMidi.startedAt && !selectedMidi.paused
+                            ? (
+                                <div onClick={pauseMidi}>
+                                    ⏸️
+                                </div>
+                            ) : (
+                                <div onClick={resumeMidi}>
+                                    ▶️
+                                </div>
+                            )
+                    }
+                    <div className={style.stop} onClick={stopMidi}>
+                        ⏹️
+                    </div>
+                    {children}
+                </div>
             </div>
         );
     }
@@ -54,16 +59,14 @@ export default ({
                         ? (
                             <span onClick={(event) => {
                                 // we don't want to show the lump detailed view when interacting with the player
-                                event.stopPropagation();
                                 stopMidi();
                             }}
                             >
-                                ⏹️️
+                                ⏹️
                             </span>
                         ) : (
                             <span onClick={(event) => {
                                 // we don't want to show the lump detailed view when interacting with the player
-                                event.stopPropagation();
                                 selectMidi({
                                     midiURL,
                                     lump,
