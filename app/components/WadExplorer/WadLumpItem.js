@@ -5,12 +5,40 @@ import style from './WadLumpItem.scss';
 
 import WadLumpDetails from './WadLumpDetails';
 import Midi from '../AudioPlayers/Midi';
+import ErrorMessage from '../Messages/ErrorMessage';
 
 const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.name === lump.name;
+
+const renderImage = ({ lump, simpleImage }) => {
+    if (simpleImage === null) {
+        return (
+            <div>
+                <ErrorMessage message="Could not load image." />
+            </div>
+        );
+    }
+
+    if (!simpleImage && lump.data.buffer) {
+        return (
+            <div className={style.loading}>Loading...</div>
+        );
+    }
+
+    return (
+        <div className={style.wadLumpImage}>
+            <img
+                title={`${lump.name} (${lump.width}×${lump.height})`}
+                alt={lump.name}
+                src={simpleImage ? URL.createObjectURL(new Blob([simpleImage])) : lump.data}
+            />
+        </div>
+    );
+};
 
 export default ({
     lump,
     midi,
+    simpleImage,
     wad,
     selectedLump,
     selectedLumpType,
@@ -29,15 +57,7 @@ export default ({
             >
                 <h4>{lump.name}</h4>
                 <div className={style.wadLumpSummary}>
-                    {lump.isImage && (
-                        <div className={style.wadLumpImage}>
-                            <img
-                                title={`${lump.name} (${lump.width}×${lump.height})`}
-                                alt={lump.name}
-                                src={lump.data}
-                            />
-                        </div>
-                    )}
+                    {lump.isImage && renderImage({ lump, simpleImage })}
                     {lump.convertsToMidi && (
                         <Midi
                             midi={midi}
@@ -60,6 +80,7 @@ export default ({
             lump={lump}
             wad={wad}
             midi={midi}
+            simpleImage={simpleImage}
             selectedMidi={selectedMidi}
             selectMidi={selectMidi}
             stopMidi={stopMidi}
