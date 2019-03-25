@@ -1,10 +1,14 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const info = require('./package.json');
 
 const isProduction = argv => argv.mode === 'production';
 
 module.exports = (env, argv) => ({
+    output: {
+        filename: '[name].[hash].js',
+    },
     module: {
         rules: [
             {
@@ -54,6 +58,14 @@ module.exports = (env, argv) => ({
                     },
                 }],
             },
+            {
+                test: /\.js$/,
+                include: /workers/,
+                use: [{
+                    loader: 'worker-loader',
+                    options: { name: '[name].[hash].js' },
+                }],
+            },
         ],
     },
     plugins: [
@@ -61,6 +73,7 @@ module.exports = (env, argv) => ({
             template: isProduction(argv) ? 'app/templates/index.html' : 'app/templates/index-without-ga.html',
             filename: isProduction(argv) ? '../index.html' : 'index.html',
         }),
+        new CleanWebpackPlugin(),
         new webpack.DefinePlugin({
             PROJECT: JSON.stringify(info.name),
             VERSION: JSON.stringify(info.version),

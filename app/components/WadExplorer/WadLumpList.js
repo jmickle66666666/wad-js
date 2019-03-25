@@ -11,27 +11,29 @@ export default ({
     selectedLumpType,
     selectedMidi,
     midis,
+    simpleImages,
     selectLump,
     selectMidi,
     stopMidi,
     focusOnWad,
     focusOnLump,
 }) => (
-    <div className={style.wadLumpsOuter}>
-        <Help id="wad-lumps" title="the lumps panel">
-            <h3 className={style.wadLumpsTitle} onClick={focusOnWad}>
-                {selectedLumpType}
-            </h3>
-        </Help>
-        <div className={style.wadLumpsInner}>
-            <div className={style.wadLumpsList}>
-                {Object.keys(wad.lumps[selectedLumpType]).map((lumpName) => {
-                    const lump = wad.lumps[selectedLumpType][lumpName];
-                    return (lump
+        <div className={style.wadLumpsOuter}>
+            <Help id="wad-lumps" title="the lumps panel">
+                <h3 className={style.wadLumpsTitle} onClick={focusOnWad}>
+                    {selectedLumpType}
+                </h3>
+            </Help>
+            <div className={style.wadLumpsInner}>
+                <div className={style.wadLumpsList}>
+                    {Object.keys(wad.lumps[selectedLumpType]).map((lumpName) => {
+                        const lump = wad.lumps[selectedLumpType][lumpName];
+                        return (lump
                             && (
                                 <WadLumpItem
                                     key={lumpName}
                                     midi={midis && midis[lumpName]}
+                                    simpleImage={simpleImages && simpleImages[lumpName]}
                                     lump={lump}
                                     wad={wad}
                                     selectedLump={selectedLump}
@@ -43,9 +45,9 @@ export default ({
                                     focusOnLump={focusOnLump}
                                 />
                             )
-                    ) || null;
-                })}
+                        ) || null;
+                    })}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );

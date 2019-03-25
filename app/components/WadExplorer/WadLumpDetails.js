@@ -8,6 +8,7 @@ export default ({
     lump,
     wad,
     midi,
+    simpleImage,
     selectedMidi,
     selectMidi,
     stopMidi,
@@ -22,18 +23,19 @@ export default ({
             <div className={style.wadLumpDetailsInner}>
                 <div className={style.wadLumpDetailsEntry}>
                         Type:
-                        {' '}
+                    {' '}
                     {lump.type}
                 </div>
                 <div className={style.wadLumpDetailsEntry}>
                         Size:
-                        {' '}
+                    {' '}
                     {lump.sizeInBytes}
                 </div>
                 <WadLumpDetailDisplay
                     wad={wad}
                     lump={lump}
                     midi={midi}
+                    simpleImage={simpleImage}
                     selectedMidi={selectedMidi}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}

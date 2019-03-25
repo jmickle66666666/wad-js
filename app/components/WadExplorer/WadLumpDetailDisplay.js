@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { INTERMISSION, STATUS_BAR } from '../../lib/constants';
+
 import Palettes from '../Lumps/Palettes';
 import Colormaps from '../Lumps/Colormaps';
 import Map from '../Lumps/Map';
@@ -13,6 +15,7 @@ export default ({
     wad,
     lump,
     midi,
+    simpleImage,
     selectedMidi,
     selectMidi,
     stopMidi,
@@ -38,7 +41,11 @@ export default ({
     }
     case 'flats': {
         return (
-            <ImageLump wad={wad} lump={lump} />
+            <ImageLump
+                wad={wad}
+                lump={lump}
+                simpleImage={simpleImage}
+            />
         );
     }
     case 'patches': {
@@ -67,6 +74,22 @@ export default ({
         );
     }
     case 'menu': {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
+        );
+    }
+    case INTERMISSION: {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
+        );
+    }
+    case STATUS_BAR: {
         return (
             <ImageLump
                 wad={wad}

@@ -1,3 +1,11 @@
+## v0.1.26: Image worker
+
+* Flats are now outsourced to workers when processing WADs. This allows to upload files much faster and also update the UI much faster so that you can browse the data without having to wait for the images to be processed and rendered.
+
+## v0.1.25: MIDI playback adjustments
+
+* I upgraded the MIDIjs script. As a result, I was able to implement more playback functionalities. Namely, pause and resume. I decided to add this behavior to the "portable" MIDI player that appears at the bottom of the screen, to keep the MIDI lumps simple.
+
 ## v0.1.24: MIDI conversion queue
 
 * Now that we have a nice-looking MIDI player, it was time to tackle a better way to send tasks to our MIDI-conversion worker. Once a WAD is uploaded, the app will look for MUS lumps in it and add them to a queue that is processed by the worker. The worker will check for more lumps to convert after it is done with the current one until the queue is empty. Next, I'm hoping to prioritize the wad and lumps that are currently being displayed on the screen.
