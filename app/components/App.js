@@ -4,6 +4,7 @@ import moment from 'moment';
 import style from './App.scss';
 
 import MidiConverter from '../workers/midiConverter';
+import SimpleImageConverter from '../workers/simpleImageConverter';
 import MapParser from '../workers/mapParser';
 
 import Wad from '../models/Wad';
@@ -34,10 +35,16 @@ export default class App extends Component {
             queue: {},
             converted: {},
         },
+        simpleImages: {
+            queue: {},
+            converted: {},
+        },
         displayError: {},
     }
 
     midiConverter = new MidiConverter()
+
+    simpleImageConverter = new SimpleImageConverter();
 
     mapParser = new MapParser();
 
@@ -48,7 +55,11 @@ export default class App extends Component {
         }), () => {
             const { wads } = this.state;
             const wadIds = Object.keys(wads || {});
-            wadIds.map(wadId => this.addToMidiConversionQueue({ wad: wads[wadId] }));
+            wadIds.map((wadId) => {
+                this.addToMidiConversionQueue({ wad: wads[wadId] });
+                this.addToSimpleImageConversionQueue({ wad: wads[wadId] });
+                return null;
+            });
         });
 
         const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
@@ -84,17 +95,18 @@ export default class App extends Component {
         console.error('A worker errored out.', { error });
     }
 
+    // Midi converter
+
     startMidiConverterWorker() {
         this.midiConverter = new MidiConverter();
         this.midiConverter.onmessage = this.saveConvertedMidi;
         this.midiConverter.onerror = this.workerError;
     }
 
-    getnextMusInQueue = ({ wadId }) => {
+    getNextMusInQueue = ({ wadId }) => {
         const { midis: { queue } } = this.state;
 
         let nextLump = {};
-
 
         const currentWadQueueIds = Object.keys(queue[wadId] || {});
 
@@ -142,6 +154,10 @@ export default class App extends Component {
     }
 
     addToMidiConversionQueue({ wad }) {
+        if (!wad.lumps.music) {
+            return;
+        }
+
         const musicLumpIds = Object.keys(wad.lumps.music);
         const musTracks = musicLumpIds
             .map(musLumpId => wad.lumps.music[musLumpId])
@@ -161,7 +177,7 @@ export default class App extends Component {
         }
 
         if (musTracks.length > 0) {
-            const { done } = this.getnextMusInQueue({ wadId: wad.id });
+            const { done } = this.getNextMusInQueue({ wadId: wad.id });
             if (done) {
                 const firstLump = { ...musTracks[0] };
                 this.startMidiConverterWorker();
@@ -284,7 +300,7 @@ export default class App extends Component {
                 },
             };
         }, () => {
-            const { nextLump, nextWadId, done } = this.getnextMusInQueue({ wadId });
+            const { nextLump, nextWadId, done } = this.getNextMusInQueue({ wadId });
 
             if (!done) {
                 this.midiConverter.postMessage({
@@ -298,6 +314,194 @@ export default class App extends Component {
             if (!preselectedMidi) {
                 const { midis: { converted: midis } } = this.state;
                 this.selectFirstMidi({ midis });
+            }
+        });
+    }
+
+    // Simple image converter
+
+    startSimpleImageConverterWorker() {
+        this.simpleImageConverter = new SimpleImageConverter();
+        this.simpleImageConverter.onmessage = this.saveConvertedSimpleImage;
+        this.simpleImageConverter.onerror = this.workerError;
+    }
+
+    getNextSimpleImageInQueue = ({ wadId }) => {
+        const { simpleImages: { queue } } = this.state;
+
+        let nextLump = {};
+
+        const currentWadQueueIds = Object.keys(queue[wadId] || {});
+
+        console.log({ currentWadQueueIds });
+
+        if (currentWadQueueIds.length > 0) {
+            nextLump = queue[wadId][currentWadQueueIds[0]];
+            return {
+                nextLump,
+                nextWadId: wadId,
+            };
+        }
+
+        const wadIds = Object.keys(queue);
+
+        console.log({ wadIds, queue });
+
+        let foundLumps = false;
+        let j = 0;
+        while (!foundLumps) {
+            if (j === wadIds.length) {
+                break;
+            }
+
+            const nextWadId = wadIds[j];
+            const nextWadQueue = queue[nextWadId];
+            const nextWadQueueIds = Object.keys(nextWadQueue);
+
+            console.log({ nextWadQueueIds });
+
+            if (nextWadQueueIds.length > 0) {
+                foundLumps = true;
+                const nextLumpId = nextWadQueueIds[0];
+                return {
+                    nextLump: nextWadQueue[nextLumpId],
+                    nextWadId,
+                };
+            }
+
+            j++;
+        }
+
+        console.log('Simple image conversion queue is empty.');
+        return { done: true };
+    }
+
+    addToSimpleImageConversionQueue({ wad }) {
+        if (!wad.lumps.flats) {
+            return;
+        }
+
+        const flatLumpIds = Object.keys(wad.lumps.flats);
+        const flats = flatLumpIds
+            .map(flatLumpId => wad.lumps.flats[flatLumpId])
+            .filter((flatLump) => {
+                const { simpleImages } = this.state;
+                const alreadyExists = (
+                    simpleImages.converted[wad.id]
+                    && simpleImages.converted[wad.id][flatLump.name]
+                );
+                return !alreadyExists;
+            });
+
+        const flatLumps = {};
+        for (let i = 0; i < flats.length; i++) {
+            const lump = flats[i];
+            flatLumps[lump.name] = { ...lump };
+        }
+
+        if (flats.length > 0) {
+            const { done } = this.getNextSimpleImageInQueue({ wadId: wad.id });
+            if (done) {
+                const firstLump = { ...flats[0] };
+                this.startSimpleImageConverterWorker();
+                this.simpleImageConverter.postMessage({
+                    wadId: wad.id,
+                    lump: firstLump,
+                    palette: wad && wad.palette,
+                });
+            }
+        }
+
+        this.setState((prevState) => {
+            const { simpleImages } = prevState;
+            const wadFlats = simpleImages.queue[wad.id];
+            return {
+                simpleImages: {
+                    ...simpleImages,
+                    queue: {
+                        ...simpleImages.queue,
+                        [wad.id]: {
+                            ...wadFlats,
+                            ...flatLumps,
+                        },
+                    },
+                },
+            };
+        });
+    }
+
+    saveConvertedSimpleImage = (payload) => {
+        const { wadId, lumpId, image } = payload.data;
+
+        // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
+        if (!image) {
+            this.setState((prevState) => {
+                const { simpleImages } = prevState;
+                const wadQueueIds = Object.keys(simpleImages.queue[wadId] || {});
+                const updatedWadQueue = {};
+                for (let i = 0; i < wadQueueIds.length; i++) {
+                    const lumpName = wadQueueIds[i];
+                    if (lumpName !== lumpId) {
+                        updatedWadQueue[lumpName] = { ...simpleImages.queue[wadId][lumpName] };
+                    }
+                }
+
+                return {
+                    simpleImages: {
+                        ...simpleImages,
+                        queue: {
+                            ...simpleImages.queue,
+                            [wadId]: {
+                                ...updatedWadQueue,
+                            },
+                        },
+                    },
+                };
+            });
+        }
+
+        // it worked
+        this.setState((prevState) => {
+            const { simpleImages } = prevState;
+            const wadConverted = simpleImages.converted[wadId];
+            const wadQueueIds = Object.keys(simpleImages.queue[wadId] || {});
+            const updatedWadQueue = {};
+            for (let i = 0; i < wadQueueIds.length; i++) {
+                const lumpName = wadQueueIds[i];
+                if (lumpName !== lumpId) {
+                    updatedWadQueue[lumpName] = { ...simpleImages.queue[wadId][lumpName] };
+                }
+            }
+
+            return {
+                simpleImages: {
+                    ...simpleImages,
+                    queue: {
+                        ...simpleImages.queue,
+                        [wadId]: {
+                            ...updatedWadQueue,
+                        },
+                    },
+                    converted: {
+                        ...simpleImages.converted,
+                        [wadId]: {
+                            ...wadConverted,
+                            [lumpId]: image,
+                        },
+                    },
+                },
+            };
+        }, () => {
+            const { nextLump, nextWadId, done } = this.getNextSimpleImageInQueue({ wadId });
+
+            if (!done) {
+                const { wads } = this.state;
+                const nextWad = wads[nextWadId];
+                this.simpleImageConverter.postMessage({
+                    wadId: nextWadId,
+                    lump: nextLump,
+                    palette: nextWad && nextWad.palette,
+                });
             }
         });
     }
@@ -376,8 +580,12 @@ export default class App extends Component {
             return ({
                 wads: updatedWads,
             });
-        }, () => this.addToMidiConversionQueue({ wad }));
+        }, () => {
+            this.addToMidiConversionQueue({ wad });
+            this.addToSimpleImageConversionQueue({ wad });
+        });
     }
+
 
     deleteWad = (wadId) => {
         this.setState((prevState) => {
@@ -785,6 +993,7 @@ export default class App extends Component {
             selectedLumpType,
             selectedMidi,
             midis,
+            simpleImages,
         } = this.state;
 
         if (displayError.error) {
@@ -874,6 +1083,7 @@ export default class App extends Component {
                                 selectedLumpType={selectedLumpType}
                                 selectedMidi={selectedMidi}
                                 midis={midis.converted[selectedWad.id]}
+                                simpleImages={simpleImages.converted[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}

@@ -15,94 +15,99 @@ export default ({
     wad,
     lump,
     midi,
+    simpleImage,
     selectedMidi,
     selectMidi,
     stopMidi,
 }) => {
     switch (lump.type) {
-        default: {
-            return null;
-        }
-        case 'palettes': {
+    default: {
+        return null;
+    }
+    case 'palettes': {
+        return (
+            <Palettes lump={lump} />
+        );
+    }
+    case 'colormaps': {
+        return (
+            <Colormaps wad={wad} lump={lump} />
+        );
+    }
+    case 'maps': {
+        return (
+            <Map wad={wad} lump={lump} />
+        );
+    }
+    case 'flats': {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+                simpleImage={simpleImage}
+            />
+        );
+    }
+    case 'patches': {
+        if (lump.isPNAMES) {
             return (
-                <Palettes lump={lump} />
+                <PatchNames lump={lump} />
             );
         }
-        case 'colormaps': {
+        return (
+            <ImageLump wad={wad} lump={lump} />
+        );
+    }
+    case 'textures': {
+        if (lump.isTEXTUREx) {
             return (
-                <Colormaps wad={wad} lump={lump} />
+                <TextureNames lump={lump} />
             );
         }
-        case 'maps': {
-            return (
-                <Map wad={wad} lump={lump} />
-            );
-        }
-        case 'flats': {
-            return (
-                <ImageLump wad={wad} lump={lump} />
-            );
-        }
-        case 'patches': {
-            if (lump.isPNAMES) {
-                return (
-                    <PatchNames lump={lump} />
-                );
-            }
-            return (
-                <ImageLump wad={wad} lump={lump} />
-            );
-        }
-        case 'textures': {
-            if (lump.isTEXTUREx) {
-                return (
-                    <TextureNames lump={lump} />
-                );
-            }
-            return (
-                <Texture wad={wad} lump={lump} />
-            );
-        }
-        case 'sprites': {
-            return (
-                <ImageLump wad={wad} lump={lump} />
-            );
-        }
-        case 'menu': {
-            return (
-                <ImageLump
-                    wad={wad}
-                    lump={lump}
-                />
-            );
-        }
-        case INTERMISSION: {
-            return (
-                <ImageLump
-                    wad={wad}
-                    lump={lump}
-                />
-            );
-        }
-        case STATUS_BAR: {
-            return (
-                <ImageLump
-                    wad={wad}
-                    lump={lump}
-                />
-            );
-        }
-        case 'music': {
-            return (
-                <Music
-                    wad={wad}
-                    lump={lump}
-                    midi={midi}
-                    selectedMidi={selectedMidi}
-                    selectMidi={selectMidi}
-                    stopMidi={stopMidi}
-                />
-            );
-        }
+        return (
+            <Texture wad={wad} lump={lump} />
+        );
+    }
+    case 'sprites': {
+        return (
+            <ImageLump wad={wad} lump={lump} />
+        );
+    }
+    case 'menu': {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
+        );
+    }
+    case INTERMISSION: {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
+        );
+    }
+    case STATUS_BAR: {
+        return (
+            <ImageLump
+                wad={wad}
+                lump={lump}
+            />
+        );
+    }
+    case 'music': {
+        return (
+            <Music
+                wad={wad}
+                lump={lump}
+                midi={midi}
+                selectedMidi={selectedMidi}
+                selectMidi={selectMidi}
+                stopMidi={stopMidi}
+            />
+        );
+    }
     }
 };

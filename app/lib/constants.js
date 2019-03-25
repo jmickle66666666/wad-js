@@ -71,6 +71,10 @@ export const UNCATEGORIZED = 'uncategorized';
 
 export const THINGS = 'THINGS';
 
+export const TEXTMAP = 'TEXTMAP';
+
+export const ENDMAP = 'ENDMAP';
+
 export const MAP_LUMPS = [
     THINGS,
     'LINEDEFS',
@@ -85,8 +89,11 @@ export const MAP_LUMPS = [
     'BLOCKMAP',
     // Hexen only
     'BEHAVIOR',
+    // ZDoom only? (optional)
+    'SCRIPTS',
     // Universal Doom Map Format only
     'ZNODES',
+    'DIALOGUE',
 ];
 
 export const OPENGL_MAP_LUMPS = [

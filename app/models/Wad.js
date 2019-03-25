@@ -543,9 +543,7 @@ export default class Wad {
         }
     }
 
-    readFlat(data, name, palette) {
-        const colorIndexes = [];
-
+    readFlat(data) {
         // hack for Heretic 65x64 scrolling flats
         const width = data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS;
 
@@ -559,16 +557,7 @@ export default class Wad {
             height,
         };
 
-        for (let i = 0; i < data.byteLength; i++) {
-            colorIndexes.push(data.getUint8(i));
-        }
-
-        const image = this.convertColorIndexesToDataURL(colorIndexes, width, height, name, palette);
-
-        return {
-            metadata,
-            image,
-        };
+        return { metadata };
     }
 
     readImageDataHeader(data) {
@@ -823,42 +812,42 @@ export default class Wad {
                         lumpClusterType = '';
                     } else if (lumpClusterType) {
                         switch (lumpClusterType) {
-                            default: {
-                                break;
-                            }
-                            case 'colormaps': {
-                                parsedLumpData = this.readColormaps(lumpData, name);
-                                break;
-                            }
-                            case 'flats': {
-                                const { image, metadata } = this.readFlat(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
-                                break;
-                            }
-                            case 'patches': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = lumpData;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
-                            case 'sprites': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
+                            break;
+                        }
                         }
 
                         // we know the type of this lump because it belongs to a cluster
@@ -901,7 +890,7 @@ export default class Wad {
                                     ...lumpIndexData,
                                     ...metadata,
                                 };
-                            } else if (INTERMISSION_LUMPS.test(name) || name === INTERMISSION_SCREEN) {
+                            } else if ((INTERMISSION_LUMPS.test(name) || name === INTERMISSION_SCREEN) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = INTERMISSION;
                                 const { image, metadata } = this.readImageData(
                                     lumpData, name, paletteData,
@@ -911,7 +900,7 @@ export default class Wad {
                                     ...lumpIndexData,
                                     ...metadata,
                                 };
-                            } else if (STATUS_BAR_LUMPS.test(name)) {
+                            } else if (STATUS_BAR_LUMPS.test(name) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = STATUS_BAR;
                                 const { image, metadata } = this.readImageData(
                                     lumpData, name, paletteData,
@@ -925,7 +914,7 @@ export default class Wad {
                                 lumpType = STATUS_BAR;
                             } else if (MAPINFO.includes(name)) {
                                 lumpType = MAP;
-                            } else if (MENU_SCREENS.includes(name)) {
+                            } else if (MENU_SCREENS.includes(name) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = MENU;
                                 const { image, metadata } = this.readImageData(
                                     lumpData, name, paletteData,
@@ -965,8 +954,9 @@ export default class Wad {
 
         this.indexLumpCount = indexLumpCount;
         this.lumps = organizedLumps;
-        this.processed = true;
         this.iwad = iwad;
+        this.palette = paletteData;
+        this.processed = true;
 
         callback(this);
         return true;
@@ -1111,6 +1101,7 @@ export default class Wad {
             name,
             type,
             iwad,
+            palette,
             size,
             bytesLoaded,
             uploadStartAt,
@@ -1132,6 +1123,7 @@ export default class Wad {
         this.name = name;
         this.type = type;
         this.iwad = iwad;
+        this.palette = palette;
         this.size = size;
         this.bytesLoaded = bytesLoaded;
         this.uploadStartAt = uploadStartAt;
@@ -1170,6 +1162,7 @@ export default class Wad {
             name: this.name,
             type: this.type,
             iwad: this.iwad,
+            palette: this.palette,
             size: this.size,
             bytesLoaded: this.bytesLoaded,
             uploadStartAt: this.uploadStartAt,
