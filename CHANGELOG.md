@@ -1,4 +1,6 @@
-## v0.1.26
+## v0.1.26: Image worker
+
+* Flats are now outsourced to workers when processing WADs. This allows to upload files much faster and also update the UI much faster so that you can browse the data without having to wait for the images to be processed and rendered.
 
 ## v0.1.25: MIDI playback adjustments
 
