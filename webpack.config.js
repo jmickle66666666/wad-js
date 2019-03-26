@@ -63,17 +63,20 @@ module.exports = (env, argv) => ({
                 include: /workers/,
                 use: [{
                     loader: 'worker-loader',
-                    options: { name: '[name].[hash].js' },
+                    options: {
+                        name: '[name].[hash].js',
+                        publicPath: isProduction(argv) ? 'dist/' : '',
+                    },
                 }],
             },
         ],
     },
     plugins: [
+        new CleanWebpackPlugin(),
         new HtmlWebPackPlugin({
             template: isProduction(argv) ? 'app/templates/index.html' : 'app/templates/index-without-ga.html',
             filename: isProduction(argv) ? '../index.html' : 'index.html',
         }),
-        new CleanWebpackPlugin(),
         new webpack.DefinePlugin({
             PROJECT: JSON.stringify(info.name),
             VERSION: JSON.stringify(info.version),

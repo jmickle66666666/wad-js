@@ -10,6 +10,78 @@
     z-index: 999;
     display: flex;
     justify-content: space-between;
+
+    a:hover {
+        color: rgb(140, 140, 140);
+    }
+}
+
+.headerMobile {
+    display: flex;
+    justify-content: space-between;
+
+    & .navIcon {
+            transition: none;
+    }
+}
+
+.hamburgerInput {
+    display: none;
+
+    &:checked ~ .headerMobile .hamburgerIcon .navIcon:before {
+        transform: rotate(-45deg);
+        top: 0;
+    }
+
+    &:checked ~ .headerMobile .hamburgerIcon .navIcon:after {
+        transform: rotate(45deg);
+        top: 0;
+    }
+
+    &:checked ~ .headerMobile .hamburgerIcon .navIcon {
+        background: transparent;
+    }
+
+    &:checked ~ .headerInner {
+        display: flex;
+    }
+}
+
+.hamburgerIcon {
+    display: none;
+    cursor: pointer;
+    float: right;
+    padding: 8px 12px;
+    position: relative;
+    user-select: none;
+}
+
+.navIcon {
+    background: white;
+    display: block;
+    height: 2px;
+    position: relative;
+    transition: background .2s ease-out;
+    width: 18px;
+  
+  &:before,
+  &:after {
+    background: white;
+    content: '';
+    display: block;
+    height: 100%;
+    position: absolute;
+    transition: all .2s ease-out;
+    width: 100%;
+  }
+  
+  &:before {
+    top: 5px;
+  }
+  
+  &:after {
+    top: -5px;
+  }
 }
 
 .headerInner {
@@ -24,6 +96,54 @@
             content: "•";
             margin-right: 7px;
         }
+    }
+}
+
+.headerLogoMobile {
+    display: flex;
+    overflow: hidden;
+}
+
+.mobileVersion {
+    display: none;
+    color: white;
+    margin-left: 7px;
+}
+
+@media (max-width: 500px) {
+    .hamburgerIcon {
+        display: block;
+    }
+
+    .headerOuter {
+        flex-direction: column;
+    }
+
+    .headerInner {
+        display: none;
+        flex-direction: column;
+
+        div {
+            margin-top: 7px;
+            margin-bottom: 4px;
+        }
+
+        & > div:not(:first-child) {
+            margin-left: 0;
+            
+            &::before {
+                content: none;
+                margin-right: 0;
+            }
+        }
+    }
+
+    .desktopVersion {
+        display: none;
+    }
+
+    .mobileVersion {
+        display: block;
     }
 }
 
