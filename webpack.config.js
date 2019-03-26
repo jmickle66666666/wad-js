@@ -3,7 +3,26 @@ const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const info = require('./package.json');
 
-const isProduction = argv => argv.mode === 'production';
+const { TARGET } = process.env;
+const isProduction = TARGET === 'build';
+console.log({ TARGET });
+
+const plugins = [
+    new HtmlWebPackPlugin({
+        template: isProduction ? 'app/templates/index.html' : 'app/templates/index-without-ga.html',
+        filename: isProduction ? '../index.html' : 'index.html',
+    }),
+    new webpack.DefinePlugin({
+        PROJECT: JSON.stringify(info.name),
+        VERSION: JSON.stringify(info.version),
+        ISSUES: JSON.stringify(info.bugs.url),
+        REPO: JSON.stringify(info.homepage),
+    }),
+];
+
+if (isProduction) {
+    plugins.unshift(new CleanWebpackPlugin());
+}
 
 module.exports = (env, argv) => ({
     output: {
@@ -65,24 +84,12 @@ module.exports = (env, argv) => ({
                     loader: 'worker-loader',
                     options: {
                         name: '[name].[hash].js',
-                        publicPath: isProduction(argv) ? 'dist/' : '',
+                        publicPath: isProduction ? 'dist/' : '',
                     },
                 }],
             },
         ],
     },
-    plugins: [
-        new CleanWebpackPlugin(),
-        new HtmlWebPackPlugin({
-            template: isProduction(argv) ? 'app/templates/index.html' : 'app/templates/index-without-ga.html',
-            filename: isProduction(argv) ? '../index.html' : 'index.html',
-        }),
-        new webpack.DefinePlugin({
-            PROJECT: JSON.stringify(info.name),
-            VERSION: JSON.stringify(info.version),
-            ISSUES: JSON.stringify(info.bugs.url),
-            REPO: JSON.stringify(info.homepage),
-        }),
-    ],
+    plugins,
     devtool: 'cheap-module-eval-source-map',
 });
