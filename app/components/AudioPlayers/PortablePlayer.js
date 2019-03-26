@@ -21,9 +21,12 @@ const convertToDisplayTime = (time) => {
 
 export default ({
     selectedMidi,
+    selectedLumpType,
+    selectedWad,
     resumeMidi,
     pauseMidi,
     stopMidi,
+    focusOnLump,
 }) => (
     <Midi
         globalPlayer
@@ -33,16 +36,18 @@ export default ({
         stopMidi={stopMidi}
         customClass={style.player}
     >
-        <div className={style.songName}>
+        <div
+            className={style.songName}
+            href={`#${selectedWad.id}/${selectedLumpType}/${selectedMidi.lumpName}`}
+            onClick={focusOnLump}
+        >
             {selectedMidi.lumpName}
         </div>
-        <Fragment>
-            <div className={style.dataBlock}>
-                    -
-                </div>
-            <div className={style.dataBlock}>
-                {convertToDisplayTime(selectedMidi.time)}
-            </div>
-        </Fragment>
+        <div className={style.dataBlock}>
+                -
+        </div>
+        <div className={style.dataBlock}>
+            {convertToDisplayTime(selectedMidi.time)}
+        </div>
     </Midi>
 );
