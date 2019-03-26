@@ -56,11 +56,11 @@ export default class App extends Component {
 
 
         if (offscreenCanvasSupportMessage) {
-            const { state, globalErrors } = this;
+            const { state } = this;
             this.state = {
                 ...state,
                 globalErrors: {
-                    ...globalErrors,
+                    ...state.globalErrors,
                     offscreenCanvasSupport: offscreenCanvasSupportMessage,
                 },
             };
