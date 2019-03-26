@@ -402,6 +402,10 @@ export default class App extends Component {
     }
 
     addToSimpleImageConversionQueue({ wad }) {
+        if (!offscreenCanvasSupported) {
+            return;
+        }
+
         if (!wad.lumps.flats) {
             return;
         }
@@ -1099,7 +1103,6 @@ export default class App extends Component {
             );
         }
 
-        console.log({ globalErrors });
         return (
             <div className={style.app}>
                 <Header />
