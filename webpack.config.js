@@ -24,7 +24,7 @@ if (isProduction) {
     plugins.unshift(new CleanWebpackPlugin());
 }
 
-module.exports = (env, argv) => ({
+module.exports = () => ({
     output: {
         filename: '[name].[hash].js',
     },

@@ -10,8 +10,10 @@ import MapParser from '../workers/mapParser';
 import Wad from '../models/Wad';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
+import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 
 import Header from './Header';
+import GlobalErrors from './Messages/GlobalErrors';
 import Logo from './Logo';
 import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
@@ -23,8 +25,15 @@ const localStorageManager = new LocalStorageManager();
 
 const prefixWindowtitle = document.title;
 
+
+const {
+    supported: offscreenCanvasSupported,
+    message: offscreenCanvasSupportMessage,
+} = offscreenCanvasSupport();
+
 export default class App extends Component {
     state = {
+        globalErrors: {},
         wads: {},
         selectedWad: {},
         selectedLump: {},
@@ -40,6 +49,22 @@ export default class App extends Component {
             converted: {},
         },
         displayError: {},
+    }
+
+    constructor(props) {
+        super(props);
+
+
+        if (offscreenCanvasSupportMessage) {
+            const { state } = this;
+            this.state = {
+                ...state,
+                globalErrors: {
+                    ...state.globalErrors,
+                    offscreenCanvasSupport: offscreenCanvasSupportMessage,
+                },
+            };
+        }
     }
 
     midiConverter = new MidiConverter()
@@ -377,6 +402,10 @@ export default class App extends Component {
     }
 
     addToSimpleImageConversionQueue({ wad }) {
+        if (!offscreenCanvasSupported) {
+            return;
+        }
+
         if (!wad.lumps.flats) {
             return;
         }
@@ -966,11 +995,6 @@ export default class App extends Component {
         }
     }
 
-    componentDidCatch(error, info) {
-        document.title = `${prefixWindowtitle} / oops!`;
-        this.setState(() => ({ displayError: { error, info } }));
-    }
-
     getWADsAsObjectURL = () => {
         const { wads } = this.state;
         const wadIds = Object.keys(wads);
@@ -984,6 +1008,32 @@ export default class App extends Component {
         return objectURL;
     }
 
+    dismissGlobalError = (errorId) => {
+        this.setState((prevState) => {
+            const { globalErrors } = prevState;
+            const globalErrorIds = Object.keys(globalErrors || {});
+            const updatedGlobalErrors = {};
+
+            for (let i = 0; i < globalErrorIds.length; i++) {
+                const globalErrorId = globalErrorIds[i];
+                if (globalErrorId !== errorId) {
+                    updatedGlobalErrors[globalErrorId] = globalErrors[globalErrorId];
+                }
+            }
+
+            return ({
+                globalErrors: {
+                    ...updatedGlobalErrors,
+                },
+            });
+        });
+    }
+
+    componentDidCatch(error, info) {
+        document.title = `${prefixWindowtitle} / oops!`;
+        this.setState(() => ({ displayError: { error, info } }));
+    }
+
     render() {
         const {
             displayError,
@@ -994,6 +1044,7 @@ export default class App extends Component {
             selectedMidi,
             midis,
             simpleImages,
+            globalErrors,
         } = this.state;
 
         if (displayError.error) {
@@ -1055,6 +1106,10 @@ export default class App extends Component {
         return (
             <div className={style.app}>
                 <Header />
+                <GlobalErrors
+                    errors={globalErrors}
+                    dismissGlobalError={this.dismissGlobalError}
+                />
                 <div className={style.main}>
                     <Logo />
                     <div className={style.top}>
@@ -1108,9 +1163,12 @@ export default class App extends Component {
                     {selectedMidi.lumpName && (
                         <PortablePlayer
                             selectedMidi={selectedMidi}
+                            selectedLumpType={selectedLumpType}
+                            selectedWad={selectedWad}
                             resumeMidi={this.resumeMidi}
                             pauseMidi={this.pauseMidi}
                             stopMidi={this.stopMidi}
+                            focusOnLump={this.focusOnLump}
                         />
                     )}
                     <BackToTop focusOnWad={this.focusOnWad} />

@@ -12,7 +12,13 @@
 }
 
 .songName {
+    height: 20px;
     margin-left: 5px;
     overflow: hidden;
     word-break: break-all;
+
+    &:hover {
+        color: rgb(140, 140, 140);
+        text-decoration: none;
+    }
 }

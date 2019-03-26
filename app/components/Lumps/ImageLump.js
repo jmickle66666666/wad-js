@@ -2,10 +2,14 @@ import React, { Fragment } from 'react';
 
 import style from './ImageLump.scss';
 
+import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
+
 import ErrorMessage from '../Messages/ErrorMessage';
 
+const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
+
 const renderImage = ({ lump, simpleImage }) => {
-    if (simpleImage === null) {
+    if (!offscreenCanvasSupported || simpleImage === null) {
         return (
             <div>
                 <ErrorMessage message="Could not load image." />

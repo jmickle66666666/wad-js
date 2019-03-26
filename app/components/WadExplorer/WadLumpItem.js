@@ -1,16 +1,19 @@
 import React from 'react';
 
-
 import style from './WadLumpItem.scss';
+
+import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 
 import WadLumpDetails from './WadLumpDetails';
 import Midi from '../AudioPlayers/Midi';
 import ErrorMessage from '../Messages/ErrorMessage';
 
+const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
+
 const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.name === lump.name;
 
 const renderImage = ({ lump, simpleImage }) => {
-    if (simpleImage === null) {
+    if (!offscreenCanvasSupported || simpleImage === null) {
         return (
             <div>
                 <ErrorMessage message="Could not load image." />
