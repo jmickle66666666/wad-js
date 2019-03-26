@@ -10,11 +10,19 @@
     z-index: 999;
     display: flex;
     justify-content: space-between;
+
+    a:hover {
+        color: rgb(140, 140, 140);
+    }
 }
 
 .headerMobile {
     display: flex;
     justify-content: space-between;
+
+    & .navIcon {
+            transition: none;
+    }
 }
 
 .hamburgerInput {
@@ -91,6 +99,17 @@
     }
 }
 
+.headerLogoMobile {
+    display: flex;
+    overflow: hidden;
+}
+
+.mobileVersion {
+    display: none;
+    color: white;
+    margin-left: 7px;
+}
+
 @media (max-width: 500px) {
     .hamburgerIcon {
         display: block;
@@ -117,6 +136,14 @@
                 margin-right: 0;
             }
         }
+    }
+
+    .desktopVersion {
+        display: none;
+    }
+
+    .mobileVersion {
+        display: block;
     }
 }
 

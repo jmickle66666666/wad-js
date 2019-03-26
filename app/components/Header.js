@@ -12,12 +12,20 @@ export default () => (
             id="hamburger"
         />
         <div className={style.headerMobile}>
-            <Logo
-                customLogoStyle={style.logo}
-                customWadStyle={style.wad}
-                customJSStyle={style.js}
-                image={false}
-            />
+            <div className={style.headerLogoMobile}>
+                <Logo
+                    customLogoStyle={style.logo}
+                    customWadStyle={style.wad}
+                    customJSStyle={style.js}
+                    image={false}
+                />
+                <div className={style.mobileVersion}>
+                    <a target="_blank" rel="noopener noreferrer" href={REPO}>
+                        v
+                        {VERSION}
+                    </a>
+                </div>
+            </div>
             <div>
                 <label
                     className={style.hamburgerIcon}
@@ -43,7 +51,7 @@ export default () => (
                     report an issue
                 </a>
             </div>
-            <div>
+            <div className={style.desktopVersion}>
                 <a target="_blank" rel="noopener noreferrer" href={REPO}>
                     v
                     {VERSION}

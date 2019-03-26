@@ -1,3 +1,9 @@
 .invertedFill {
         fill: rgb(240, 240, 240);
 }
+
+.icon {
+    &:hover path {
+        fill: rgb(120, 120, 120);
+    }
+}
