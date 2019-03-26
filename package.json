@@ -15,8 +15,8 @@
         "url": "https://github.com/yvesgurcan/wadjs/issues"
     },
     "scripts": {
-        "start": "webpack-dev-server app --mode development",
-        "build": "webpack app --mode production",
+        "start": "TARGET=development webpack-dev-server app --mode development",
+        "build": "TARGET=build webpack app --mode production",
         "build:grunt": "grunt",
         "lint": "eslint app"
     },
