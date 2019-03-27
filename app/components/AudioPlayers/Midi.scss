@@ -1,5 +1,9 @@
-.playerButton {
-    cursor: pointer;
+.player {
+    [role=button] {
+        font-size: 30px;
+        height: 35.5px;
+        cursor: pointer;
+    }
 }
 
 .loading {
@@ -8,5 +12,6 @@
 }
 
 .stop {
-    margin-left: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
