@@ -27,23 +27,45 @@ export default ({
 }) => {
     if (globalPlayer) {
         return (
-            <div className={style.playerButton}>
+            <div className={style.player}>
                 <div className={customClass}>
                     {
                         selectedMidi.startedAt && !selectedMidi.paused
                             ? (
-                                <div onClick={pauseMidi}>
-                                    ⏸️
-                                </div>
+                                <span
+                                    role="button"
+                                    onClick={pauseMidi}
+                                    onKeyPress={pauseMidi}
+                                    tabIndex={0}
+                                >
+                                    <span role="img" aria-label="pause">
+                                        ⏸️
+                                    </span>
+                                </span>
                             ) : (
-                                <div onClick={resumeMidi}>
-                                    ▶️
-                                </div>
+                                <span
+                                    role="button"
+                                    onClick={resumeMidi}
+                                    onKeyPress={resumeMidi}
+                                    tabIndex={0}
+                                >
+                                    <span role="img" aria-label="play">
+                                        ▶️
+                                    </span>
+                                </span>
                             )
                     }
-                    <div className={style.stop} onClick={stopMidi}>
-                        ⏹️
-                    </div>
+                    <span
+                        className={style.stop}
+                        role="button"
+                        onClick={stopMidi}
+                        onKeyPress={pauseMidi}
+                        tabIndex={0}
+                    >
+                        <span role="img" aria-label="stop">
+                            ⏹️
+                        </span>
+                    </span>
                     {children}
                 </div>
             </div>
@@ -52,29 +74,45 @@ export default ({
 
     const midiURL = URL.createObjectURL(new Blob([midi]));
     if (midi) {
+        const handleStopMidi = () => {
+            // we don't want to show the lump detailed view when interacting with the player
+            stopMidi();
+        };
+
+        const handleSelectMidi = () => {
+            // we don't want to show the lump detailed view when interacting with the player
+            selectMidi({
+                midiURL,
+                lump,
+                wadId: wad.id,
+            });
+        };
+
         return (
-            <div className={style.playerButton}>
+            <div className={style.player}>
                 {
                     midiIsPlaying({ selectedMidi, wad, lump })
                         ? (
-                            <span onClick={(event) => {
-                                // we don't want to show the lump detailed view when interacting with the player
-                                stopMidi();
-                            }}
+                            <span
+                                role="button"
+                                onClick={handleStopMidi}
+                                onKeyPress={handleStopMidi}
+                                tabIndex={0}
                             >
-                                ⏹️
+                                <span role="img" aria-label="stop">
+                                    ⏹️
+                                </span>
                             </span>
                         ) : (
-                            <span onClick={(event) => {
-                                // we don't want to show the lump detailed view when interacting with the player
-                                selectMidi({
-                                    midiURL,
-                                    lump,
-                                    wadId: wad.id,
-                                });
-                            }}
+                            <span
+                                role="button"
+                                onClick={handleSelectMidi}
+                                onKeyPress={handleSelectMidi}
+                                tabIndex={0}
                             >
-                                ▶️
+                                <span role="img" aria-label="play">
+                                    ▶️
+                                </span>
                             </span>
                         )
                 }

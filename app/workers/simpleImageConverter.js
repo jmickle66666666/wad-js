@@ -16,7 +16,7 @@ async function convertColorIndexesReferencesToBlob(
     height,
     palette,
 ) {
-    if (palette.length !== COLOR_COUNT_PER_PALETTE) {
+    if (!palette || palette.length !== COLOR_COUNT_PER_PALETTE) {
         console.error('The palette does not have enough colors to draw images.');
         return null;
     }

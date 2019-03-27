@@ -1,0 +1,36 @@
+.globalMessages {
+    position: fixed;
+    top: 40px;
+    z-index: 3;
+    margin-left: 25px;
+    margin-right: 25px;
+    width: calc(100vw - 50px);
+    box-sizing: content-box;
+}
+
+.error, .info {
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    box-shadow: 2px 2px 20px rgb(20, 0, 0);
+    justify-content: space-between;
+    background: rgb(200, 200, 220);
+    color: rgb(0, 0, 160);
+    border: 1px solid rgb(0, 0, 160);
+}
+
+.error {
+    background: rgb(220, 200, 200);
+    color: rgb(160, 0, 0);
+    border: 1px solid rgb(160, 0, 0);
+}
+
+.dismissGlobalMessage {
+    margin-left: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}

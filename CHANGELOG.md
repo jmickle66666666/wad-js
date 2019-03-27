@@ -1,3 +1,13 @@
+## v0.1.27 and v0.1.28: Preparing for more workers
+
+* The UI now has a "global message" component that can show info and error messages. This comes handy when things are happening in the background or for issues that affect the whole app. There wasn't any logical place to show this kind of info before.
+
+* The app now handles the lack of support of `OffscreenCanvas` by displaying a message. It's not really an option to run the app without this feature, so a browser that is not compatible with `OffscreenCanvas` is pretty much a dealbreaker.
+
+* The MIDI player now has bigger buttons. Easier to click on 'em on a mobile device.
+
+* Now that I am more familiar with web workers, I refactored the code that handles the tasks they execute. The goal is to make the code as reusable as possible to easily create new types of workers. The end goal is to have this app convert anything you throw at it, namely sounds, maps, scripts, etc., but that's a long ways away. Right now, a big step after this one would be to parse the entire WAD for a certain file format instead of limiting the workers to a specific lump type (for example, the "simple image converter" only looks in flat lumps, but this file format also exists in menu lumps for Heretic).
+
 ## v0.1.26: Image worker
 
 * Flats are now outsourced to workers when processing WADs. This allows to upload files much faster and also update the UI much faster so that you can browse the data without having to wait for the images to be processed and rendered.
