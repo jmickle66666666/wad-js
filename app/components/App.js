@@ -66,17 +66,17 @@ export default class App extends Component {
             });
         }
 
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'savedWads',
+            text: 'Loading WADs from previous session...',
+        });
+
         const wads = await this.getWadsFromLocalMemory();
-        this.setState(() => ({
-            wads,
-        }), () => {
-            const { wads } = this.state;
+        this.setState(() => ({ wads }), () => {
+            this.dismissGlobalMessage('savedWads');
             const wadIds = Object.keys(wads || {});
-            wadIds.map((wadId) => {
-                this.addToMidiConversionQueue({ wad: wads[wadId] });
-                this.addToSimpleImageConversionQueue({ wad: wads[wadId] });
-                return null;
-            });
+            wadIds.map(wadId => this.convertLumps({ wad: wads[wadId] }));
         });
 
         const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
@@ -212,6 +212,35 @@ export default class App extends Component {
         });
     }
 
+    removeWadFromTargetObject = ({ targetObject, wadId }) => {
+        this.setState((prevState) => {
+            const items = prevState[targetObject];
+
+            return {
+                [targetObject]: {
+                    ...items,
+                    queue: {
+                        ...items.queue,
+                        [wadId]: {},
+                    },
+                    converted: {
+                        ...items.converted,
+                        [wadId]: {},
+                    },
+                },
+            };
+        });
+    }
+
+    clearTargetObject = ({ targetObject }) => {
+        this.setState(() => ({
+            [targetObject]: {
+                queue: {},
+                converted: {},
+            },
+        }));
+    }
+
     moveItemFromWadQueueToConvertedItems = ({
         targetObject,
         wadId,
@@ -295,6 +324,25 @@ export default class App extends Component {
 
     workerError(error) {
         console.error('A worker errored out.', { error });
+    }
+
+    // Get workers started
+
+    convertLumps = ({ wad }) => {
+        this.addToMidiConversionQueue({ wad });
+        this.addToSimpleImageConversionQueue({ wad });
+    }
+
+    // Remove items from queue/converted
+
+    stopConvertingWadItems = ({ wadId }) => {
+        this.removeWadFromTargetObject({ targetObject: 'midis', wadId });
+        this.removeWadFromTargetObject({ targetObject: 'simpleImages', wadId });
+    }
+
+    stopConvertingAllWads = () => {
+        this.clearTargetObject({ targetObject: 'midis' });
+        this.clearTargetObject({ targetObject: 'simpleImages' });
     }
 
     // Midi converter
@@ -596,16 +644,13 @@ export default class App extends Component {
             return ({
                 wads: updatedWads,
             });
-        }, () => {
-            this.addToMidiConversionQueue({ wad });
-            this.addToSimpleImageConversionQueue({ wad });
-        });
+        }, () => this.convertLumps({ wad }));
     }
 
 
     deleteWad = (wadId) => {
         this.setState((prevState) => {
-            const { wads } = prevState;
+            const { wads, selectedWad } = prevState;
 
             const filteredWadKeys = Object.keys(wads).filter(wadKey => wadKey !== wadId);
 
@@ -618,7 +663,7 @@ export default class App extends Component {
 
             localStorageManager.set('wads', updatedWads);
 
-            if (prevState.selectedWad && prevState.selectedWad.id === wadId) {
+            if (selectedWad && selectedWad.id === wadId) {
                 window.location.hash = '#uploader';
 
                 return ({
@@ -628,10 +673,10 @@ export default class App extends Component {
                 });
             }
 
-            return ({
-                wads: updatedWads,
-            });
+            return ({ wads: updatedWads });
         });
+
+        this.stopConvertingWadItems({ wadId });
     }
 
     deleteWads = () => {
@@ -641,6 +686,7 @@ export default class App extends Component {
             selectedWad: {},
             selectedLump: {},
         }));
+        this.stopConvertingAllWads();
     }
 
     selectWad = async (wadId, init) => {
