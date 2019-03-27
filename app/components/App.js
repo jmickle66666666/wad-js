@@ -108,31 +108,64 @@ export default class App extends Component {
         }
     }
 
-    workerError(error) {
-        console.error('A worker errored out.', { error });
-    }
+    // Workers
 
     startWorker({
-        id,
-        instance,
+        workerId,
+        workerClass,
         onmessage = () => { },
-        onerror = () => { },
+        onerror = this.workerError,
     }) {
-        this[id] = new instance();
-        this[id].onmessage = onmessage;
-        this[id].onerror = onerror;
+        this[workerId] = new workerClass();
+        this[workerId].onmessage = onmessage;
+        this[workerId].onerror = onerror;
     }
 
-    updateWorkerWadQueue = ({
+    getLumps = ({
+        targetObject,
         wad,
-        id,
+        lumpType,
+        originalFormat,
+        extractLumpData = lump => lump,
+    }) => {
+        const lumpIds = Object.keys(wad.lumps[lumpType] || {});
+
+        const unconvertedLumps = lumpIds
+            .map(lumpId => wad.lumps[lumpType][lumpId])
+            .filter((lump) => {
+                // eslint-disable-next-line react/destructuring-assignment
+                const items = this.state[targetObject];
+                const alreadyExists = (
+                    items.converted[wad.id]
+                    && items.converted[wad.id][lump.name]
+                );
+                return !alreadyExists
+                    && (!originalFormat || lump.originalFormat === originalFormat);
+            });
+
+        const lumpObject = {};
+        for (let i = 0; i < unconvertedLumps.length; i++) {
+            const lump = unconvertedLumps[i];
+            lumpObject[lump.name] = extractLumpData(lump);
+        }
+
+        return {
+            lumps: lumpObject,
+            firstLump: unconvertedLumps[0],
+            count: lumpIds.length,
+        };
+    }
+
+    addItemsToTargetObject = ({
+        wad,
+        targetObject,
         items,
         newQueue,
-        newConvertedItems,
+        newConvertedItems = {},
     }) => {
         const wadItems = items.queue[wad.id];
         return {
-            [id]: {
+            [targetObject]: {
                 ...items,
                 queue: {
                     ...items.queue,
@@ -152,8 +185,35 @@ export default class App extends Component {
         };
     }
 
+    removeItemFromQueue = ({ targetObject, wadId, lumpId }) => {
+        // didn't work: remove item from queue (otherwise, we get stuck in infinite loop)
+        this.setState((prevState) => {
+            const items = prevState[targetObject];
+            const wadQueueIds = Object.keys(items.queue[wadId] || {});
+            const updatedWadQueue = {};
+            for (let i = 0; i < wadQueueIds.length; i++) {
+                const lumpName = wadQueueIds[i];
+                if (lumpName !== lumpId) {
+                    updatedWadQueue[lumpName] = { ...items.queue[wadId][lumpName] };
+                }
+            }
+
+            return {
+                [targetObject]: {
+                    ...items,
+                    queue: {
+                        ...items.queue,
+                        [wadId]: {
+                            ...updatedWadQueue,
+                        },
+                    },
+                },
+            };
+        });
+    }
+
     moveItemFromWadQueueToConvertedItems = ({
-        id,
+        targetObject,
         wadId,
         lumpId,
         items,
@@ -170,7 +230,7 @@ export default class App extends Component {
         }
 
         return {
-            [id]: {
+            [targetObject]: {
                 ...items,
                 queue: {
                     ...items.queue,
@@ -189,41 +249,12 @@ export default class App extends Component {
         };
     }
 
-    removeItemFromQueue = ({ id, wadId, lumpId }) => {
-        // didn't work: remove item from queue (otherwise, we get stuck in infinite loop)
-        this.setState((prevState) => {
-            const items = prevState[id];
-            const wadQueueIds = Object.keys(items.queue[wadId] || {});
-            const updatedWadQueue = {};
-            for (let i = 0; i < wadQueueIds.length; i++) {
-                const lumpName = wadQueueIds[i];
-                if (lumpName !== lumpId) {
-                    updatedWadQueue[lumpName] = { ...items.queue[wadId][lumpName] };
-                }
-            }
-
-            return {
-                [id]: {
-                    ...items,
-                    queue: {
-                        ...items.queue,
-                        [wadId]: {
-                            ...updatedWadQueue,
-                        },
-                    },
-                },
-            };
-        });
-    }
-
-    getNextItemInQueue = ({ id, wadId }) => {
-        const { [id]: { queue } } = this.state;
+    getNextItemInQueue = ({ targetObject, wadId }) => {
+        const { [targetObject]: { queue } } = this.state;
 
         let nextLump = {};
 
         const currentWadQueueIds = Object.keys(queue[wadId] || {});
-
-        console.log({ currentWadQueueIds });
 
         if (currentWadQueueIds.length > 0) {
             nextLump = queue[wadId][currentWadQueueIds[0]];
@@ -235,8 +266,6 @@ export default class App extends Component {
 
         const wadIds = Object.keys(queue);
 
-        console.log({ wadIds, queue });
-
         let foundLumps = false;
         let j = 0;
         while (!foundLumps) {
@@ -247,8 +276,6 @@ export default class App extends Component {
             const nextWadId = wadIds[j];
             const nextWadQueue = queue[nextWadId];
             const nextWadQueueIds = Object.keys(nextWadQueue);
-
-            console.log({ nextWadQueueIds });
 
             if (nextWadQueueIds.length > 0) {
                 foundLumps = true;
@@ -262,19 +289,21 @@ export default class App extends Component {
             j++;
         }
 
-        console.log(`Conversion queue for '${id}' is empty.`);
+        console.log(`Conversion queue for '${targetObject}' is empty.`);
         return { done: true };
+    }
+
+    workerError(error) {
+        console.error('A worker errored out.', { error });
     }
 
     // Midi converter
 
     startMidiConverterWorker() {
         this.startWorker({
-            id: 'midiConverter',
-            id2: 'midi',
-            instance: MidiConverter,
+            workerId: 'midiConverter',
+            workerClass: MidiConverter,
             onmessage: this.saveConvertedMidi,
-            onerror: this.workerError,
         });
     }
 
@@ -283,72 +312,59 @@ export default class App extends Component {
             return;
         }
 
-        const musicLumpIds = Object.keys(wad.lumps.music);
-        const musTracks = musicLumpIds
-            .map(musLumpId => wad.lumps.music[musLumpId])
-            .filter((musLump) => {
-                const { midis } = this.state;
-                const alreadyExists = (
-                    midis.converted[wad.id]
-                    && midis.converted[wad.id][musLump.name]
-                );
-                return musLump.originalFormat === 'MUS' && !alreadyExists;
-            });
+        const {
+            lumps: musLumps,
+            firstLump: firstMusLump,
+            count: musCount,
+        } = this.getLumps({
+            wad,
+            lumpType: 'music',
+            targetObject: 'midis',
+            originalFormat: 'MUS',
+        });
 
-        const musLumps = {};
-        for (let i = 0; i < musTracks.length; i++) {
-            const lump = musTracks[i];
-            musLumps[lump.name] = { ...lump };
-        }
-
-        if (musTracks.length > 0) {
+        // get the worker going if there's nothing in the queue
+        if (musCount > 0) {
             const { done } = this.getNextItemInQueue({
-                id: 'midis',
+                targetObject: 'midis',
                 wadId: wad.id,
             });
             if (done) {
-                const firstLump = { ...musTracks[0] };
+                const { name: lumpId, data } = firstMusLump;
                 this.startMidiConverterWorker();
                 this.midiConverter.postMessage({
                     wadId: wad.id,
-                    lumpId: firstLump.name,
-                    data: firstLump.data,
+                    lumpId,
+                    data,
                 });
             }
         }
 
-        const midiTracks = musicLumpIds
-            .map(musLumpId => wad.lumps.music[musLumpId])
-            .filter((musLump) => {
-                const { midis } = this.state;
-                const alreadyExists = (
-                    midis.converted[wad.id]
-                    && midis.converted[wad.id][musLump.name]
-                );
-                return musLump.originalFormat === 'MIDI' && !alreadyExists;
-            });
-
-        const midiLumps = {};
-        for (let i = 0; i < midiTracks.length; i++) {
-            const lump = midiTracks[i];
-            const { data: midi } = lump;
-            midiLumps[lump.name] = midi;
-        }
-
+        const {
+            lumps: midiLumps,
+            count: midiCount,
+        } = this.getLumps({
+            wad,
+            lumpType: 'music',
+            targetObject: 'midis',
+            originalFormat: 'MIDI',
+            extractLumpData: lump => lump.data,
+        });
 
         this.setState((prevState) => {
             const { midis } = prevState;
 
-            return this.updateWorkerWadQueue({
+            return this.addItemsToTargetObject({
                 wad,
-                id: 'midis',
+                targetObject: 'midis',
                 items: midis,
                 newQueue: musLumps,
                 newConvertedItems: midiLumps,
             });
         }, () => {
+            // load the first MIDI into the portable player
             const { preselectedMidi, midis: { converted: midis } } = this.state;
-            if (!preselectedMidi && midiTracks.length > 0) {
+            if (!preselectedMidi && midiCount > 0) {
                 this.selectFirstMidi({ midis });
             }
         });
@@ -359,14 +375,18 @@ export default class App extends Component {
 
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
         if (!midi) {
-            this.removeItemFromQueue({ id: 'midis', wadId, lumpId });
+            this.removeItemFromQueue({
+                targetObject: 'midis',
+                wadId,
+                lumpId,
+            });
         }
 
         // it worked
         this.setState((prevState) => {
             const { midis } = prevState;
             return this.moveItemFromWadQueueToConvertedItems({
-                id: 'midis',
+                targetObject: 'midis',
                 wadId,
                 lumpId,
                 items: midis,
@@ -374,7 +394,7 @@ export default class App extends Component {
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
-                id: 'midis',
+                targetObject: 'midis',
                 wadId,
             });
 
@@ -398,11 +418,9 @@ export default class App extends Component {
 
     startSimpleImageConverterWorker() {
         this.startWorker({
-            id: 'simpleImageConverter',
-            id2: 'image',
-            instance: SimpleImageConverter,
+            workerId: 'simpleImageConverter',
+            workerClass: SimpleImageConverter,
             onmessage: this.saveConvertedSimpleImage,
-            onerror: this.workerError,
         });
     }
 
@@ -415,35 +433,27 @@ export default class App extends Component {
             return;
         }
 
-        const flatLumpIds = Object.keys(wad.lumps.flats);
-        const flats = flatLumpIds
-            .map(flatLumpId => wad.lumps.flats[flatLumpId])
-            .filter((flatLump) => {
-                const { simpleImages } = this.state;
-                const alreadyExists = (
-                    simpleImages.converted[wad.id]
-                    && simpleImages.converted[wad.id][flatLump.name]
-                );
-                return !alreadyExists;
-            });
+        const {
+            lumps: flatLumps,
+            firstLump: firstFlatLump,
+            count: flatCount,
+        } = this.getLumps({
+            wad,
+            lumpType: 'flats',
+            targetObject: 'simpleImages',
+            originalFormat: null,
+        });
 
-        const flatLumps = {};
-        for (let i = 0; i < flats.length; i++) {
-            const lump = flats[i];
-            flatLumps[lump.name] = { ...lump };
-        }
-
-        if (flats.length > 0) {
+        if (flatCount > 0) {
             const { done } = this.getNextItemInQueue({
-                id: 'simpleImages',
+                targetObject: 'simpleImages',
                 wadId: wad.id,
             });
             if (done) {
-                const firstLump = { ...flats[0] };
                 this.startSimpleImageConverterWorker();
                 this.simpleImageConverter.postMessage({
                     wadId: wad.id,
-                    lump: firstLump,
+                    lump: firstFlatLump,
                     palette: wad && wad.palette,
                 });
             }
@@ -451,13 +461,11 @@ export default class App extends Component {
 
         this.setState((prevState) => {
             const { simpleImages } = prevState;
-
-            return this.updateWorkerWadQueue({
+            return this.addItemsToTargetObject({
                 wad,
-                id: 'simpleImages',
+                targetObject: 'simpleImages',
                 items: simpleImages,
                 newQueue: flatLumps,
-                newConvertedItems: {},
             });
         });
     }
@@ -465,16 +473,20 @@ export default class App extends Component {
     saveConvertedSimpleImage = (payload) => {
         const { wadId, lumpId, image } = payload.data;
 
-        // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
+        // didn't work
         if (!image) {
-            this.removeItemFromQueue({ id: 'simpleImages', wadId, lumpId });
+            this.removeItemFromQueue({
+                targetObject: 'simpleImages',
+                wadId,
+                lumpId,
+            });
         }
 
         // it worked
         this.setState((prevState) => {
             const { simpleImages } = prevState;
             return this.moveItemFromWadQueueToConvertedItems({
-                id: 'simpleImages',
+                targetObject: 'simpleImages',
                 wadId,
                 lumpId,
                 items: simpleImages,
@@ -482,7 +494,7 @@ export default class App extends Component {
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
-                id: 'simpleImages',
+                targetObject: 'simpleImages',
                 wadId,
             });
 
