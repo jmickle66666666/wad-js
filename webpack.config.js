@@ -27,6 +27,7 @@ if (isProduction) {
 module.exports = () => ({
     output: {
         filename: '[name].[hash].js',
+        hashDigestLength: 8,
     },
     module: {
         rules: [

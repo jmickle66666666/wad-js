@@ -13,7 +13,7 @@ import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 
 import Header from './Header';
-import GlobalErrors from './Messages/GlobalErrors';
+import GlobalMessages from './Messages/GlobalMessages';
 import Logo from './Logo';
 import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
@@ -33,7 +33,7 @@ const {
 
 export default class App extends Component {
     state = {
-        globalErrors: {},
+        globalMessages: {},
         wads: {},
         selectedWad: {},
         selectedLump: {},
@@ -51,22 +51,6 @@ export default class App extends Component {
         displayError: {},
     }
 
-    constructor(props) {
-        super(props);
-
-
-        if (offscreenCanvasSupportMessage) {
-            const { state } = this;
-            this.state = {
-                ...state,
-                globalErrors: {
-                    ...state.globalErrors,
-                    offscreenCanvasSupport: offscreenCanvasSupportMessage,
-                },
-            };
-        }
-    }
-
     midiConverter = new MidiConverter()
 
     simpleImageConverter = new SimpleImageConverter();
@@ -74,6 +58,14 @@ export default class App extends Component {
     mapParser = new MapParser();
 
     async componentDidMount() {
+        if (offscreenCanvasSupportMessage) {
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'offscreenCanvasSupport',
+                text: offscreenCanvasSupportMessage,
+            });
+        }
+
         const wads = await this.getWadsFromLocalMemory();
         this.setState(() => ({
             wads,
@@ -536,12 +528,23 @@ export default class App extends Component {
     }
 
     preUploadFreedoom = () => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'freedoom1.wad',
+            text: 'Uploading \'freedoom1.wad\'...',
+        });
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'freedoom2.wad',
+            text: 'Uploading \'freedoom2.wad\'...',
+        });
+
         const freedoom1 = new Wad();
         freedoom1.readRemoteFile(
             '/public/freedoom1.wad',
             'freedoom1.wad',
             {},
-            this.addFreedoom,
+            wad => this.addFreedoom(wad),
             true,
         );
 
@@ -550,7 +553,7 @@ export default class App extends Component {
             '/public/freedoom2.wad',
             'freedoom2.wad',
             {},
-            this.addFreedoom,
+            wad => this.addFreedoom(wad),
             true,
         );
 
@@ -560,7 +563,8 @@ export default class App extends Component {
 
     addFreedoom = (wad) => {
         if (wad.uploaded && wad.processed) {
-            this.addWad(wad);
+            this.addWad(wad, false, true);
+            this.dismissGlobalMessage(wad.id);
         }
     }
 
@@ -979,22 +983,35 @@ export default class App extends Component {
         return objectURL;
     }
 
-    dismissGlobalError = (errorId) => {
-        this.setState((prevState) => {
-            const { globalErrors } = prevState;
-            const globalErrorIds = Object.keys(globalErrors || {});
-            const updatedGlobalErrors = {};
+    addGlobalMessage = (message) => {
+        const { id, text, type } = message;
+        this.setState(prevState => ({
+            globalMessages: {
+                ...prevState.globalMessages,
+                [id]: {
+                    type,
+                    text,
+                },
+            },
+        }));
+    }
 
-            for (let i = 0; i < globalErrorIds.length; i++) {
-                const globalErrorId = globalErrorIds[i];
-                if (globalErrorId !== errorId) {
-                    updatedGlobalErrors[globalErrorId] = globalErrors[globalErrorId];
+    dismissGlobalMessage = (messageId) => {
+        this.setState((prevState) => {
+            const { globalMessages } = prevState;
+            const globalMessageIds = Object.keys(globalMessages || {});
+            const updatedGlobalMessages = {};
+
+            for (let i = 0; i < globalMessageIds.length; i++) {
+                const globalMessageId = globalMessageIds[i];
+                if (globalMessageId !== messageId) {
+                    updatedGlobalMessages[globalMessageId] = globalMessages[globalMessageId];
                 }
             }
 
             return ({
-                globalErrors: {
-                    ...updatedGlobalErrors,
+                globalMessages: {
+                    ...updatedGlobalMessages,
                 },
             });
         });
@@ -1015,7 +1032,7 @@ export default class App extends Component {
             selectedMidi,
             midis,
             simpleImages,
-            globalErrors,
+            globalMessages,
         } = this.state;
 
         if (displayError.error) {
@@ -1077,9 +1094,9 @@ export default class App extends Component {
         return (
             <div className={style.app}>
                 <Header />
-                <GlobalErrors
-                    errors={globalErrors}
-                    dismissGlobalError={this.dismissGlobalError}
+                <GlobalMessages
+                    messages={globalMessages}
+                    dismissGlobalMessage={this.dismissGlobalMessage}
                 />
                 <div className={style.main}>
                     <Logo />
