@@ -8,7 +8,7 @@
 }
 
 .dataBlock {
-    margin-left: 5px;
+    margin-left: 10px;
 }
 
 .songName {
@@ -16,6 +16,7 @@
     margin-left: 5px;
     overflow: hidden;
     word-break: break-all;
+    cursor: pointer;
 
     &:hover {
         color: rgb(140, 140, 140);
