@@ -29,6 +29,9 @@ module.exports = () => ({
         filename: '[name].[hash].js',
         hashDigestLength: 8,
     },
+    optimization: {
+        minimize: true,
+    },
     module: {
         rules: [
             {
