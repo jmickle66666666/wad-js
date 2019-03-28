@@ -650,7 +650,12 @@ export default class App extends Component {
 
     deleteWad = (wadId) => {
         this.setState((prevState) => {
-            const { wads, selectedWad } = prevState;
+            const {
+                wads,
+                selectedWad,
+                selectedMidi,
+                preselectedMidi,
+            } = prevState;
 
             const filteredWadKeys = Object.keys(wads).filter(wadKey => wadKey !== wadId);
 
@@ -666,10 +671,19 @@ export default class App extends Component {
             if (selectedWad && selectedWad.id === wadId) {
                 window.location.hash = '#uploader';
 
+                let updatedSelectedMidi = selectedMidi;
+                let updatedPreselectedMidi = preselectedMidi;
+                if (selectedMidi.wadId === selectedWad.id) {
+                    updatedSelectedMidi = {};
+                    updatedPreselectedMidi = false;
+                }
+
                 return ({
                     wads: updatedWads,
                     selectedWad: {},
                     selectedLump: {},
+                    selectedMidi: { ...updatedSelectedMidi },
+                    preselectedMidi: updatedPreselectedMidi,
                 });
             }
 
@@ -685,11 +699,19 @@ export default class App extends Component {
             wads: {},
             selectedWad: {},
             selectedLump: {},
+            selectedMidi: {},
+            preselectedMidi: false,
         }));
         this.stopConvertingAllWads();
     }
 
-    selectWad = async (wadId, init) => {
+    selectWadAndLump = (lumpName, lumpType, wadId) => {
+        this.selectWad(wadId);
+        this.selectLumpType(lumpType);
+        this.selectLump(lumpName, true);
+    }
+
+    selectWad = (wadId, init) => {
         this.setState((prevState) => {
             const selectedWad = prevState.wads[wadId];
             if (!selectedWad) {
@@ -814,8 +836,6 @@ export default class App extends Component {
                         startedAt: 0,
                         time: 0,
                     };
-
-                    console.log({ newlySelectedMidi });
 
                     return {
                         selectedMidi: newlySelectedMidi,
@@ -1214,10 +1234,13 @@ export default class App extends Component {
                             resumeMidi={this.resumeMidi}
                             pauseMidi={this.pauseMidi}
                             stopMidi={this.stopMidi}
-                            focusOnLump={this.focusOnLump}
+                            selectWadAndLump={this.selectWadAndLump}
                         />
                     )}
-                    <BackToTop focusOnWad={this.focusOnWad} />
+                    <BackToTop
+                        selectLump={this.selectLump}
+                        focusOnWad={this.focusOnWad}
+                    />
                 </div>
             </div>
         );
