@@ -1,3 +1,7 @@
+## v0.1.29: Improved MIDI player
+
+* I thought that the current MIDI player was cool, but I felt like it cool be better. I've been working on converting the code to modern JavaScript and add functionalities that I wish were present on the initial version. With a more robust event system and error handling, I hope to create a better user experience. I also want to take further advantage of the AudioContext API to add functionalities to the player such as a simple playlist system and display the actual duration of a track.
+
 ## v0.1.27 and v0.1.28: Preparing for more workers
 
 * The UI now has a "global message" component that can show info and error messages. This comes handy when things are happening in the background or for issues that affect the whole app. There wasn't any logical place to show this kind of info before.
