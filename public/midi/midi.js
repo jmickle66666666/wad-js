@@ -1,110 +1,117 @@
+const AUDIO_BUFFER_SIZE = 8192;
+const MIDI_PLAYER_BASE_URL = '/public/midi/';
+
+function browserVersion() {
+    const nAgt = navigator.userAgent;
+    let browserName = navigator.appName;
+    let fullVersion = `${parseFloat(navigator.appVersion)}`;
+    let majorVersion = parseInt(navigator.appVersion, 10);
+    let nameOffset;
+    let verOffset;
+    let ix;
+
+    /* eslint-disable */
+    // In Opera, the true version is after "Opera" or after "Version"
+    if ((verOffset = nAgt.indexOf('Opera')) !== -1) {
+        browserName = 'Opera';
+        fullVersion = nAgt.substring(verOffset + 6);
+        if ((verOffset = nAgt.indexOf('Version')) !== -1) {
+            fullVersion = nAgt.substring(verOffset + 8);
+        }
+    }
+    // In MSIE, the true version is after "MSIE" in userAgent
+    else if ((verOffset = nAgt.indexOf('MSIE')) !== -1) {
+        browserName = 'Microsoft Internet Explorer';
+        fullVersion = nAgt.substring(verOffset + 5);
+    }
+    // Since IE 11, "MSIE" is not part of the user Agent
+    // the true version is after "rv"?
+    else if ((verOffset = nAgt.indexOf('Trident')) !== -1) {
+        browserName = 'Microsoft Internet Explorer';
+        if ((verOffset = nAgt.indexOf('rv:')) !== -1) {
+            fullVersion = nAgt.substring(verOffset + 3);
+        } else {
+            fullVersion = '0.0'; // hm?
+        }
+    }
+    // In Chrome, the true version is after "Chrome"
+    else if ((verOffset = nAgt.indexOf('Chrome')) !== -1) {
+        browserName = 'Chrome';
+        fullVersion = nAgt.substring(verOffset + 7);
+    }
+    // The default Andorid Browser does not have "Chrome" in its userAgent
+    else if ((verOffset = nAgt.indexOf('Android')) !== -1) {
+        browserName = 'Android';
+        fullVersion = nAgt.substring(verOffset + 8);
+    }
+    // In Safari, the true version is after "Safari" or after "Version"
+    else if ((verOffset = nAgt.indexOf('Safari')) !== -1) {
+        browserName = 'Safari';
+        fullVersion = nAgt.substring(verOffset + 7);
+        if ((verOffset = nAgt.indexOf('Version')) != -1) {
+            fullVersion = nAgt.substring(verOffset + 8);
+        }
+    }
+    // In Firefox, the true version is after "Firefox"
+    else if ((verOffset = nAgt.indexOf('Firefox')) !== -1) {
+        browserName = 'Firefox';
+        fullVersion = nAgt.substring(verOffset + 8);
+    }
+    // In most other browsers, "name/version" is at the end of userAgent
+    else if ((nameOffset = nAgt.lastIndexOf(' ') + 1)
+        < (verOffset = nAgt.lastIndexOf('/'))) {
+        browserName = nAgt.substring(nameOffset, verOffset);
+        fullVersion = nAgt.substring(verOffset + 1);
+        if (browserName.toLowerCase() === browserName.toUpperCase()) {
+            browserName = navigator.appName;
+        }
+    }
+    // trim the fullVersion string at semicolon/space if present
+    if ((ix = fullVersion.indexOf(';')) !== -1) {
+        fullVersion = fullVersion.substring(0, ix);
+    }
+    if ((ix = fullVersion.indexOf(' ')) !== -1) {
+        fullVersion = fullVersion.substring(0, ix);
+    }
+    /* eslint-enable */
+
+    majorVersion = parseInt(`${fullVersion}`, 10);
+    if (Number.isNaN(majorVersion)) {
+        fullVersion = `${parseFloat(navigator.appVersion)}`;
+        majorVersion = parseInt(navigator.appVersion, 10);
+    }
+
+    const bv = {
+        browserName,
+        fullVersion,
+        majorVersion,
+        appName: navigator.appName,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+    };
+
+    return bv;
+}
+
+class MidiPlayer {
+    constructor() {
+
+    }
+}
 
 // eslint-disable-next-line
 (function (globalParam) {
     const global = globalParam;
     let audioMethod;
-    let context = 0;
-    let source = 0;
-    const audioBufferSize = 8192;
+    let context;
+    let source;
     let waveBuffer;
     let midiFileBuffer;
-    let readWaveBytes = 0;
-    let song = 0;
-    const BASE_URL = '/public/midi/';
+    let song;
     let startTime = 0;
     let audioStatus = '';
-
-    function browserVersion() {
-        const nAgt = navigator.userAgent;
-        let browserName = navigator.appName;
-        let fullVersion = `${parseFloat(navigator.appVersion)}`;
-        let majorVersion = parseInt(navigator.appVersion, 10);
-        let nameOffset;
-        let verOffset;
-        let ix;
-
-        /* eslint-disable */
-        // In Opera, the true version is after "Opera" or after "Version"
-        if ((verOffset = nAgt.indexOf('Opera')) !== -1) {
-            browserName = 'Opera';
-            fullVersion = nAgt.substring(verOffset + 6);
-            if ((verOffset = nAgt.indexOf('Version')) !== -1) {
-                fullVersion = nAgt.substring(verOffset + 8);
-            }
-        }
-        // In MSIE, the true version is after "MSIE" in userAgent
-        else if ((verOffset = nAgt.indexOf('MSIE')) !== -1) {
-            browserName = 'Microsoft Internet Explorer';
-            fullVersion = nAgt.substring(verOffset + 5);
-        }
-        // Since IE 11, "MSIE" is not part of the user Agent
-        // the true version is after "rv"?
-        else if ((verOffset = nAgt.indexOf('Trident')) !== -1) {
-            browserName = 'Microsoft Internet Explorer';
-            if ((verOffset = nAgt.indexOf('rv:')) !== -1) {
-                fullVersion = nAgt.substring(verOffset + 3);
-            } else {
-                fullVersion = '0.0'; // hm?
-            }
-        }
-        // In Chrome, the true version is after "Chrome"
-        else if ((verOffset = nAgt.indexOf('Chrome')) !== -1) {
-            browserName = 'Chrome';
-            fullVersion = nAgt.substring(verOffset + 7);
-        }
-        // The default Andorid Browser does not have "Chrome" in its userAgent
-        else if ((verOffset = nAgt.indexOf('Android')) !== -1) {
-            browserName = 'Android';
-            fullVersion = nAgt.substring(verOffset + 8);
-        }
-        // In Safari, the true version is after "Safari" or after "Version"
-        else if ((verOffset = nAgt.indexOf('Safari')) !== -1) {
-            browserName = 'Safari';
-            fullVersion = nAgt.substring(verOffset + 7);
-            if ((verOffset = nAgt.indexOf('Version')) != -1) {
-                fullVersion = nAgt.substring(verOffset + 8);
-            }
-        }
-        // In Firefox, the true version is after "Firefox"
-        else if ((verOffset = nAgt.indexOf('Firefox')) !== -1) {
-            browserName = 'Firefox';
-            fullVersion = nAgt.substring(verOffset + 8);
-        }
-        // In most other browsers, "name/version" is at the end of userAgent
-        else if ((nameOffset = nAgt.lastIndexOf(' ') + 1)
-            < (verOffset = nAgt.lastIndexOf('/'))) {
-            browserName = nAgt.substring(nameOffset, verOffset);
-            fullVersion = nAgt.substring(verOffset + 1);
-            if (browserName.toLowerCase() === browserName.toUpperCase()) {
-                browserName = navigator.appName;
-            }
-        }
-        // trim the fullVersion string at semicolon/space if present
-        if ((ix = fullVersion.indexOf(';')) !== -1) {
-            fullVersion = fullVersion.substring(0, ix);
-        }
-        if ((ix = fullVersion.indexOf(' ')) !== -1) {
-            fullVersion = fullVersion.substring(0, ix);
-        }
-        /* eslint-enable */
-
-        majorVersion = parseInt(`${fullVersion}`, 10);
-        if (Number.isNaN(majorVersion)) {
-            fullVersion = `${parseFloat(navigator.appVersion)}`;
-            majorVersion = parseInt(navigator.appVersion, 10);
-        }
-
-        const bv = {
-            browserName,
-            fullVersion,
-            majorVersion,
-            appName: navigator.appName,
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-        };
-
-        return bv;
-    }
+    let midiFileArray;
+    let stream;
 
     function requireScript(file, callback) {
         const script = document.getElementsByTagName('script')[0];
@@ -119,13 +126,8 @@
         };
 
         // others
-        newjs.onload = () => {
-            callback();
-        };
-
-        newjs.onerror = () => {
-            MIDIjs.message_callback(`Error: Cannot load  JavaScript filet ${file}`);
-        };
+        newjs.onload = () => callback();
+        newjs.onerror = () => MIDIjs.message_callback(`Error: Cannot load  JavaScript filet ${file}`);
 
         newjs.src = file;
         newjs.type = 'text/javascript';
@@ -138,16 +140,16 @@
         playerEvent.time = context.currentTime - startTime;
         MIDIjs.player_callback(playerEvent);
         // collect new wave data from libtimidity into waveBuffer
-        readWaveBytes = Module.ccall('mid_song_read_wave', 'number',
+        const readWaveBytes = Module.ccall('mid_song_read_wave', 'number',
             ['number', 'number', 'number', 'number'],
-            [song, waveBuffer, audioBufferSize * 2, false]);
+            [song, waveBuffer, AUDIO_BUFFER_SIZE * 2, false]);
         if (readWaveBytes === 0) {
             stopWebAudioAPI();
             return;
         }
 
         const maxI16 = 2 ** 15;
-        for (let i = 0; i < audioBufferSize; i++) {
+        for (let i = 0; i < AUDIO_BUFFER_SIZE; i++) {
             if (i < readWaveBytes) {
                 // convert PCM data from C sint16 to JavaScript number (range -1.0 .. +1.0)
                 ev.outputBuffer.getChannelData(0)[i] = Module.getValue(waveBuffer + 2 * i, 'i16') / maxI16;
@@ -183,14 +185,14 @@
                 const MID_AUDIO_S16LSB = 0x8010; // signed 16-bit samples
                 const options = Module.ccall('mid_create_options', 'number',
                     ['number', 'number', 'number', 'number'],
-                    [context.sampleRate, MID_AUDIO_S16LSB, 1, audioBufferSize * 2]);
+                    [context.sampleRate, MID_AUDIO_S16LSB, 1, AUDIO_BUFFER_SIZE * 2]);
                 song = Module.ccall('mid_song_load', 'number', ['number', 'number'], [stream, options]);
-                rval = Module.ccall('mid_istream_close', 'number', ['number'], [stream]);
+                Module.ccall('mid_istream_close', 'number', ['number'], [stream]);
                 Module.ccall('mid_song_start', 'void', ['number'], [song]);
 
-                // create script Processor with buffer of size audioBufferSize and a single output channel
-                source = context.createScriptProcessor(audioBufferSize, 0, 1);
-                waveBuffer = Module._malloc(audioBufferSize * 2);
+                // create script Processor with buffer of size AUDIO_BUFFER_SIZE and a single output channel
+                source = context.createScriptProcessor(AUDIO_BUFFER_SIZE, 0, 1);
+                waveBuffer = Module._malloc(AUDIO_BUFFER_SIZE * 2);
                 source.onaudioprocess = getNextWave; // add eventhandler for next buffer full of audio data
                 source.connect(context.destination); // connect the source to the context's destination (the speakers)
                 startTime = context.currentTime;
@@ -205,7 +207,7 @@
         // the buffer may be initialized to all zeroes (=silence)
         const sinusBuffer = context.createBuffer(1, 44100, 44100);
         freq = 440; // Hz
-        for (i = 0; i < 48000; i++) {
+        for (let i = 0; i < 48000; i++) {
             sinusBuffer.getChannelData(0)[i] = 0; // Math.sin(i / 48000 * 2 * Math.PI * freq);
         }
         const bufferSource = context.createBufferSource(); // creates a sound source
@@ -223,7 +225,7 @@
             var script_src = document.scripts[i].src;
             const index = script_src.lastIndexOf('midi.js');
             if (index === script_src.length - 7) {
-                libtimidity_url = `${BASE_URL}libtimidity.js`;
+                libtimidity_url = `${MIDI_PLAYER_BASE_URL}libtimidity.js`;
                 break;
             }
         }
@@ -269,28 +271,28 @@
             midiFileBuffer = Module._malloc(midiFileArray.length);
             Module.writeArrayToMemory(midiFileArray, midiFileBuffer);
 
-            rval = Module.ccall('mid_init', 'number', [], []);
+            Module.ccall('mid_init', 'number', [], []);
             stream = Module.ccall('mid_istream_open_mem', 'number',
                 ['number', 'number', 'number'],
                 [midiFileBuffer, midiFileArray.length, false]);
             const MID_AUDIO_S16LSB = 0x8010; // signed 16-bit samples
             const options = Module.ccall('mid_create_options', 'number',
                 ['number', 'number', 'number', 'number'],
-                [context.sampleRate, MID_AUDIO_S16LSB, 1, audioBufferSize * 2]);
+                [context.sampleRate, MID_AUDIO_S16LSB, 1, AUDIO_BUFFER_SIZE * 2]);
             song = Module.ccall('mid_song_load', 'number', ['number', 'number'], [stream, options]);
-            rval = Module.ccall('mid_istream_close', 'number', ['number'], [stream]);
+            Module.ccall('mid_istream_close', 'number', ['number'], [stream]);
 
             num_missing = Module.ccall('mid_song_get_num_missing_instruments', 'number', ['number'], [song]);
             if (num_missing > 0) {
                 for (let i = 0; i < num_missing; i++) {
                     const missingPatch = Module.ccall('mid_song_get_missing_instrument', 'string', ['number', 'number'], [song, i]);
-                    loadMissingPatch(url, `${BASE_URL}pat/`, missingPatch);
+                    loadMissingPatch(url, `${MIDI_PLAYER_BASE_URL}pat/`, missingPatch);
                 }
             } else {
                 Module.ccall('mid_song_start', 'void', ['number'], [song]);
                 // create script Processor with auto buffer size and a single output channel
-                source = context.createScriptProcessor(audioBufferSize, 0, 1);
-                waveBuffer = Module._malloc(audioBufferSize * 2);
+                source = context.createScriptProcessor(AUDIO_BUFFER_SIZE, 0, 1);
+                waveBuffer = Module._malloc(AUDIO_BUFFER_SIZE * 2);
                 source.onaudioprocess = getNextWave; // add eventhandler for next buffer full of audio data
                 source.connect(context.destination); // connect the source to the context's destination (the speakers)
                 startTime = context.currentTime;
@@ -413,7 +415,7 @@
         global.MIDIjs.stop = stopWebAudioAPI;
         audioStatus = `${'audioMethod: WebAudioAPI'
             + ', sampleRate (Hz): '}${context.sampleRate
-        }, audioBufferSize (Byte): ${audioBufferSize}`;
+        }, audioBufferSize (Byte): ${AUDIO_BUFFER_SIZE}`;
     } else if (audioMethod === 'bgsound') {
         global.MIDIjs.play = playBGSound;
         global.MIDIjs.stop = stopBGSound;
