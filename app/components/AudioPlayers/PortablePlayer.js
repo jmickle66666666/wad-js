@@ -26,7 +26,7 @@ export default ({
     resumeMidi,
     pauseMidi,
     stopMidi,
-    focusOnLump,
+    selectWadAndLump,
 }) => (
     <Midi
         globalPlayer
@@ -36,13 +36,17 @@ export default ({
         stopMidi={stopMidi}
         customClass={style.player}
     >
-        <div
+        <a
             className={style.songName}
-            href={`#${selectedWad.id}/${selectedLumpType}/${selectedMidi.lumpName}`}
-            onClick={focusOnLump}
+            href={`#${selectedMidi.wadId}/${selectedMidi.lumpType}/${selectedMidi.lumpName}`}
+            onClick={() => selectWadAndLump(
+                selectedMidi.lumpName,
+                selectedMidi.lumpType,
+                selectedMidi.wadId,
+            )}
         >
             {selectedMidi.lumpName}
-        </div>
+        </a>
         <div className={style.dataBlock}>
                 -
         </div>
