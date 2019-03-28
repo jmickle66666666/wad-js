@@ -11,6 +11,15 @@ import Wad from '../models/Wad';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
+import MidiPlayer from '../lib/midi/MidiPlayer';
+import {
+    MIDI_ERROR,
+    MIDI_STATUS,
+    MIDI_PLAY,
+    MIDI_PAUSE,
+    MIDI_RESUME,
+    MIDI_STOP,
+} from '../lib/constants';
 
 import Header from './Header';
 import GlobalMessages from './Messages/GlobalMessages';
@@ -24,7 +33,6 @@ import BackToTop from './BackToTop';
 const localStorageManager = new LocalStorageManager();
 
 const prefixWindowtitle = document.title;
-
 
 const {
     supported: offscreenCanvasSupported,
@@ -330,7 +338,7 @@ export default class App extends Component {
 
     convertLumps = ({ wad }) => {
         this.addToMidiConversionQueue({ wad });
-        this.addToSimpleImageConversionQueue({ wad });
+        // this.addToSimpleImageConversionQueue({ wad });
     }
 
     // Remove items from queue/converted
@@ -377,7 +385,7 @@ export default class App extends Component {
                 targetObject: 'midis',
                 wadId: wad.id,
             });
-            if (done) {
+            if (done && firstMusLump) {
                 const { name: lumpId, data } = firstMusLump;
                 this.startMidiConverterWorker();
                 this.midiConverter.postMessage({
@@ -847,49 +855,86 @@ export default class App extends Component {
     }
 
     initMidiPlayer = () => {
-        MIDIjs.player_callback = this.updateMidiTimePlayer;
-        MIDIjs.initialized = true;
+        this.midiPlayer = new MidiPlayer({
+            eventLogger: this.handleMidiPlayerEvent,
+        });
     }
 
-    updateMidiTimePlayer = ({ time }) => {
-        const roundedDownTime = Math.ceil(time);
+    handleMidiPlayerEvent = ({
+        event,
+        message,
+        time,
+        done,
+        ...payload
+    }) => {
+        const midiPlayerMessagePrefix = 'Midi player:';
+        console.log({
+            event, message, time, payload,
+        });
 
-        const { selectedMidi: { time: previousTime = 0 } } = this.state;
-        // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
-        if (roundedDownTime <= previousTime) {
-            return;
+        switch (event) {
+        default: {
+            if (message) {
+                this.addGlobalMessage({
+                    type: 'info',
+                    id: MIDI_STATUS,
+                    text: `${midiPlayerMessagePrefix} ${message}`,
+                });
+            }
+            break;
         }
+        case MIDI_ERROR: {
+            this.dismissGlobalMessage(MIDI_STATUS);
+            this.addGlobalMessage({
+                type: 'error',
+                id: event,
+                text: `${midiPlayerMessagePrefix} ${message}`,
+            });
+            break;
+        }
+        case MIDI_PLAY:
+        case MIDI_PAUSE:
+        case MIDI_RESUME: {
+            const { globalMessages } = this.state;
+            if (globalMessages[MIDI_STATUS]) {
+                this.dismissGlobalMessage(MIDI_STATUS);
+            }
 
-        this.setState(prevState => ({
-            selectedMidi: {
-                ...prevState.selectedMidi,
-                time: roundedDownTime,
-            },
-        }));
+            const roundedDownTime = Math.floor(time);
+
+            const { selectedMidi: { time: previousTime = 0 } } = this.state;
+            // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
+            if (roundedDownTime >= previousTime) {
+                this.setState(prevState => ({
+                    selectedMidi: {
+                        ...prevState.selectedMidi,
+                        time: roundedDownTime,
+                    },
+                }));
+            }
+
+            break;
+        }
+        case MIDI_STOP: {
+            this.dismissGlobalMessage(MIDI_STATUS);
+            break;
+        }
+        }
     }
 
     selectMidi = ({
         midiURL,
         lump,
         wadId,
-        lastRetry,
     }) => {
-        if (typeof MIDIjs === 'undefined' && !lastRetry) {
-            console.error('MIDIjs not initialized. Retry in 1 second.');
-            setTimeout(() => this.selectMidi({
-                midiURL,
-                lump,
-                wadId,
-                lastRetry: true,
-            }), 1000);
-            return;
-        }
-
-        if (!MIDIjs.initialized) {
+        if (!this.midiPlayer) {
             this.initMidiPlayer();
         }
 
-        MIDIjs.play(midiURL);
+        const success = this.midiPlayer.play(midiURL, lump.name);
+        if (!success) {
+            return;
+        }
 
         this.setState(() => {
             const selectedMidi = {
@@ -908,24 +953,23 @@ export default class App extends Component {
         });
     }
 
-    resumeMidi = (lastRetry) => {
-        if (typeof MIDIjs === 'undefined' && !lastRetry) {
-            console.error('MIDIjs not initialized. Retry in 1 second.');
-            setTimeout(() => this.startMidi(true), 1000);
-            return;
-        }
-
-        if (!MIDIjs.initialized) {
+    resumeMidi = () => {
+        if (!this.midiPlayer) {
             this.initMidiPlayer();
         }
 
         let time = 0;
+        let success;
         const { selectedMidi } = this.state;
         if (selectedMidi.paused) {
-            MIDIjs.resume();
+            success = this.midiPlayer.resume();
             time = selectedMidi.time;
         } else {
-            MIDIjs.play(selectedMidi.data);
+            success = this.midiPlayer.play(selectedMidi.data, selectedMidi.lumpName);
+        }
+
+        if (!success) {
+            return;
         }
 
         this.setState(prevState => ({
@@ -938,15 +982,13 @@ export default class App extends Component {
         }));
     }
 
-    pauseMidi = (lastRetry) => {
-        if (typeof MIDIjs === 'undefined' && !lastRetry) {
-            console.error('MIDIjs not initialized. Retry in 1 second.');
-            setTimeout(() => this.pauseMidi(true), 1000);
-            return;
-        }
-
+    pauseMidi = () => {
         this.setState((prevState) => {
-            MIDIjs.pause();
+            const success = this.midiPlayer.pause();
+
+            if (!success) {
+                return {};
+            }
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
@@ -959,14 +1001,8 @@ export default class App extends Component {
         });
     }
 
-    stopMidi = (lastRetry) => {
-        if (typeof MIDIjs === 'undefined' && !lastRetry) {
-            console.error('MIDIjs not initialized. Retry in 1 second.');
-            setTimeout(() => this.stopMidi(true), 1000);
-            return;
-        }
-
-        if (!MIDIjs.initialized) {
+    stopMidi = () => {
+        if (!this.midiPlayer) {
             this.initMidiPlayer();
         }
 
@@ -976,7 +1012,11 @@ export default class App extends Component {
         }
 
         this.setState((prevState) => {
-            MIDIjs.stop();
+            const success = this.midiPlayer.stop();
+
+            if (!success) {
+                return {};
+            }
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
