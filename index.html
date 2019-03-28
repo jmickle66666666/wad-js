@@ -20,20 +20,6 @@
     </script>
     <body>
         <section id="app"></section>
-        <script>
-        let midiPlayerLoaded = false;
-        document.onclick = loadMidiPlayer;
-        
-        function loadMidiPlayer() {
-            if (!midiPlayerLoaded) {
-                const script = document.createElement('script');
-                script.src = "/public/midi/midi.js";
-                document.getElementsByTagName('head')[0].appendChild(script);
-
-                midiPlayerLoaded = true;
-                document.onclick = null;
-            }
-        }
-        </script>
-    <script type="text/javascript" src="dist/main.93229a00.js"></script></body>
+        <script id="libtimidity" src="/public/midi/libtimidity.js"></script>
+    <script type="text/javascript" src="dist/main.8a8a8c54.js"></script></body>
 </html>
