@@ -19,6 +19,7 @@ import {
     MIDI_PAUSE,
     MIDI_RESUME,
     MIDI_STOP,
+    MIDI_END,
 } from '../lib/constants';
 
 import Header from './Header';
@@ -28,7 +29,8 @@ import WadUploader from './Upload/WadUploader';
 import UploadedWadList from './Upload/UploadedWadList';
 import WadDetails from './WadExplorer/WadDetails';
 import PortablePlayer from './AudioPlayers/PortablePlayer';
-import BackToTop from './BackToTop';
+import SettingsMenu from './SettingsMenu';
+import SettingsIcon from './SettingsIcon';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -56,6 +58,11 @@ export default class App extends Component {
             queue: {},
             converted: {},
         },
+        showSettings: false,
+        settings: {
+            playbackLoop: false,
+            playNextTrack: true,
+        },
         displayError: {},
     }
 
@@ -79,6 +86,13 @@ export default class App extends Component {
             id: 'savedWads',
             text: 'Loading WADs from previous session...',
         });
+
+        const settings = await this.getSettingsFromLocalMemory();
+        if (settings) {
+            this.setState(() => ({
+                settings,
+            }));
+        }
 
         const wads = await this.getWadsFromLocalMemory();
         this.setState(() => ({ wads }), () => {
@@ -854,6 +868,48 @@ export default class App extends Component {
         }
     }
 
+    selectNextMidi = ({ midis }) => {
+        const { wads, selectedMidi } = this.state;
+
+        if (selectedMidi.name) {
+            return;
+        }
+
+        const wadIds = Object.keys(midis);
+
+        if (wadIds.length > 0) {
+            const firstWadId = wadIds[0];
+            const midiIds = Object.keys(midis[firstWadId]);
+
+            if (midiIds.length > 0) {
+                const firstMidiId = midiIds[0];
+                const firstMidiData = midis[firstWadId][firstMidiId];
+                const wad = wads[firstWadId];
+                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
+
+                if (!lump) {
+                    return;
+                }
+
+                this.setState(() => {
+                    const newlySelectedMidi = {
+                        data: URL.createObjectURL(new Blob([firstMidiData])),
+                        lumpName: lump.name,
+                        lumpType: lump.type,
+                        wadId: firstWadId,
+                        startedAt: 0,
+                        time: 0,
+                    };
+
+                    return {
+                        selectedMidi: newlySelectedMidi,
+                        preselectedMidi: true,
+                    };
+                });
+            }
+        }
+    }
+
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
             eventLogger: this.handleMidiPlayerEvent,
@@ -873,52 +929,91 @@ export default class App extends Component {
         });
 
         switch (event) {
-        default: {
-            if (message) {
+            default: {
+                if (message) {
+                    this.addGlobalMessage({
+                        type: 'info',
+                        id: MIDI_STATUS,
+                        text: `${midiPlayerMessagePrefix} ${message}`,
+                    });
+                }
+                break;
+            }
+            case MIDI_ERROR: {
+                this.dismissGlobalMessage(MIDI_STATUS);
                 this.addGlobalMessage({
-                    type: 'info',
-                    id: MIDI_STATUS,
+                    type: 'error',
+                    id: event,
                     text: `${midiPlayerMessagePrefix} ${message}`,
                 });
+                break;
             }
-            break;
-        }
-        case MIDI_ERROR: {
-            this.dismissGlobalMessage(MIDI_STATUS);
-            this.addGlobalMessage({
-                type: 'error',
-                id: event,
-                text: `${midiPlayerMessagePrefix} ${message}`,
-            });
-            break;
-        }
-        case MIDI_PLAY:
-        case MIDI_PAUSE:
-        case MIDI_RESUME: {
-            const { globalMessages } = this.state;
-            if (globalMessages[MIDI_STATUS]) {
+            case MIDI_PLAY:
+            case MIDI_PAUSE:
+            case MIDI_RESUME: {
+                const { globalMessages } = this.state;
+                if (globalMessages[MIDI_STATUS]) {
+                    this.dismissGlobalMessage(MIDI_STATUS);
+                }
+
+                const roundedDownTime = Math.floor(time);
+
+                const { selectedMidi: { time: previousTime = 0 } } = this.state;
+                // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
+                if (roundedDownTime >= previousTime) {
+                    this.setState(prevState => ({
+                        selectedMidi: {
+                            ...prevState.selectedMidi,
+                            time: roundedDownTime,
+                        },
+                    }));
+                }
+
+                break;
+            }
+            case MIDI_STOP: {
                 this.dismissGlobalMessage(MIDI_STATUS);
+                break;
             }
-
-            const roundedDownTime = Math.floor(time);
-
-            const { selectedMidi: { time: previousTime = 0 } } = this.state;
-            // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
-            if (roundedDownTime >= previousTime) {
+            case MIDI_END: {
+                const roundedDownTime = Math.floor(time);
                 this.setState(prevState => ({
                     selectedMidi: {
                         ...prevState.selectedMidi,
                         time: roundedDownTime,
+                        ended: true,
                     },
                 }));
-            }
 
-            break;
-        }
-        case MIDI_STOP: {
-            this.dismissGlobalMessage(MIDI_STATUS);
-            break;
-        }
+                const {
+                    settings,
+                    midis,
+                    wads,
+                    selectedMidi,
+                } = this.state;
+
+                if (settings.playNextTrack) {
+                    this.selectNextMidi();
+                } else if (settings.playbackLoop) {
+                    const { wadId, lumpType, lumpName } = selectedMidi;
+                    if (
+                        wads[wadId] && wads[wadId].lumps && wads[wadId].lumps[lumpType] && wads[wadId].lumps[lumpType][lumpName]
+                        && midis && midis.converted && midis.converted[wadId] && midis.converted[wadId][lumpName]
+                    ) {
+                        const lump = wads[wadId].lumps[lumpType][lumpName];
+                        const data = midis.converted[wadId][lumpName];
+                        console.log({ lump, data });
+                        const midiURL = URL.createObjectURL(new Blob([data]));
+                        this.selectMidi({
+                            midiURL,
+                            lump,
+                            wadId,
+                        });
+                    }
+                }
+
+                break;
+            }
         }
     }
 
@@ -961,7 +1056,7 @@ export default class App extends Component {
         let time = 0;
         let success;
         const { selectedMidi } = this.state;
-        if (selectedMidi.paused) {
+        if (selectedMidi.paused && !selectedMidi.ended) {
             success = this.midiPlayer.resume();
             time = selectedMidi.time;
         } else {
@@ -1135,6 +1230,27 @@ export default class App extends Component {
         });
     }
 
+    toggleSettingsMenu = () => {
+        this.setState(prevState => ({
+            showSettings: !prevState.showSettings,
+        }));
+    }
+
+    handleSettingChange = ({ toggle }) => {
+        if (toggle) {
+            this.setState(prevState => ({
+                settings: {
+                    ...prevState.settings,
+                    [toggle]: !prevState.settings[toggle],
+                },
+            }), () => this.saveSettingsInLocalMemory(this.state.settings));
+        }
+    }
+
+    getSettingsFromLocalMemory = async () => localStorageManager.get('settings')
+
+    saveSettingsInLocalMemory = settings => localStorageManager.set('settings', settings)
+
     componentDidCatch(error, info) {
         document.title = `${prefixWindowtitle} / oops!`;
         this.setState(() => ({ displayError: { error, info } }));
@@ -1151,6 +1267,8 @@ export default class App extends Component {
             midis,
             simpleImages,
             globalMessages,
+            showSettings,
+            settings,
         } = this.state;
 
         if (displayError.error) {
@@ -1204,7 +1322,6 @@ export default class App extends Component {
                             <a className={style.errorBackLink} href="/">Reload the app.</a>
                         </div>
                     </div>
-                    <BackToTop focusOnWad={this.focusOnWad} />
                 </div>
             );
         }
@@ -1258,12 +1375,25 @@ export default class App extends Component {
                             />
                         )}
                 </div>
+                {
+                    showSettings && (
+                        <SettingsMenu
+                            settings={settings}
+                            handleSettingChange={this.handleSettingChange}
+                            toggleSettingsMenu={this.toggleSettingsMenu}
+                        />
+                    )
+                }
                 <div className={style.helper}>
                     {selectedWad.name && (
                         <div className={style.selectedWadOuter}>
-                            <div className={style.selectedWadInner}>
+                            <a
+                                href={`#/${selectedWad.id}${selectedLumpType ? `/${selectedLumpType}` : ''}${selectedLump.name ? `/${selectedLump.name}` : ''}`}
+                                className={style.selectedWadInner}
+                                onClick={this.focusOnWad}
+                            >
                                 {selectedWad.name}
-                            </div>
+                            </a>
                         </div>
                     )}
                     {selectedMidi.lumpName && (
@@ -1277,10 +1407,7 @@ export default class App extends Component {
                             selectWadAndLump={this.selectWadAndLump}
                         />
                     )}
-                    <BackToTop
-                        selectLump={this.selectLump}
-                        focusOnWad={this.focusOnWad}
-                    />
+                    <SettingsIcon toggleSettingsMenu={this.toggleSettingsMenu} />
                 </div>
             </div>
         );

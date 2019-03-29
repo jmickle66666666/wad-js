@@ -1,3 +1,9 @@
+## v0.1.30: Settings and MIDI loop
+
+* I've tweaked the "helper bar" that appears at the bottom. The `^` icon has now been changed for something like `⚙️`. That's right, wadJS now has settings. They're only for the MIDI player right now, but I've been thinking about that for a while, so I'm happy :)
+
+* The MIDI player got some hotfixing and also was given the ability to play the same track repeatedly. Yeehaw!
+
 ## v0.1.29: Improved MIDI player
 
 * I thought that the current MIDI player was cool, but I felt like it cool be better. I've been working on converting the code to modern JavaScript and add functionalities that I wish were present on the initial version. With a more robust event system and error handling, I hope to create a better user experience. I also want to take further advantage of the AudioContext API to add functionalities to the player such as a simple playlist system and display the actual duration of a track.

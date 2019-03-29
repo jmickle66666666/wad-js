@@ -10,6 +10,7 @@ import {
     MIDI_PAUSE,
     MIDI_RESUME,
     MIDI_STOP,
+    MIDI_END,
 } from '../constants';
 
 function browserVersion() {
@@ -217,6 +218,10 @@ export default class MidiPlayer {
         );
         if (readWaveBytes === 0) {
             this.stop();
+            this.emitEvent({
+                event: MIDI_END,
+                time,
+            });
             return;
         }
 
@@ -225,7 +230,6 @@ export default class MidiPlayer {
                 // convert PCM data from C sint16 to JavaScript number (range -1.0 .. +1.0)
                 ev.outputBuffer.getChannelData(0)[i] = Module.getValue(this.waveBuffer + 2 * i, 'i16') / MAX_I16;
             } else {
-                this.message_callback('Filling 0 at end of buffer');
                 // fill end of buffer with zeroes, may happen at the end of a piece
                 ev.outputBuffer.getChannelData(0)[i] = 0;
             }
@@ -251,7 +255,7 @@ export default class MidiPlayer {
                 return;
             }
 
-            this.num_missing--;
+            this.missingPatchCount = this.missingPatchCount - 1;
             FS.createDataFile(
                 'pat/',
                 filename,
@@ -260,7 +264,7 @@ export default class MidiPlayer {
                 true,
             );
 
-            if (this.num_missing === 0) {
+            if (this.missingPatchCount === 0) {
                 this.stream = Module.ccall(
                     'mid_istream_open_mem',
                     'number',
@@ -296,34 +300,22 @@ export default class MidiPlayer {
                     [this.song],
                 );
 
-                // create script Processor with buffer of size AUDIO_BUFFER_SIZE and a single output channel
-                this.source = this.context.createScriptProcessor(MIDI_AUDIO_BUFFER_SIZE, 0, 1);
-                this.waveBuffer = Module._malloc(MIDI_AUDIO_BUFFER_SIZE * 2);
-
-                // add eventhandler for next buffer full of audio data
-                this.source.onaudioprocess = event => this.getNextWave(event);
-
-                // connect the source to the context's destination (the speakers)
-                this.source.connect(this.context.destination);
-                this.startTime = this.context.currentTime;
-
-                this.emitEvent({ event: MIDI_PLAY });
+                this.initWebAudioPlayback();
             }
         };
         request.send();
     }
 
-    unmuteiOSHack() {
-        // iOS unmutes web audio when playing a buffer source
-        // the buffer may be initialized to all zeroes (=silence)
-        const sinusBuffer = this.context.createBuffer(1, 44100, 44100);
-        for (let i = 0; i < 48000; i++) {
-            sinusBuffer.getChannelData(0)[i] = 0; // Math.sin(i / 48000 * 2 * Math.PI * freq);
-        }
-        const bufferSource = this.context.createBufferSource(); // creates a sound source
-        bufferSource.buffer = sinusBuffer;
-        bufferSource.connect(this.context.destination); // connect the source to the context's destination (the speakers)
-        bufferSource.start(0); // play the bufferSource now
+    initWebAudioPlayback = () => {
+        this.context = new AudioContext();
+        // create script Processor with auto buffer size and a single output channel
+        this.source = this.context.createScriptProcessor(MIDI_AUDIO_BUFFER_SIZE, 0, 1);
+        this.waveBuffer = Module._malloc(MIDI_AUDIO_BUFFER_SIZE * 2);
+        this.source.onaudioprocess = event => this.getNextWave(event); // add eventhandler for next buffer full of audio data
+        this.source.connect(this.context.destination); // connect the source to the context's destination (the speakers)
+        this.startTime = this.context.currentTime;
+
+        this.emitEvent({ event: MIDI_PLAY, time: 0 });
     }
 
     playWebAudioAPIWithScriptLoaded(url, name) {
@@ -391,20 +383,20 @@ export default class MidiPlayer {
                     [this.stream],
                 );
 
-                this.num_missing = Module.ccall(
+                this.missingPatchCount = Module.ccall(
                     'mid_song_get_num_missing_instruments',
                     'number',
                     ['number'],
                     [this.song],
                 );
 
-                if (this.num_missing > 0) {
+                if (this.missingPatchCount > 0) {
                     this.emitEvent({
                         event: MIDI_LOAD_PATCH,
                         message: 'Loading MIDI patches...',
                     });
 
-                    for (let i = 0; i < this.num_missing; i++) {
+                    for (let i = 0; i < this.missingPatchCount; i++) {
                         const missingPatch = Module.ccall(
                             'mid_song_get_missing_instrument',
                             'string',
@@ -418,13 +410,13 @@ export default class MidiPlayer {
                         );
                     }
                 } else {
-                    Module.ccall('mid_song_start', 'void', ['number'], [this.song]);
-                    // create script Processor with auto buffer size and a single output channel
-                    this.source = this.context.createScriptProcessor(MIDI_AUDIO_BUFFER_SIZE, 0, 1);
-                    this.waveBuffer = Module._malloc(MIDI_AUDIO_BUFFER_SIZE * 2);
-                    this.source.onaudioprocess = event => this.getNextWave(event); // add eventhandler for next buffer full of audio data
-                    this.source.connect(this.context.destination); // connect the source to the context's destination (the speakers)
-                    this.startTime = this.context.currentTime;
+                    Module.ccall(
+                        'mid_song_start',
+                        'void', ['number'],
+                        [this.song],
+                    );
+
+                    this.initWebAudioPlayback();
                 }
             } catch (error) {
                 this.emitEvent({
@@ -437,7 +429,7 @@ export default class MidiPlayer {
     }
 
     playWebAudioAPI(url, name) {
-        this.stop(this.url !== url);
+        this.stop();
         if (navigator.platform === 'iPad' || navigator.platform === 'iPhone' || navigator.platform === 'iPod') {
             // Unmute works only after return of the user generated event. So we let the event return and play with delay
             // from the callback after libtimidity will have been loaded
@@ -445,12 +437,11 @@ export default class MidiPlayer {
             this.unmuteiOSHack();
         }
 
-        this.url = url;
         this.playWebAudioAPIWithScriptLoaded(url, name);
         return true;
     }
 
-    stopWebAudioAPI(freeMemory = true) {
+    stopWebAudioAPI() {
         if (this.source) {
             // terminate playback
             this.source.disconnect();
@@ -461,24 +452,22 @@ export default class MidiPlayer {
             this.source = 0;
 
             // free libtimitdiy ressources
-            if (freeMemory) {
-                Module._free(this.waveBuffer);
-                Module._free(this.midiFileBuffer);
+            Module._free(this.waveBuffer);
+            Module._free(this.midiFileBuffer);
 
-                Module.ccall(
-                    'mid_song_free',
-                    'void',
-                    ['number'],
-                    [this.song],
-                );
+            Module.ccall(
+                'mid_song_free',
+                'void',
+                ['number'],
+                [this.song],
+            );
 
-                Module.ccall(
-                    'mid_exit',
-                    'void',
-                    [],
-                    [],
-                );
-            }
+            Module.ccall(
+                'mid_exit',
+                'void',
+                [],
+                [],
+            );
 
             this.song = 0;
         }
@@ -511,6 +500,19 @@ export default class MidiPlayer {
             time,
         });
         return true;
+    }
+
+    unmuteiOSHack() {
+        // iOS unmutes web audio when playing a buffer source
+        // the buffer may be initialized to all zeroes (=silence)
+        const sinusBuffer = this.context.createBuffer(1, 44100, 44100);
+        for (let i = 0; i < 48000; i++) {
+            sinusBuffer.getChannelData(0)[i] = 0; // Math.sin(i / 48000 * 2 * Math.PI * freq);
+        }
+        const bufferSource = this.context.createBufferSource(); // creates a sound source
+        bufferSource.buffer = sinusBuffer;
+        bufferSource.connect(this.context.destination); // connect the source to the context's destination (the speakers)
+        bufferSource.start(0); // play the bufferSource now
     }
 
     playBGSound(url) {
