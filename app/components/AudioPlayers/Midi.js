@@ -7,6 +7,7 @@ import ErrorMessage from '../Messages/ErrorMessage';
 const midiIsPlaying = ({ selectedMidi, wad, lump }) => (
     selectedMidi
     && !selectedMidi.paused
+    && !selectedMidi.ended
     && selectedMidi.startedAt
     && selectedMidi.wadId === wad.id
     && selectedMidi.lumpName === lump.name
@@ -30,7 +31,7 @@ export default ({
             <div className={style.player}>
                 <div className={customClass}>
                     {
-                        selectedMidi.startedAt && !selectedMidi.paused
+                        selectedMidi.startedAt && !selectedMidi.paused && !selectedMidi.ended
                             ? (
                                 <span
                                     role="button"
