@@ -10,6 +10,7 @@ import {
     MIDI_PAUSE,
     MIDI_RESUME,
     MIDI_STOP,
+    MIDI_END,
 } from '../constants';
 
 function browserVersion() {
@@ -217,6 +218,10 @@ export default class MidiPlayer {
         );
         if (readWaveBytes === 0) {
             this.stop();
+            this.emitEvent({
+                event: MIDI_END,
+                time,
+            });
             return;
         }
 
@@ -225,7 +230,6 @@ export default class MidiPlayer {
                 // convert PCM data from C sint16 to JavaScript number (range -1.0 .. +1.0)
                 ev.outputBuffer.getChannelData(0)[i] = Module.getValue(this.waveBuffer + 2 * i, 'i16') / MAX_I16;
             } else {
-                this.message_callback('Filling 0 at end of buffer');
                 // fill end of buffer with zeroes, may happen at the end of a piece
                 ev.outputBuffer.getChannelData(0)[i] = 0;
             }
@@ -310,8 +314,6 @@ export default class MidiPlayer {
         this.source.onaudioprocess = event => this.getNextWave(event); // add eventhandler for next buffer full of audio data
         this.source.connect(this.context.destination); // connect the source to the context's destination (the speakers)
         this.startTime = this.context.currentTime;
-
-        console.log(this.song, this.context, this.source, this.waveBuffer);
 
         this.emitEvent({ event: MIDI_PLAY, time: 0 });
     }

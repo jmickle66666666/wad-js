@@ -56,6 +56,8 @@ export const MIDI_RESUME = 'MIDI_RESUME';
 
 export const MIDI_STOP = 'MIDI_STOP';
 
+export const MIDI_END = 'MIDI_END';
+
 
 /* File formats */
 
