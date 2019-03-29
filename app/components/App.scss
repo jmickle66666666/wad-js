@@ -109,4 +109,8 @@ h4 {
 .selectedWadInner {
     overflow: hidden;
     word-break: break-all;
+
+    &:hover {
+        color: rgb(140, 140, 140);
+    }
 }
