@@ -1415,6 +1415,7 @@ export default class App extends Component {
                             selectedMidi={selectedMidi}
                             selectedLumpType={selectedLumpType}
                             selectedWad={selectedWad}
+                            selectNextMidi={this.selectNextMidi}
                             resumeMidi={this.resumeMidi}
                             pauseMidi={this.pauseMidi}
                             stopMidi={this.stopMidi}
