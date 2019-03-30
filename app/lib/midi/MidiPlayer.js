@@ -499,6 +499,7 @@ export default class MidiPlayer {
             event: MIDI_RESUME,
             time,
         });
+
         return true;
     }
 

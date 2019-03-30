@@ -23,7 +23,7 @@ import {
 onmessage = (message) => {
     const { wadId, lumpId, data } = message.data;
 
-    console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
 
     // Structure to hold MUS file header
     const musheader = {
@@ -426,7 +426,7 @@ onmessage = (message) => {
                 queuedtime += timedelay;
             }
         }
-        console.log(`Converted '${lumpId}' from MUS to MIDI (WAD: '${wadId}').`);
+        // console.log(`Converted '${lumpId}' from MUS to MIDI (WAD: '${wadId}').`);
         // End of track
         writeEndTrack();
 

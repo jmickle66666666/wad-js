@@ -1,3 +1,7 @@
+## v0.1.31: Play MIDIs from the same WAD
+
+* The MIDI player is now able to play MIDIs in the same WAD as the lump that is currently being played. Next, I'll add the abilitiy to play all MIDIS from all WADs. Because this MIDI player is gonna be fancy! 🍌🍌🍌
+
 ## v0.1.30: Settings and MIDI loop
 
 * I've tweaked the "helper bar" that appears at the bottom. The `^` icon has now been changed for something like `⚙️`. That's right, wadJS now has settings. They're only for the MIDI player right now, but I've been thinking about that for a while, so I'm happy :)
