@@ -42,6 +42,7 @@ export default ({
     lump,
     midi,
     simpleImage,
+    text,
     wad,
     selectedLump,
     selectedLumpType,
@@ -84,6 +85,7 @@ export default ({
             wad={wad}
             midi={midi}
             simpleImage={simpleImage}
+            text={text}
             selectedMidi={selectedMidi}
             selectMidi={selectMidi}
             stopMidi={stopMidi}

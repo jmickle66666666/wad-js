@@ -9,6 +9,7 @@ export default ({
     wad,
     midi,
     simpleImage,
+    text,
     selectedMidi,
     selectMidi,
     stopMidi,
@@ -36,6 +37,7 @@ export default ({
                     lump={lump}
                     midi={midi}
                     simpleImage={simpleImage}
+                    text={text}
                     selectedMidi={selectedMidi}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}

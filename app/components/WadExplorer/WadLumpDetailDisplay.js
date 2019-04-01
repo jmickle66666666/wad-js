@@ -2,6 +2,7 @@ import React from 'react';
 
 import { INTERMISSION, STATUS_BAR } from '../../lib/constants';
 
+import TextLump from '../Lumps/TextLump';
 import Palettes from '../Lumps/Palettes';
 import Colormaps from '../Lumps/Colormaps';
 import Map from '../Lumps/Map';
@@ -16,6 +17,7 @@ export default ({
     lump,
     midi,
     simpleImage,
+    text,
     selectedMidi,
     selectMidi,
     stopMidi,
@@ -23,6 +25,14 @@ export default ({
     switch (lump.type) {
         default: {
             return null;
+        }
+        case 'uncategorized': {
+            return (
+                <TextLump
+                    lump={lump}
+                    text={text}
+                />
+            );
         }
         case 'palettes': {
             return (
