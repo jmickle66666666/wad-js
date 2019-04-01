@@ -1,3 +1,7 @@
+## v0.1.32: Text lumps
+
+* We're trying to get the data out of these WADs, right? Well, this time, we're working on getting text info out of them. With the `textConverter`, wadJS will attempt to convert any uncategorized lump to text so that the user can see what's inside.
+
 ## v0.1.31: Play MIDIs from the same WAD
 
 * The MIDI player is now able to play MIDIs in the same WAD as the lump that is currently being played. Next, I'll add the abilitiy to play all MIDIS from all WADs. Because this MIDI player is gonna be fancy! 🍌🍌🍌
