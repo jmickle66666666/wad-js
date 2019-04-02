@@ -143,7 +143,19 @@ export default class App extends Component {
     initMediaSession = () => {
         if (mediaSessionSupported) {
             try {
+                const audio = document.createElement('audio');
+                audio.src = '/public/silence.mp3';
+
+                window.audio = audio;
+
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'wadJS',
+                    artist: 'wadJS',
+                    album: 'wadJS',
+                });
+
                 navigator.mediaSession.setActionHandler('play', () => {
+                    audio.play();
                     const { selectedMidi } = this.state;
                     if (selectedMidi) {
                         const { startedAt, paused, ended } = selectedMidi;
