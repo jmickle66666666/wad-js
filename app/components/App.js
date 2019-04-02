@@ -74,6 +74,8 @@ export default class App extends Component {
         displayError: {},
     }
 
+    dummyAudio = document.createElement('audio')
+
     midiConverter = new MidiConverter()
 
     simpleImageConverter = new SimpleImageConverter();
@@ -143,19 +145,13 @@ export default class App extends Component {
     initMediaSession = () => {
         if (mediaSessionSupported) {
             try {
-                const audio = document.createElement('audio');
-                audio.src = '/public/silence.mp3';
+                this.dummyAudio.src = '/public/silence.mp3';
 
-                window.audio = audio;
+                // debug
+                window.dummyAudio = this.dummyAudio;
 
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: 'wadJS',
-                    artist: 'wadJS',
-                    album: 'wadJS',
-                });
-
+                navigator.mediaSession.metadata = new MediaMetadata({ title: 'wadJS' });
                 navigator.mediaSession.setActionHandler('play', () => {
-                    audio.play();
                     const { selectedMidi } = this.state;
                     if (selectedMidi) {
                         const { startedAt, paused, ended } = selectedMidi;
@@ -1138,6 +1134,10 @@ export default class App extends Component {
                 }));
             }
 
+            if (this.dummyAudio.ended) {
+                this.dummyAudio.play();
+            }
+
             break;
         }
         case MIDI_END: {
@@ -1162,12 +1162,17 @@ export default class App extends Component {
             } else if (settings.playbackLoop) {
                 const { wadId, lumpType, lumpName } = selectedMidi;
                 if (
-                    wads[wadId] && wads[wadId].lumps && wads[wadId].lumps[lumpType] && wads[wadId].lumps[lumpType][lumpName]
-                        && midis && midis.converted && midis.converted[wadId] && midis.converted[wadId][lumpName]
+                    wads[wadId]
+                        && wads[wadId].lumps
+                        && wads[wadId].lumps[lumpType]
+                        && wads[wadId].lumps[lumpType][lumpName]
+                        && midis
+                        && midis.converted
+                        && midis.converted[wadId]
+                        && midis.converted[wadId][lumpName]
                 ) {
                     const lump = wads[wadId].lumps[lumpType][lumpName];
                     const data = midis.converted[wadId][lumpName];
-                    console.log({ lump, data });
                     const midiURL = URL.createObjectURL(new Blob([data]));
                     this.selectMidi({
                         midiURL,
@@ -1195,6 +1200,8 @@ export default class App extends Component {
         if (!success) {
             return;
         }
+
+        this.dummyAudio.play();
 
         const { globalMessages } = this.state;
         if (globalMessages[MIDI_STATUS]) {
@@ -1237,6 +1244,8 @@ export default class App extends Component {
             return;
         }
 
+        this.dummyAudio.play();
+
         const { globalMessages } = this.state;
         if (globalMessages[MIDI_STATUS]) {
             this.dismissGlobalMessage(MIDI_STATUS);
@@ -1264,6 +1273,8 @@ export default class App extends Component {
             if (!success) {
                 return {};
             }
+
+            this.dummyAudio.pause();
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
@@ -1297,6 +1308,8 @@ export default class App extends Component {
             if (!success) {
                 return {};
             }
+
+            this.dummyAudio.pause();
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
