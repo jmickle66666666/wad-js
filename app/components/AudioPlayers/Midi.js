@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import style from './Midi.scss';
 
@@ -23,6 +23,7 @@ export default ({
     resumeMidi,
     pauseMidi,
     stopMidi,
+    selectNextMidi,
     customClass,
     children,
 }) => {
@@ -33,40 +34,55 @@ export default ({
                     {
                         selectedMidi.startedAt && !selectedMidi.paused && !selectedMidi.ended
                             ? (
-                                <span
-                                    role="button"
-                                    onClick={pauseMidi}
-                                    onKeyPress={pauseMidi}
-                                    tabIndex={0}
-                                >
-                                    <span role="img" aria-label="pause">
-                                        ⏸️
+                                <Fragment>
+                                    <span
+                                        role="button"
+                                        onClick={pauseMidi}
+                                        onKeyPress={pauseMidi}
+                                        tabIndex={0}
+                                    >
+                                        <span role="img" aria-label="pause">
+                                            ⏸️
+                                        </span>
                                     </span>
-                                </span>
+                                    <span
+                                        className={style.stop}
+                                        role="button"
+                                        onClick={stopMidi}
+                                        onKeyPress={stopMidi}
+                                        tabIndex={0}
+                                    >
+                                        <span role="img" aria-label="stop">
+                                            ⏹️
+                                        </span>
+                                    </span>
+                                </Fragment>
                             ) : (
-                                <span
-                                    role="button"
-                                    onClick={resumeMidi}
-                                    onKeyPress={resumeMidi}
-                                    tabIndex={0}
-                                >
-                                    <span role="img" aria-label="play">
-                                        ▶️
+                                <Fragment>
+                                    <span
+                                        role="button"
+                                        onClick={resumeMidi}
+                                        onKeyPress={resumeMidi}
+                                        tabIndex={0}
+                                    >
+                                        <span role="img" aria-label="play">
+                                            ▶️
+                                        </span>
                                     </span>
-                                </span>
+                                    <span
+                                        className={style.stop}
+                                        role="button"
+                                        onClick={selectNextMidi}
+                                        onKeyPress={selectNextMidi}
+                                        tabIndex={0}
+                                    >
+                                        <span role="img" aria-label="stop">
+                                            ⏭
+                                        </span>
+                                    </span>
+                                </Fragment>
                             )
                     }
-                    <span
-                        className={style.stop}
-                        role="button"
-                        onClick={stopMidi}
-                        onKeyPress={pauseMidi}
-                        tabIndex={0}
-                    >
-                        <span role="img" aria-label="stop">
-                            ⏹️
-                        </span>
-                    </span>
                     {children}
                 </div>
             </div>

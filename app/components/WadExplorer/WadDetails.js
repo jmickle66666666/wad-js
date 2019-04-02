@@ -37,6 +37,7 @@ export default class WadDetails extends Component {
             selectedMidi,
             midis,
             simpleImages,
+            text,
             selectWad,
             selectLump,
             selectLumpType,
@@ -49,6 +50,7 @@ export default class WadDetails extends Component {
             updateSelectedWadFromList,
         } = this.props;
         const { download } = this.state;
+        const handleExportToJSON = download ? this.getJSON : this.toggleDownload;
         return (
             <Fragment>
                 <span id="wadDetails" className={style.wadDetailsAnchor} />
@@ -59,7 +61,8 @@ export default class WadDetails extends Component {
                         </h2>
                     </a>
                     <div
-                        onClick={download ? this.getJSON : this.toggleDownload}
+                        onClick={handleExportToJSON}
+                        onKeyPress={handleExportToJSON}
                         className={style.exportWad}
                         role="button"
                         title={`Export ${wad.name} into a JSON file.`}
@@ -68,6 +71,7 @@ export default class WadDetails extends Component {
                         <CodeFileIcon inverted />
                     </div>
                     {(download && (
+                        // eslint-disable-next-line jsx-a11y/anchor-has-content
                         <a
                             id="selectedJsonDownload"
                             href={wad.jsonObjectURL}
@@ -106,6 +110,7 @@ export default class WadDetails extends Component {
                             selectedLumpType={selectedLumpType}
                             selectedMidi={selectedMidi}
                             midis={selectedLumpType === 'music' && midis}
+                            text={selectedLumpType === 'uncategorized' && text}
                             simpleImages={selectedLumpType === 'flats' && simpleImages}
                             selectLump={selectLump}
                             selectMidi={selectMidi}

@@ -26,6 +26,7 @@ export default ({
     resumeMidi,
     pauseMidi,
     stopMidi,
+    selectNextMidi,
     selectWadAndLump,
 }) => (
     <Midi
@@ -34,6 +35,7 @@ export default ({
         resumeMidi={resumeMidi}
         pauseMidi={pauseMidi}
         stopMidi={stopMidi}
+        selectNextMidi={selectNextMidi}
         customClass={style.player}
     >
         <a
@@ -49,7 +51,7 @@ export default ({
         </a>
         <div className={style.dataBlock}>
                 -
-        </div>
+            </div>
         <div className={style.dataBlock}>
             {convertToDisplayTime(selectedMidi.time)}
         </div>
