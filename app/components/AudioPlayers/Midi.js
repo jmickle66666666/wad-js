@@ -28,11 +28,12 @@ export default ({
     children,
 }) => {
     if (globalPlayer) {
+        const { startedAt, paused, ended } = selectedMidi;
         return (
             <div className={style.player}>
                 <div className={customClass}>
                     {
-                        selectedMidi.startedAt && !selectedMidi.paused && !selectedMidi.ended
+                        startedAt && !paused && !ended
                             ? (
                                 <Fragment>
                                     <span

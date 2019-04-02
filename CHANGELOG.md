@@ -1,3 +1,7 @@
+## v0.1.33: Media Session API
+
+* Giving a try to Media Session and hopefully give some ability to control playback of MIDIs from the notification screen on your decvices :)
+
 ## v0.1.32: Text lumps
 
 * We're trying to get the data out of these WADs, right? Well, this time, we're working on getting text info out of them. With the `textConverter`, wadJS will attempt to convert any uncategorized lump to text so that the user can see what's inside.
