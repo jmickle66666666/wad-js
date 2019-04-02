@@ -1206,15 +1206,26 @@ export default class App extends Component {
             this.dismissGlobalMessage(MIDI_STATUS);
         }
 
-        this.dummyAudio.play();
-
         if (mediaSessionSupport) {
+            const { wads } = this.state;
+            const wad = wads[wadId];
+            const wadName = wad ? wad.name : '';
+
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: lump.name,
-                artist: PROJECT,
-                artwork: [{ src: archie }],
+                artist: wadName,
+                artwork: [
+                    { src: archie, sizes: '96x96', type: 'image/png' },
+                    { src: archie, sizes: '128x128', type: 'image/png' },
+                    { src: archie, sizes: '192x192', type: 'image/png' },
+                    { src: archie, sizes: '256x256', type: 'image/png' },
+                    { src: archie, sizes: '384x384', type: 'image/png' },
+                    { src: archie, sizes: '512x512', type: 'image/png' },
+                ],
             });
         }
+
+        this.dummyAudio.play();
 
         this.setState(() => {
             const selectedMidi = {
