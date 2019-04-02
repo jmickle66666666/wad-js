@@ -3,6 +3,8 @@ import moment from 'moment';
 
 import style from './App.scss';
 
+import archie from '../assets/archie.png';
+
 import MidiConverter from '../workers/midiConverter';
 import SimpleImageConverter from '../workers/simpleImageConverter';
 import TextConverter from '../workers/textConverter';
@@ -149,8 +151,6 @@ export default class App extends Component {
 
                 // debug
                 window.dummyAudio = this.dummyAudio;
-
-                navigator.mediaSession.metadata = new MediaMetadata({ title: 'wadJS' });
                 navigator.mediaSession.setActionHandler('play', () => {
                     const { selectedMidi } = this.state;
                     if (selectedMidi) {
@@ -1201,11 +1201,19 @@ export default class App extends Component {
             return;
         }
 
-        this.dummyAudio.play();
-
         const { globalMessages } = this.state;
         if (globalMessages[MIDI_STATUS]) {
             this.dismissGlobalMessage(MIDI_STATUS);
+        }
+
+        this.dummyAudio.play();
+
+        if (mediaSessionSupport) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: lump.name,
+                artist: PROJECT,
+                artwork: [{ src: archie }],
+            });
         }
 
         this.setState(() => {
