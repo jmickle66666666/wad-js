@@ -12,6 +12,7 @@ import Wad from '../models/Wad';
 
 import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
+import mediaSessionSupport from '../lib/mediaSessionSupport';
 import MidiPlayer from '../lib/midi/MidiPlayer';
 import {
     MIDI_ERROR,
@@ -38,6 +39,11 @@ const {
     supported: offscreenCanvasSupported,
     message: offscreenCanvasSupportMessage,
 } = offscreenCanvasSupport();
+
+const {
+    supported: mediaSessionSupported,
+    message: mediaSessionMessage,
+} = mediaSessionSupport();
 
 export default class App extends Component {
     state = {
@@ -82,6 +88,8 @@ export default class App extends Component {
                 text: offscreenCanvasSupportMessage,
             });
         }
+
+        this.initMediaSession();
 
         this.addGlobalMessage({
             type: 'info',
@@ -129,6 +137,34 @@ export default class App extends Component {
 
         if (lumpName) {
             this.selectLump(lumpName, true);
+        }
+    }
+
+    initMediaSession = () => {
+        if (mediaSessionSupported) {
+            navigator.mediaSession.setActionHandler('play', () => {
+                const { selectedMidi } = this.state;
+                if (selectedMidi) {
+                    const { startedAt, paused, ended } = selectedMidi;
+                    if (startedAt && !paused && !ended) {
+                        this.pauseMidi();
+                    } else {
+                        this.resumeMidi();
+                    }
+                }
+            });
+            navigator.mediaSession.setActionHandler('pause', () => this.pauseMidi());
+            navigator.mediaSession.setActionHandler('stop', () => this.stopMidi());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.selectNextMidi());
+        } else {
+            const { globalMessages } = this.state;
+            if (!globalMessages.mediaSession) {
+                this.addGlobalMessage({
+                    type: 'warning',
+                    id: 'mediaSession',
+                    text: mediaSessionMessage,
+                });
+            }
         }
     }
 
