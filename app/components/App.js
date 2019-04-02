@@ -3,8 +3,6 @@ import moment from 'moment';
 
 import style from './App.scss';
 
-import archie from '../assets/archie.png';
-
 import MidiConverter from '../workers/midiConverter';
 import SimpleImageConverter from '../workers/simpleImageConverter';
 import TextConverter from '../workers/textConverter';
@@ -17,6 +15,7 @@ import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 import mediaSessionSupport from '../lib/mediaSessionSupport';
 import MidiPlayer from '../lib/midi/MidiPlayer';
 import {
+    ARCHIE,
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
@@ -1215,12 +1214,12 @@ export default class App extends Component {
                 title: lump.name,
                 artist: wadName,
                 artwork: [
-                    { src: archie, sizes: '96x96', type: 'image/png' },
-                    { src: archie, sizes: '128x128', type: 'image/png' },
-                    { src: archie, sizes: '192x192', type: 'image/png' },
-                    { src: archie, sizes: '256x256', type: 'image/png' },
-                    { src: archie, sizes: '384x384', type: 'image/png' },
-                    { src: archie, sizes: '512x512', type: 'image/png' },
+                    { src: ARCHIE, sizes: '96x96', type: 'image/png' },
+                    { src: ARCHIE, sizes: '128x128', type: 'image/png' },
+                    { src: ARCHIE, sizes: '192x192', type: 'image/png' },
+                    { src: ARCHIE, sizes: '256x256', type: 'image/png' },
+                    { src: ARCHIE, sizes: '384x384', type: 'image/png' },
+                    { src: ARCHIE, sizes: '512x512', type: 'image/png' },
                 ],
             });
         }
