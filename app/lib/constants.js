@@ -33,6 +33,8 @@ export const MAX_I16 = 2 ** 15;
 
 export const MIDI_AUDIO_BUFFER_SIZE = 8192;
 
+export const ARCHIE = '/public/archie.png';
+
 // signed 16-bit samples
 export const MIDI_AUDIO_S16LSB = 0x8010;
 
