@@ -12,28 +12,40 @@ export default ({
     selectedMidi,
     midis,
     simpleImages,
+    text,
     selectLump,
     selectMidi,
     stopMidi,
     focusOnWad,
     focusOnLump,
 }) => (
-        <div className={style.wadLumpsOuter}>
-            <Help id="wad-lumps" title="the lumps panel">
-                <h3 className={style.wadLumpsTitle} onClick={focusOnWad}>
+    <div className={style.wadLumpsOuter}>
+        <Help id="wad-lumps" title="the lumps panel">
+            <h3
+                className={style.wadLumpsTitle}
+            >
+                <div
+                    role="button"
+                    onClick={focusOnWad}
+                    onKeyPress={focusOnWad}
+                    tabIndex={0}
+                >
                     {selectedLumpType}
-                </h3>
-            </Help>
-            <div className={style.wadLumpsInner}>
-                <div className={style.wadLumpsList}>
-                    {Object.keys(wad.lumps[selectedLumpType]).map((lumpName) => {
-                        const lump = wad.lumps[selectedLumpType][lumpName];
-                        return (lump
+
+                </div>
+            </h3>
+        </Help>
+        <div className={style.wadLumpsInner}>
+            <div className={style.wadLumpsList}>
+                {Object.keys(wad.lumps[selectedLumpType]).map((lumpName) => {
+                    const lump = wad.lumps[selectedLumpType][lumpName];
+                    return (lump
                             && (
                                 <WadLumpItem
                                     key={lumpName}
                                     midi={midis && midis[lumpName]}
                                     simpleImage={simpleImages && simpleImages[lumpName]}
+                                    text={text && text[lumpName]}
                                     lump={lump}
                                     wad={wad}
                                     selectedLump={selectedLump}
@@ -45,9 +57,9 @@ export default ({
                                     focusOnLump={focusOnLump}
                                 />
                             )
-                        ) || null;
-                    })}
-                </div>
+                    ) || null;
+                })}
             </div>
         </div>
-    );
+    </div>
+);

@@ -154,6 +154,8 @@ export const PNAMES = 'PNAMES';
 
 export const SBARINFO = 'SBARINFO';
 
+export const SNDINFO = 'SNDINFO'; // Hexen only
+
 export const MENU_SCREENS = [
     'TITLEPIC',
     'HELP',
@@ -168,8 +170,6 @@ export const MUSIC_LUMPS = [
     'GENMIDI',
     'DMXGUS',
     'DMXGUSC',
-    // Hexen only
-    'SNDINFO',
 ];
 
 export const DEMO_LUMPS = [
@@ -178,6 +178,8 @@ export const DEMO_LUMPS = [
     'DEMO3',
     'DEMO4',
 ];
+
+/* Lump special values */
 
 export const LUMP_INDEX_ENTRY_SIZE = 16;
 export const LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE = 4;

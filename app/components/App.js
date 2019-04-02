@@ -5,6 +5,7 @@ import style from './App.scss';
 
 import MidiConverter from '../workers/midiConverter';
 import SimpleImageConverter from '../workers/simpleImageConverter';
+import TextConverter from '../workers/textConverter';
 import MapParser from '../workers/mapParser';
 
 import Wad from '../models/Wad';
@@ -16,9 +17,6 @@ import {
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
-    MIDI_PAUSE,
-    MIDI_RESUME,
-    MIDI_STOP,
     MIDI_END,
 } from '../lib/constants';
 
@@ -55,6 +53,10 @@ export default class App extends Component {
             converted: {},
         },
         simpleImages: {
+            queue: {},
+            converted: {},
+        },
+        text: {
             queue: {},
             converted: {},
         },
@@ -353,6 +355,7 @@ export default class App extends Component {
     convertLumps = ({ wad }) => {
         this.addToMidiConversionQueue({ wad });
         // this.addToSimpleImageConversionQueue({ wad });
+        this.addToTextConversionQueue({ wad });
     }
 
     // Remove items from queue/converted
@@ -365,6 +368,102 @@ export default class App extends Component {
     stopConvertingAllWads = () => {
         this.clearTargetObject({ targetObject: 'midis' });
         this.clearTargetObject({ targetObject: 'simpleImages' });
+    }
+
+    // Text converter
+
+    startTextConverterWorker() {
+        this.startWorker({
+            workerId: 'textConverter',
+            workerClass: TextConverter,
+            onmessage: this.saveConvertedText,
+        });
+    }
+
+    addToTextConversionQueue({ wad }) {
+        if (!wad.lumps.uncategorized) {
+            return;
+        }
+
+        const {
+            lumps: textLumps,
+            firstLump: firstTextLump,
+            count: textLumpCount,
+        } = this.getLumps({
+            wad,
+            lumpType: 'uncategorized',
+            targetObject: 'text',
+            originalFormat: null,
+        });
+
+        if (textLumpCount > 0) {
+            const { done } = this.getNextItemInQueue({
+                targetObject: 'text',
+                wadId: wad.id,
+            });
+
+            // get the worker going if there is nothing in the queue
+            if (done && firstTextLump) {
+                const { name: lumpId, data } = firstTextLump;
+
+                this.startTextConverterWorker();
+                this.textConverter.postMessage({
+                    wadId: wad.id,
+                    lumpId,
+                    data,
+                });
+            }
+
+            this.setState((prevState) => {
+                const { text } = prevState;
+
+                return this.addItemsToTargetObject({
+                    wad,
+                    targetObject: 'text',
+                    items: text,
+                    newQueue: textLumps,
+                });
+            });
+        }
+    }
+
+
+    saveConvertedText = (payload) => {
+        const { wadId, lumpId, text: textData } = payload.data;
+
+        // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
+        if (!textData) {
+            this.removeItemFromQueue({
+                targetObject: 'text',
+                wadId,
+                lumpId,
+            });
+        }
+
+        // it worked
+        this.setState((prevState) => {
+            const { text } = prevState;
+            return this.moveItemFromWadQueueToConvertedItems({
+                targetObject: 'text',
+                wadId,
+                lumpId,
+                items: text,
+                newItem: textData,
+            });
+        }, () => {
+            const { nextLump, nextWadId, done } = this.getNextItemInQueue({
+                targetObject: 'text',
+                wadId,
+            });
+
+            if (!done) {
+                this.textConverter.postMessage({
+                    wadId: nextWadId,
+                    lumpId: nextLump.name,
+                    data: nextLump.data,
+                });
+            }
+        });
     }
 
     // Midi converter
@@ -385,7 +484,7 @@ export default class App extends Component {
         const {
             lumps: musLumps,
             firstLump: firstMusLump,
-            count: musCount,
+            count: musLumpCount,
         } = this.getLumps({
             wad,
             lumpType: 'music',
@@ -393,12 +492,13 @@ export default class App extends Component {
             originalFormat: 'MUS',
         });
 
-        // get the worker going if there's nothing in the queue
-        if (musCount > 0) {
+        if (musLumpCount > 0) {
             const { done } = this.getNextItemInQueue({
                 targetObject: 'midis',
                 wadId: wad.id,
             });
+
+            // get the worker going if there is nothing in the queue
             if (done && firstMusLump) {
                 const { name: lumpId, data } = firstMusLump;
                 this.startMidiConverterWorker();
@@ -412,7 +512,7 @@ export default class App extends Component {
 
         const {
             lumps: midiLumps,
-            count: midiCount,
+            count: midiLumpCount,
         } = this.getLumps({
             wad,
             lumpType: 'music',
@@ -434,7 +534,7 @@ export default class App extends Component {
         }, () => {
             // load the first MIDI into the portable player
             const { preselectedMidi, midis: { converted: midis } } = this.state;
-            if (!preselectedMidi && midiCount > 0) {
+            if (!preselectedMidi && midiLumpCount > 0) {
                 this.selectFirstMidi({ midis });
             }
         });
@@ -506,7 +606,7 @@ export default class App extends Component {
         const {
             lumps: flatLumps,
             firstLump: firstFlatLump,
-            count: flatCount,
+            count: flatLumpCount,
         } = this.getLumps({
             wad,
             lumpType: 'flats',
@@ -514,11 +614,13 @@ export default class App extends Component {
             originalFormat: null,
         });
 
-        if (flatCount > 0) {
+        if (flatLumpCount > 0) {
             const { done } = this.getNextItemInQueue({
                 targetObject: 'simpleImages',
                 wadId: wad.id,
             });
+
+            // get the worker going if there is nothing in the queue
             if (done) {
                 this.startSimpleImageConverterWorker();
                 this.simpleImageConverter.postMessage({
@@ -962,9 +1064,7 @@ export default class App extends Component {
             this.initMidiPlayer();
             break;
         }
-        case MIDI_PLAY:
-        case MIDI_PAUSE:
-        case MIDI_RESUME: {
+        case MIDI_PLAY: {
             const { globalMessages } = this.state;
             if (globalMessages[MIDI_STATUS]) {
                 this.dismissGlobalMessage(MIDI_STATUS);
@@ -983,10 +1083,6 @@ export default class App extends Component {
                 }));
             }
 
-            break;
-        }
-        case MIDI_STOP: {
-            this.dismissGlobalMessage(MIDI_STATUS);
             break;
         }
         case MIDI_END: {
@@ -1045,6 +1141,11 @@ export default class App extends Component {
             return;
         }
 
+        const { globalMessages } = this.state;
+        if (globalMessages[MIDI_STATUS]) {
+            this.dismissGlobalMessage(MIDI_STATUS);
+        }
+
         this.setState(() => {
             const selectedMidi = {
                 data: midiURL,
@@ -1081,6 +1182,11 @@ export default class App extends Component {
             return;
         }
 
+        const { globalMessages } = this.state;
+        if (globalMessages[MIDI_STATUS]) {
+            this.dismissGlobalMessage(MIDI_STATUS);
+        }
+
         this.setState(prevState => ({
             selectedMidi: {
                 ...prevState.selectedMidi,
@@ -1092,6 +1198,11 @@ export default class App extends Component {
     }
 
     pauseMidi = () => {
+        const { globalMessages } = this.state;
+        if (globalMessages[MIDI_STATUS]) {
+            this.dismissGlobalMessage(MIDI_STATUS);
+        }
+
         this.setState((prevState) => {
             const success = this.midiPlayer.pause();
 
@@ -1118,6 +1229,11 @@ export default class App extends Component {
         const { selectedMidi: prevSelectedMidi } = this.state;
         if (prevSelectedMidi.time === 0) {
             return;
+        }
+
+        const { globalMessages } = this.state;
+        if (globalMessages[MIDI_STATUS]) {
+            this.dismissGlobalMessage(MIDI_STATUS);
         }
 
         this.setState((prevState) => {
@@ -1257,7 +1373,10 @@ export default class App extends Component {
                     ...prevState.settings,
                     [toggle]: !prevState.settings[toggle],
                 },
-            }), () => this.saveSettingsInLocalMemory(this.state.settings));
+            }), () => {
+                const { settings } = this.state;
+                this.saveSettingsInLocalMemory(settings);
+            });
         }
     }
 
@@ -1280,6 +1399,7 @@ export default class App extends Component {
             selectedMidi,
             midis,
             simpleImages,
+            text,
             globalMessages,
             showSettings,
             settings,
@@ -1376,6 +1496,7 @@ export default class App extends Component {
                                 selectedMidi={selectedMidi}
                                 midis={midis.converted[selectedWad.id]}
                                 simpleImages={simpleImages.converted[selectedWad.id]}
+                                text={text.converted[selectedWad.id]}
                                 selectWad={this.selectWad}
                                 selectLump={this.selectLump}
                                 selectLumpType={this.selectLumpType}
@@ -1415,6 +1536,7 @@ export default class App extends Component {
                             selectedMidi={selectedMidi}
                             selectedLumpType={selectedLumpType}
                             selectedWad={selectedWad}
+                            selectNextMidi={this.selectNextMidi}
                             resumeMidi={this.resumeMidi}
                             pauseMidi={this.pauseMidi}
                             stopMidi={this.stopMidi}
