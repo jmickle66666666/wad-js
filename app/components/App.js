@@ -142,20 +142,27 @@ export default class App extends Component {
 
     initMediaSession = () => {
         if (mediaSessionSupported) {
-            navigator.mediaSession.setActionHandler('play', () => {
-                const { selectedMidi } = this.state;
-                if (selectedMidi) {
-                    const { startedAt, paused, ended } = selectedMidi;
-                    if (startedAt && !paused && !ended) {
-                        this.pauseMidi();
-                    } else {
-                        this.resumeMidi();
+            try {
+                navigator.mediaSession.setActionHandler('play', () => {
+                    const { selectedMidi } = this.state;
+                    if (selectedMidi) {
+                        const { startedAt, paused, ended } = selectedMidi;
+                        if (startedAt && !paused && !ended) {
+                            this.pauseMidi();
+                        } else {
+                            this.resumeMidi();
+                        }
                     }
-                }
-            });
-            navigator.mediaSession.setActionHandler('pause', () => this.pauseMidi());
-            navigator.mediaSession.setActionHandler('stop', () => this.stopMidi());
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.selectNextMidi());
+                });
+                navigator.mediaSession.setActionHandler('pause', () => this.pauseMidi());
+                navigator.mediaSession.setActionHandler('nexttrack', () => this.selectNextMidi());
+            } catch (error) {
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: 'mediaSession',
+                    text: `An error occurred while initializing Media Session: ${error}`,
+                });
+            }
         } else {
             const { globalMessages } = this.state;
             if (!globalMessages.mediaSession) {
