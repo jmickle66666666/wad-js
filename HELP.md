@@ -47,3 +47,11 @@ Typical categories are "Maps", "Sounds", "Sprites", etc. If you do not find a lu
 This part of the application shows details about the lumps that belong to a specific type.
 
 If the WAD was provided the right palette, you should be able to view graphics in details.
+
+## Settings
+
+In the settings menu, you can adjust the behavior of wadJS:
+* Play music in a loop: Turning this feature ON means that the media player will not stop playing music until you click on <svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height="18" width="18">
+        <path fill="black" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z" />
+    </svg>.
+* Play next available track: Turning this feature ON means that the player will cycle through all the music in your uploaded WADs.
