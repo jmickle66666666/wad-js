@@ -1,3 +1,9 @@
+## v0.1.34: Updating documentation and MIDI player icons
+
+* Fix icons not showing up in the help documentation.
+* Add help documentation for the settings menu.
+* Replace playback buttons of the MIDI player with SVG icons instead of relying on emojis.
+
 ## v0.1.33: Media Session API
 
 * Giving a try to Media Session and hopefully give some ability to control playback of MIDIs from the notification screen on your decvices :)
