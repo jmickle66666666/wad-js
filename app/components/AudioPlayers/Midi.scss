@@ -1,8 +1,27 @@
 .player {
+    display: flex;
+    justify-content: center;
+
     [role=button] {
-        font-size: 30px;
-        height: 35.5px;
+        padding: 5px;
         cursor: pointer;
+
+        &, svg {
+            height: 40px;
+            width: 40px;    
+        }
+    }
+}
+
+.portablePlayer {
+    [role=button] {
+        cursor: pointer;
+
+        &, svg {
+
+            height: 20px;
+            width: 20px;
+        }
     }
 }
 
@@ -11,7 +30,19 @@
     font-size: 14px;
 }
 
-.stop {
+.stop, .forward {
     margin-left: 5px;
     margin-right: 5px;
+}
+
+.forward {
+    margin-left: 4px;
+    margin-right: 2px;
+    width: 24px !important;
+    height: 24px !important;
+
+    svg {
+        width: 24px !important;
+        height: 24px !important;
+    }
 }
