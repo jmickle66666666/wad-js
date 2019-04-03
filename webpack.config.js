@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const info = require('./package.json');
 
 const { TARGET } = process.env;
@@ -22,6 +23,10 @@ const plugins = [
 
 if (isProduction) {
     plugins.unshift(new CleanWebpackPlugin());
+} else {
+    plugins.push(new BundleAnalyzerPlugin({
+        openAnalyzer: false,
+    }));
 }
 
 module.exports = () => ({

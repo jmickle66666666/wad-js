@@ -2,6 +2,11 @@ import React, { Fragment } from 'react';
 
 import style from './Midi.scss';
 
+import PlayIcon from '../../icons/Play';
+import PauseIcon from '../../icons/Pause';
+import StopIcon from '../../icons/Stop';
+import ForwardIcon from '../../icons/Forward';
+
 import ErrorMessage from '../Messages/ErrorMessage';
 
 const midiIsPlaying = ({ selectedMidi, wad, lump }) => (
@@ -30,57 +35,49 @@ export default ({
     if (globalPlayer) {
         const { startedAt, paused, ended } = selectedMidi;
         return (
-            <div className={style.player}>
+            <div className={style.portablePlayer}>
                 <div className={customClass}>
                     {
                         startedAt && !paused && !ended
                             ? (
                                 <Fragment>
-                                    <span
+                                    <div
                                         role="button"
                                         onClick={pauseMidi}
                                         onKeyPress={pauseMidi}
                                         tabIndex={0}
                                     >
-                                        <span role="img" aria-label="pause">
-                                            ⏸️
-                                        </span>
-                                    </span>
-                                    <span
+                                        <PauseIcon inverted />
+                                    </div>
+                                    <div
                                         className={style.stop}
                                         role="button"
                                         onClick={stopMidi}
                                         onKeyPress={stopMidi}
                                         tabIndex={0}
                                     >
-                                        <span role="img" aria-label="stop">
-                                            ⏹️
-                                        </span>
-                                    </span>
+                                        <StopIcon inverted />
+                                    </div>
                                 </Fragment>
                             ) : (
                                 <Fragment>
-                                    <span
+                                    <div
                                         role="button"
                                         onClick={resumeMidi}
                                         onKeyPress={resumeMidi}
                                         tabIndex={0}
                                     >
-                                        <span role="img" aria-label="play">
-                                            ▶️
-                                        </span>
-                                    </span>
-                                    <span
-                                        className={style.stop}
+                                        <PlayIcon inverted />
+                                    </div>
+                                    <div
+                                        className={style.forward}
                                         role="button"
                                         onClick={selectNextMidi}
                                         onKeyPress={selectNextMidi}
                                         tabIndex={0}
                                     >
-                                        <span role="img" aria-label="stop">
-                                            ⏭
-                                        </span>
-                                    </span>
+                                        <ForwardIcon inverted />
+                                    </div>
                                 </Fragment>
                             )
                     }
@@ -111,27 +108,23 @@ export default ({
                 {
                     midiIsPlaying({ selectedMidi, wad, lump })
                         ? (
-                            <span
+                            <div
                                 role="button"
                                 onClick={handleStopMidi}
                                 onKeyPress={handleStopMidi}
                                 tabIndex={0}
                             >
-                                <span role="img" aria-label="stop">
-                                    ⏹️
-                                </span>
-                            </span>
+                                <StopIcon />
+                            </div>
                         ) : (
-                            <span
+                            <div
                                 role="button"
                                 onClick={handleSelectMidi}
                                 onKeyPress={handleSelectMidi}
                                 tabIndex={0}
                             >
-                                <span role="img" aria-label="play">
-                                    ▶️
-                                </span>
-                            </span>
+                                <PlayIcon />
+                            </div>
                         )
                 }
             </div>
