@@ -2,8 +2,11 @@ import React from 'react';
 
 import style from './SettingsMenu.scss';
 
+import Help from './Help';
+
 export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
     <div className={style.settingsMenuOuter}>
+        <Help id="settings" title="settings">
         <h2
             role="button"
             className={style.settingsMenuTitle}
@@ -11,6 +14,7 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
             onKeyPress={toggleSettingsMenu}
             tabIndex={0}
         >
+        </Help>
             Settings
         </h2>
         <label className={style.setting} htmlFor="playbackLoop">
