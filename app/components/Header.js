@@ -37,12 +37,12 @@ export default () => (
         </div>
         <div className={style.headerInner}>
             <div>
-                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/HELP.md`}>
+                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/doc/HELP.md`}>
                     help
                 </a>
             </div>
             <div>
-                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/CHANGELOG.md`}>
+                <a target="_blank" rel="noopener noreferrer" href={`${REPO}/blob/master/doc/CHANGELOG.md`}>
                     changelog
                 </a>
             </div>
