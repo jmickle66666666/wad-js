@@ -1,4 +1,4 @@
-## v0.1.34: 
+## v0.1.34: Updating documentation and MIDI player icons
 
 * Fix icons not showing up in the help documentation.
 * Add help documentation for the settings menu.
