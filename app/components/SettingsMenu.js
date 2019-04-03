@@ -6,17 +6,19 @@ import Help from './Help';
 
 export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
     <div className={style.settingsMenuOuter}>
-        <Help id="settings" title="settings">
-        <h2
-            role="button"
-            className={style.settingsMenuTitle}
-            onClick={toggleSettingsMenu}
-            onKeyPress={toggleSettingsMenu}
-            tabIndex={0}
-        >
-        </Help>
-            Settings
-        </h2>
+        <div className={style.settingsMenuTitleOuter}>
+            <Help id="settings" title="settings" iconClass="helpIconInvertedNoMargin">
+                <h2
+                    role="button"
+                    className={style.settingsMenuTitle}
+                    onClick={toggleSettingsMenu}
+                    onKeyPress={toggleSettingsMenu}
+                    tabIndex={0}
+                >
+                    Settings
+                </h2>
+            </Help>
+        </div>
         <label className={style.setting} htmlFor="playbackLoop">
             <input
                 type="checkbox"
