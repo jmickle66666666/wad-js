@@ -107,14 +107,23 @@ export default class App extends Component {
             }));
         }
 
-        const wads = await this.getWadsFromLocalMemory();
-        this.setState(() => ({ wads }), () => {
+        const { wads, error } = await this.getWadsFromLocalMemory();
+        if (error) {
             this.dismissGlobalMessage('savedWads');
-            const wadIds = Object.keys(wads || {});
-            wadIds.map(wadId => this.convertLumps({ wad: wads[wadId] }));
-        });
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'localForage',
+                text: `localForage: ${error}`,
+            });
+        } else {
+            this.setState(() => ({ wads }), () => {
+                this.dismissGlobalMessage('savedWads');
+                const wadIds = Object.keys(wads || {});
+                wadIds.map(wadId => this.convertLumps({ wad: wads[wadId] }));
+            });
+        }
 
-        const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
+        const { result: freedoomPreloaded } = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             // this.preUploadFreedoom();
         }
@@ -733,10 +742,14 @@ export default class App extends Component {
     }
 
     async getWadsFromLocalMemory() {
-        const savedWads = await localStorageManager.get('wads');
+        const { result: savedWads, error } = await localStorageManager.get('wads');
+
+        if (error) {
+            return { error };
+        }
 
         if (!savedWads) {
-            return {};
+            return { wads: {} };
         }
 
         const wadsData = Object.keys(savedWads).map(wadId => savedWads[wadId]);
@@ -754,7 +767,7 @@ export default class App extends Component {
             wads[wad.id] = wad;
         }
 
-        return wads;
+        return { wads };
     }
 
     async saveWadsInLocalMemory(wads) {
@@ -813,11 +826,16 @@ export default class App extends Component {
                 [wad.id]: wad,
             };
 
-            this.saveWadsInLocalMemory(updatedWads);
+            const { error } = this.saveWadsInLocalMemory(updatedWads);
+            if (error) {
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: 'localForage',
+                    text: `localForage: ${error}`,
+                });
+            }
 
-            return ({
-                wads: updatedWads,
-            });
+            return ({ wads: updatedWads });
         }, () => this.convertLumps({ wad }));
     }
 
