@@ -1,0 +1,1 @@
+* Break down the JSON of the WADs loaded in the browser memory into smaller JSON. If storing the JSON in IndexedDB (via localForage) raises an error about the size of the serialized value, the WADs should be saved in the browser memory with multiple keys (`wad-001`, `wad-002, `wad-003`, etc.) instead of a single `wads` key.

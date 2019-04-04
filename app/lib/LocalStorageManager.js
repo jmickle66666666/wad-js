@@ -6,12 +6,22 @@ export default class LocalStorageManager {
     }
 
     async get(key) {
-        const value = await this.localStorage.getItem(`${PROJECT}-${key}`);
-        return value;
+        try {
+            const result = await this.localStorage.getItem(`${PROJECT}-${key}`);
+            return { result };
+        } catch (error) {
+            console.error(`An error occurred while fetching '${key}'.`, { error });
+            return { error };
+        }
     }
 
     async set(key, value) {
-        const result = await this.localStorage.setItem(`${PROJECT}-${key}`, value);
-        return result;
+        try {
+            await this.localStorage.setItem(`${PROJECT}-${key}`, value);
+            return {};
+        } catch (error) {
+            console.error(`An error occurred while saving '${key}'.`, { error });
+            return { error };
+        }
     }
 }

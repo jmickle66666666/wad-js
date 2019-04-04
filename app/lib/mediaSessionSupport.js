@@ -1,6 +1,13 @@
 import React, { Fragment } from 'react';
 
 export default () => {
+    const isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)|(Mobile)|(Phone)|(Silk)/i);
+    if (!isMobile) {
+        return {
+            ignored: true,
+        };
+    }
+
     if ('mediaSession' in navigator) {
         return {
             supported: true,

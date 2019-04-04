@@ -1,3 +1,9 @@
+## v0.1.35: Various
+* Catch errors from localForage. So if the JSON of your WADs is getting too big, you should get an error.
+* MIDI player will loop within same WAD (by clicking on the next track button or by allowing in the settings to play the next available track automatically) if it didn't find any other uploaded WADs to look for MIDIs.
+* Deleting all WADs will stop MIDI playback.
+* The app will not bug you about unsupported Media Session API if you are not seemingly on a mobile device.
+
 ## v0.1.34: Updating documentation and MIDI player icons
 
 * Fix icons not showing up in the help documentation.

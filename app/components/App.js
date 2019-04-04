@@ -15,7 +15,6 @@ import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 import mediaSessionSupport from '../lib/mediaSessionSupport';
 import MidiPlayer from '../lib/midi/MidiPlayer';
 import {
-    ARCHIE,
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
@@ -43,6 +42,7 @@ const {
 
 const {
     supported: mediaSessionSupported,
+    ignored: mediaSessionIgnored,
     message: mediaSessionMessage,
 } = mediaSessionSupport();
 
@@ -100,21 +100,30 @@ export default class App extends Component {
             text: 'Loading WADs from previous session...',
         });
 
-        const settings = await this.getSettingsFromLocalMemory();
+        const { result: settings } = await this.getSettingsFromLocalMemory();
         if (settings) {
             this.setState(() => ({
                 settings,
             }));
         }
 
-        const wads = await this.getWadsFromLocalMemory();
-        this.setState(() => ({ wads }), () => {
+        const { wads, error } = await this.getWadsFromLocalMemory();
+        if (error) {
             this.dismissGlobalMessage('savedWads');
-            const wadIds = Object.keys(wads || {});
-            wadIds.map(wadId => this.convertLumps({ wad: wads[wadId] }));
-        });
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'localForage',
+                text: `localForage: ${error}`,
+            });
+        } else {
+            this.setState(() => ({ wads }), () => {
+                this.dismissGlobalMessage('savedWads');
+                const wadIds = Object.keys(wads || {});
+                wadIds.map(wadId => this.convertLumps({ wad: wads[wadId] }));
+            });
+        }
 
-        const freedoomPreloaded = await localStorageManager.get('freedoom-preloaded');
+        const { result: freedoomPreloaded } = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
             // this.preUploadFreedoom();
         }
@@ -170,7 +179,7 @@ export default class App extends Component {
                     text: `An error occurred while initializing Media Session: ${error}`,
                 });
             }
-        } else {
+        } else if (!mediaSessionIgnored) {
             const { globalMessages } = this.state;
             if (!globalMessages.mediaSession) {
                 this.addGlobalMessage({
@@ -733,10 +742,14 @@ export default class App extends Component {
     }
 
     async getWadsFromLocalMemory() {
-        const savedWads = await localStorageManager.get('wads');
+        const { result: savedWads, error } = await localStorageManager.get('wads');
+
+        if (error) {
+            return { error };
+        }
 
         if (!savedWads) {
-            return {};
+            return { wads: {} };
         }
 
         const wadsData = Object.keys(savedWads).map(wadId => savedWads[wadId]);
@@ -754,11 +767,18 @@ export default class App extends Component {
             wads[wad.id] = wad;
         }
 
-        return wads;
+        return { wads };
     }
 
     async saveWadsInLocalMemory(wads) {
-        return localStorageManager.set('wads', wads);
+        const { error } = await localStorageManager.set('wads', wads);
+        if (error) {
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'localForage',
+                text: `localForage: ${error}`,
+            });
+        }
     }
 
     preUploadFreedoom = () => {
@@ -792,7 +812,7 @@ export default class App extends Component {
         );
 
         // dev: comment out when feature is ready
-        // localStorageManager.set('freedoom-preloaded', true);
+        localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {
@@ -815,9 +835,7 @@ export default class App extends Component {
 
             this.saveWadsInLocalMemory(updatedWads);
 
-            return ({
-                wads: updatedWads,
-            });
+            return ({ wads: updatedWads });
         }, () => this.convertLumps({ wad }));
     }
 
@@ -877,6 +895,7 @@ export default class App extends Component {
             preselectedMidi: false,
         }));
         this.stopConvertingAllWads();
+        this.clearMidiPlayer();
     }
 
     selectWadAndLump = (lumpName, lumpType, wadId) => {
@@ -1001,7 +1020,7 @@ export default class App extends Component {
                     return;
                 }
 
-                if (mediaSessionSupport) {
+                if (mediaSessionSupported && !mediaSessionIgnored) {
                     const wadName = wad ? wad.name : '';
 
                     navigator.mediaSession.metadata = new MediaMetadata({
@@ -1032,49 +1051,128 @@ export default class App extends Component {
     selectNextMidi = () => {
         const { wads, selectedMidi, midis } = this.state;
 
-        console.log({ selectedMidi });
-
         if (!selectedMidi.lumpName) {
-            return;
+            return false;
         }
 
         const { wadId, lumpName, lumpType } = selectedMidi;
         const { converted: convertedMidis } = midis;
-        const midiIds = Object.keys(convertedMidis[wadId]);
+        const currentWadMidiIds = Object.keys(convertedMidis[wadId]);
 
-        console.log({ midiIds });
+        const selectedMidiIndex = currentWadMidiIds.findIndex(midiId => midiId === lumpName);
 
-        const selectedMidiIndex = midiIds.findIndex(midiId => midiId === lumpName);
+        // we reached the last MIDI in the current WAD
+        if (selectedMidiIndex >= currentWadMidiIds.length - 1) {
+            const wadIds = Object.keys(wads);
 
-        console.log({ selectedMidiIndex });
+            // there are no WADs
+            if (wadIds.length === 0) {
+                return false;
+            }
 
-        if (selectedMidiIndex > midiIds.length - 1) {
-            // TODO: select MIDI from next wad
-        } else {
-            const nextMidiName = midiIds[selectedMidiIndex + 1];
+            // select first MIDI (if any) in the only WAD
+            if (wadIds.length === 1) {
+                console.log('1');
+                const firstWadId = wadIds[0];
+                const nextWadMidiIds = Object.keys(convertedMidis[firstWadId] || {});
+                if (nextWadMidiIds.length > 0) {
+                    const nextMidiName = nextWadMidiIds[0];
 
-            const nextMidiData = convertedMidis[wadId]
-                && convertedMidis[wadId]
-                && convertedMidis[wadId][nextMidiName];
-
-            // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
-            if (nextMidiData) {
-                const nextMidiLump = wads[wadId]
-                    && wads[wadId].lumps
-                    && wads[wadId].lumps[lumpType]
-                    && wads[wadId].lumps[lumpType][nextMidiName];
-
-                if (nextMidiLump) {
-                    const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
-                    this.selectMidi({
-                        midiURL,
-                        lump: nextMidiLump,
-                        wadId,
+                    const nextMidi = this.reconcileMidiLumpAndData({
+                        wads,
+                        wadId: firstWadId,
+                        convertedMidis,
+                        midiName: nextMidiName,
+                        lumpType, // warning: this will need to change!
                     });
+
+                    if (nextMidi) {
+                        this.selectMidi({ ...nextMidi });
+                        return true;
+                    }
                 }
             }
+
+            // select first MIDI from next WAD that has MIDIs (if any)
+            if (wadIds.length >= 2) {
+
+            }
+        } else {
+            // select next MIDI of the current WAD
+            const nextMidiName = currentWadMidiIds[selectedMidiIndex + 1];
+
+            const nextMidi = this.reconcileMidiLumpAndData({
+                wads,
+                wadId,
+                convertedMidis,
+                midiName: nextMidiName,
+                lumpType, // warning: this will need to change!
+            });
+
+            if (nextMidi) {
+                this.selectMidi({ ...nextMidi });
+            }
         }
+
+        return true;
     }
+
+    reconcileMidiLumpAndData = ({
+        wads,
+        wadId,
+        convertedMidis,
+        midiName,
+        lumpType,
+    }) => {
+        const nextMidiData = this.getMidiData({
+            convertedMidis,
+            wadId,
+            midiName,
+        });
+
+        if (nextMidiData) {
+            const nextMidiLump = this.getMidiLump({
+                wads,
+                wadId,
+                lumpType,
+                midiName,
+            });
+
+            if (nextMidiLump) {
+                const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
+                return {
+                    midiURL,
+                    lump: nextMidiLump,
+                    wadId,
+                };
+            }
+        }
+
+        return false;
+    }
+
+    getMidiData = ({
+        convertedMidis,
+        wadId,
+        midiName,
+    }) => (
+            convertedMidis[wadId]
+            && convertedMidis[wadId]
+            && convertedMidis[wadId][midiName]
+        )
+
+    // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
+    getMidiLump = ({
+        wads,
+        wadId,
+        lumpType,
+        midiName,
+    }) => (
+            wads[wadId]
+            && wads[wadId].lumps
+            && wads[wadId].lumps[lumpType]
+            && wads[wadId].lumps[lumpType][midiName]
+        )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1214,7 +1312,7 @@ export default class App extends Component {
             this.dismissGlobalMessage(MIDI_STATUS);
         }
 
-        if (mediaSessionSupport) {
+        if (mediaSessionSupported && !mediaSessionIgnored) {
             const { wads } = this.state;
             const wad = wads[wadId];
             const wadName = wad ? wad.name : '';
@@ -1342,6 +1440,18 @@ export default class App extends Component {
         });
     }
 
+    clearMidiPlayer = () => {
+        if (this.midiPlayer) {
+            this.midiPlayer.stop();
+            this.dummyAudio.pause();
+            if (this.selectedMidi && this.selectedMidi.data) {
+                this.setState(() => ({
+                    selectedMidi: {},
+                }));
+            }
+        }
+    }
+
     deselectAll = () => {
         document.title = `${prefixWindowtitle}`;
         this.setState(() => ({
@@ -1371,16 +1481,16 @@ export default class App extends Component {
     }
 
     updateSelectedWadFromList = (updatedWad) => {
-        this.setState(async (prevState) => {
-            const wads = {
+        this.setState((prevState) => {
+            const updatedWads = {
                 ...prevState.wads,
                 [updatedWad.id]: { ...updatedWad },
             };
 
-            const result = await this.saveWadsInLocalMemory(wads);
+            this.saveWadsInLocalMemory(updatedWads);
 
             return {
-                wads,
+                wads: updatedWads,
                 selectedWad: updatedWad,
             };
         });
