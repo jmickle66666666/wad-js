@@ -1062,7 +1062,7 @@ export default class App extends Component {
         const selectedMidiIndex = currentWadMidiIds.findIndex(midiId => midiId === lumpName);
 
         // we reached the last MIDI in the current WAD
-        if (selectedMidiIndex > currentWadMidiIds.length - 1) {
+        if (selectedMidiIndex >= currentWadMidiIds.length - 1) {
             const wadIds = Object.keys(wads);
 
             // there are no WADs
@@ -1072,6 +1072,7 @@ export default class App extends Component {
 
             // select first MIDI (if any) in the only WAD
             if (wadIds.length === 1) {
+                console.log('1');
                 const firstWadId = wadIds[0];
                 const nextWadMidiIds = Object.keys(convertedMidis[firstWadId] || {});
                 if (nextWadMidiIds.length > 0) {
