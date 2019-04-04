@@ -51,5 +51,6 @@ If the WAD was provided the right palette, you should be able to view graphics i
 ## Settings
 
 In the settings menu, you can adjust the behavior of wadJS:
-* Play music in a loop: Turning this feature ON means that the media player will not stop playing music until you click on ![stop](./static/stop.svg).
+* Play music in a loop: Turning this feature ON means that the media player will continue playing music once it reaches the end of a track.
+
 * Play next available track: Turning this feature ON means that the player will cycle through all the music in your uploaded WADs.
