@@ -10,7 +10,7 @@ export default class LocalStorageManager {
             const result = await this.localStorage.getItem(`${PROJECT}-${key}`);
             return { result };
         } catch (error) {
-            console.error(`An error occurred while fetching ${key}.`, { error });
+            console.error(`An error occurred while fetching '${key}'.`, { error });
             return { error };
         }
     }
@@ -20,7 +20,7 @@ export default class LocalStorageManager {
             await this.localStorage.setItem(`${PROJECT}-${key}`, value);
             return {};
         } catch (error) {
-            console.error(`An error occurred while saving ${key}.`, { error });
+            console.error(`An error occurred while saving '${key}'.`, { error });
             return { error };
         }
     }

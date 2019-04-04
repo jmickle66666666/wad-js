@@ -771,7 +771,14 @@ export default class App extends Component {
     }
 
     async saveWadsInLocalMemory(wads) {
-        return localStorageManager.set('wads', wads);
+        const { error } = await localStorageManager.set('wads', wads);
+        if (error) {
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'localForage',
+                text: `localForage: ${error}`,
+            });
+        }
     }
 
     preUploadFreedoom = () => {
@@ -826,14 +833,7 @@ export default class App extends Component {
                 [wad.id]: wad,
             };
 
-            const { error } = this.saveWadsInLocalMemory(updatedWads);
-            if (error) {
-                this.addGlobalMessage({
-                    type: 'error',
-                    id: 'localForage',
-                    text: `localForage: ${error}`,
-                });
-            }
+            this.saveWadsInLocalMemory(updatedWads);
 
             return ({ wads: updatedWads });
         }, () => this.convertLumps({ wad }));
@@ -1051,49 +1051,127 @@ export default class App extends Component {
     selectNextMidi = () => {
         const { wads, selectedMidi, midis } = this.state;
 
-        console.log({ selectedMidi });
-
         if (!selectedMidi.lumpName) {
-            return;
+            return false;
         }
 
         const { wadId, lumpName, lumpType } = selectedMidi;
         const { converted: convertedMidis } = midis;
-        const midiIds = Object.keys(convertedMidis[wadId]);
+        const currentWadMidiIds = Object.keys(convertedMidis[wadId]);
 
-        console.log({ midiIds });
+        const selectedMidiIndex = currentWadMidiIds.findIndex(midiId => midiId === lumpName);
 
-        const selectedMidiIndex = midiIds.findIndex(midiId => midiId === lumpName);
+        // we reached the last MIDI in the current WAD
+        if (selectedMidiIndex > currentWadMidiIds.length - 1) {
+            const wadIds = Object.keys(wads);
 
-        console.log({ selectedMidiIndex });
+            // there are no WADs
+            if (wadIds.length === 0) {
+                return false;
+            }
 
-        if (selectedMidiIndex > midiIds.length - 1) {
-            // TODO: select MIDI from next wad
-        } else {
-            const nextMidiName = midiIds[selectedMidiIndex + 1];
+            // select first MIDI (if any) in the only WAD
+            if (wadIds.length === 1) {
+                const firstWadId = wadIds[0];
+                const nextWadMidiIds = Object.keys(convertedMidis[firstWadId] || {});
+                if (nextWadMidiIds.length > 0) {
+                    const nextMidiName = nextWadMidiIds[0];
 
-            const nextMidiData = convertedMidis[wadId]
-                && convertedMidis[wadId]
-                && convertedMidis[wadId][nextMidiName];
-
-            // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
-            if (nextMidiData) {
-                const nextMidiLump = wads[wadId]
-                    && wads[wadId].lumps
-                    && wads[wadId].lumps[lumpType]
-                    && wads[wadId].lumps[lumpType][nextMidiName];
-
-                if (nextMidiLump) {
-                    const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
-                    this.selectMidi({
-                        midiURL,
-                        lump: nextMidiLump,
-                        wadId,
+                    const nextMidi = this.reconcileMidiLumpAndData({
+                        wads,
+                        wadId: firstWadId,
+                        convertedMidis,
+                        midiName: nextMidiName,
+                        lumpType, // warning: this will need to change!
                     });
+
+                    if (nextMidi) {
+                        this.selectMidi({ ...nextMidi });
+                        return true;
+                    }
                 }
             }
+
+            // select first MIDI from next WAD that has MIDIs (if any)
+            if (wadIds.length >= 2) {
+
+            }
+        } else {
+            // select next MIDI of the current WAD
+            const nextMidiName = currentWadMidiIds[selectedMidiIndex + 1];
+
+            const nextMidi = this.reconcileMidiLumpAndData({
+                wads,
+                wadId,
+                convertedMidis,
+                midiName: nextMidiName,
+                lumpType, // warning: this will need to change!
+            });
+
+            if (nextMidi) {
+                this.selectMidi({ ...nextMidi });
+            }
         }
+
+        return true;
     }
+
+    reconcileMidiLumpAndData = ({
+        wads,
+        wadId,
+        convertedMidis,
+        midiName,
+        lumpType,
+    }) => {
+        const nextMidiData = this.getMidiData({
+            convertedMidis,
+            wadId,
+            midiName,
+        });
+
+        if (nextMidiData) {
+            const nextMidiLump = this.getMidiLump({
+                wads,
+                wadId,
+                lumpType,
+                midiName,
+            });
+
+            if (nextMidiLump) {
+                const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
+                return {
+                    midiURL,
+                    lump: nextMidiLump,
+                    wadId,
+                };
+            }
+        }
+
+        return false;
+    }
+
+    getMidiData = ({
+        convertedMidis,
+        wadId,
+        midiName,
+    }) => (
+            convertedMidis[wadId]
+            && convertedMidis[wadId]
+            && convertedMidis[wadId][midiName]
+        )
+
+    // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
+    getMidiLump = ({
+        wads,
+        wadId,
+        lumpType,
+        midiName,
+    }) => (
+            wads[wadId]
+            && wads[wadId].lumps
+            && wads[wadId].lumps[lumpType]
+            && wads[wadId].lumps[lumpType][midiName]
+        )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1118,78 +1196,78 @@ export default class App extends Component {
         }
 
         switch (event) {
-        default: {
-            if (message) {
+            default: {
+                if (message) {
+                    this.addGlobalMessage({
+                        type: 'info',
+                        id: MIDI_STATUS,
+                        text: `${midiPlayerMessagePrefix} ${message}`,
+                    });
+                }
+                break;
+            }
+            case MIDI_ERROR: {
+                this.dismissGlobalMessage(MIDI_STATUS);
                 this.addGlobalMessage({
-                    type: 'info',
-                    id: MIDI_STATUS,
+                    type: 'error',
+                    id: event,
                     text: `${midiPlayerMessagePrefix} ${message}`,
                 });
+
+                // reset the midi player
+                // creating a new instance can help with the MIDI player after it crashed
+                this.midiPlayer.stop();
+                this.initMidiPlayer();
+                break;
             }
-            break;
-        }
-        case MIDI_ERROR: {
-            this.dismissGlobalMessage(MIDI_STATUS);
-            this.addGlobalMessage({
-                type: 'error',
-                id: event,
-                text: `${midiPlayerMessagePrefix} ${message}`,
-            });
+            case MIDI_PLAY: {
+                const { globalMessages } = this.state;
+                if (globalMessages[MIDI_STATUS]) {
+                    this.dismissGlobalMessage(MIDI_STATUS);
+                }
 
-            // reset the midi player
-            // creating a new instance can help with the MIDI player after it crashed
-            this.midiPlayer.stop();
-            this.initMidiPlayer();
-            break;
-        }
-        case MIDI_PLAY: {
-            const { globalMessages } = this.state;
-            if (globalMessages[MIDI_STATUS]) {
-                this.dismissGlobalMessage(MIDI_STATUS);
+                const roundedDownTime = Math.floor(time);
+
+                const { selectedMidi: { time: previousTime = 0 } } = this.state;
+                // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
+                if (roundedDownTime >= previousTime) {
+                    this.setState(prevState => ({
+                        selectedMidi: {
+                            ...prevState.selectedMidi,
+                            time: roundedDownTime,
+                        },
+                    }));
+                }
+
+                if (this.dummyAudio.ended) {
+                    this.dummyAudio.play();
+                }
+
+                break;
             }
-
-            const roundedDownTime = Math.floor(time);
-
-            const { selectedMidi: { time: previousTime = 0 } } = this.state;
-            // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
-            if (roundedDownTime >= previousTime) {
+            case MIDI_END: {
+                const roundedDownTime = Math.floor(time);
                 this.setState(prevState => ({
                     selectedMidi: {
                         ...prevState.selectedMidi,
                         time: roundedDownTime,
+                        ended: true,
                     },
                 }));
-            }
 
-            if (this.dummyAudio.ended) {
-                this.dummyAudio.play();
-            }
+                const {
+                    settings,
+                    midis,
+                    wads,
+                    selectedMidi,
+                } = this.state;
 
-            break;
-        }
-        case MIDI_END: {
-            const roundedDownTime = Math.floor(time);
-            this.setState(prevState => ({
-                selectedMidi: {
-                    ...prevState.selectedMidi,
-                    time: roundedDownTime,
-                    ended: true,
-                },
-            }));
-
-            const {
-                settings,
-                midis,
-                wads,
-                selectedMidi,
-            } = this.state;
-
-            if (settings.playNextTrack) {
-                this.selectNextMidi();
-            } else if (settings.playbackLoop) {
-                const { wadId, lumpType, lumpName } = selectedMidi;
-                if (
-                    wads[wadId]
+                if (settings.playNextTrack) {
+                    this.selectNextMidi();
+                } else if (settings.playbackLoop) {
+                    const { wadId, lumpType, lumpName } = selectedMidi;
+                    if (
+                        wads[wadId]
                         && wads[wadId].lumps
                         && wads[wadId].lumps[lumpType]
                         && wads[wadId].lumps[lumpType][lumpName]
@@ -1197,20 +1275,20 @@ export default class App extends Component {
                         && midis.converted
                         && midis.converted[wadId]
                         && midis.converted[wadId][lumpName]
-                ) {
-                    const lump = wads[wadId].lumps[lumpType][lumpName];
-                    const data = midis.converted[wadId][lumpName];
-                    const midiURL = URL.createObjectURL(new Blob([data]));
-                    this.selectMidi({
-                        midiURL,
-                        lump,
-                        wadId,
-                    });
+                    ) {
+                        const lump = wads[wadId].lumps[lumpType][lumpName];
+                        const data = midis.converted[wadId][lumpName];
+                        const midiURL = URL.createObjectURL(new Blob([data]));
+                        this.selectMidi({
+                            midiURL,
+                            lump,
+                            wadId,
+                        });
+                    }
                 }
-            }
 
-            break;
-        }
+                break;
+            }
         }
     }
 
@@ -1402,16 +1480,16 @@ export default class App extends Component {
     }
 
     updateSelectedWadFromList = (updatedWad) => {
-        this.setState(async (prevState) => {
-            const wads = {
+        this.setState((prevState) => {
+            const updatedWads = {
                 ...prevState.wads,
                 [updatedWad.id]: { ...updatedWad },
             };
 
-            const result = await this.saveWadsInLocalMemory(wads);
+            this.saveWadsInLocalMemory(updatedWads);
 
             return {
-                wads,
+                wads: updatedWads,
                 selectedWad: updatedWad,
             };
         });
