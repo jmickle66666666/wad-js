@@ -100,7 +100,7 @@ export default class App extends Component {
             text: 'Loading WADs from previous session...',
         });
 
-        const settings = await this.getSettingsFromLocalMemory();
+        const { result: settings } = await this.getSettingsFromLocalMemory();
         if (settings) {
             this.setState(() => ({
                 settings,
@@ -812,7 +812,7 @@ export default class App extends Component {
         );
 
         // dev: comment out when feature is ready
-        // localStorageManager.set('freedoom-preloaded', true);
+        localStorageManager.set('freedoom-preloaded', true);
     }
 
     addFreedoom = (wad) => {
