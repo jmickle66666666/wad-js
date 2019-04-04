@@ -877,6 +877,7 @@ export default class App extends Component {
             preselectedMidi: false,
         }));
         this.stopConvertingAllWads();
+        this.clearMidiPlayer();
     }
 
     selectWadAndLump = (lumpName, lumpType, wadId) => {
@@ -1340,6 +1341,18 @@ export default class App extends Component {
                 selectedMidi,
             };
         });
+    }
+
+    clearMidiPlayer = () => {
+        if (this.midiPlayer) {
+            this.midiPlayer.stop();
+            this.dummyAudio.pause();
+            if (this.selectedMidi && this.selectedMidi.data) {
+                this.setState(() => ({
+                    selectedMidi: {},
+                }));
+            }
+        }
     }
 
     deselectAll = () => {
