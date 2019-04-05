@@ -1,5 +1,6 @@
 import {
     MIDI_HEADER_DATA,
+    MUS_HEADER_SIGNATURE,
     MUS_NUM_CHANNELS,
     MUS_PERCUSSION_CHANNEL,
     MIDI_PERCUSSION_CHANNEL,
@@ -18,22 +19,35 @@ import {
     MIDI_PITCH_WHEEL,
 } from '../lib/constants';
 
+function readMusHeader(dataView) {
+    const id = [];
+
+    for (let i = 0; i < 4; i++) {
+        id.push(dataView.getUint8(i));
+    }
+
+    const musHeader = {
+        id: id.join(' '), // used to check that this is a valid MUS file
+        scoreLength: dataView.getUint16(4, true),
+        scoreStart: dataView.getUint16(6, true), // only this value is truly helpful to parse the MUS
+        primaryChannels: dataView.getUint16(8, true),
+        secondaryChannels: dataView.getUint16(10, true),
+        instrumentCount: dataView.getUint16(12, true),
+    };
+
+    return musHeader;
+}
+
+function isValidMusHeader(id) {
+    return MUS_HEADER_SIGNATURE === id;
+}
+
 // TODO: Send the error string in postMessage
 
 onmessage = (message) => {
     const { wadId, lumpId, data } = message.data;
 
     // console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
-
-    // Structure to hold MUS file header
-    const musheader = {
-        id: [],
-        scorelength: null,
-        scorestart: null,
-        primarychannels: null,
-        secondarychannels: null,
-        instrumentcount: null,
-    };
 
     let musDataView;
     let musDataPosition;
@@ -251,21 +265,6 @@ onmessage = (message) => {
         return channelMap[musChannel];
     }
 
-    function readMusHeader(dataView) {
-        const output = Object.create(musheader);
-
-        for (let i = 0; i < 4; i++) {
-            output.id.push(dataView.getUint8(i));
-        }
-        output.scorelength = dataView.getUint16(4, true);
-        output.scorestart = dataView.getUint16(6, true);
-        output.primarychannels = dataView.getUint16(8, true);
-        output.secondarychannels = dataView.getUint16(10, true);
-        output.instrumentcount = dataView.getUint16(12, true);
-
-        return output;
-    }
-
     function convertMusToMidi(musinput) {
         // master dataview for input mus
         musDataView = musinput;
@@ -294,7 +293,7 @@ onmessage = (message) => {
         let controllervalue;
 
         // Flag for when the score end marker is hit.
-        let hitscoreend = 0;
+        let hitScoreEnd = false;
 
         // Temp working byte
         let working;
@@ -306,27 +305,25 @@ onmessage = (message) => {
             channelMap[channel] = -1;
         }
 
-        // Grab the header
-        const musfileheader = readMusHeader(musDataView);
-        // Check MUS header
-        if (musfileheader.id[0] !== 'M'.charCodeAt(0) || musfileheader.id[1] !== 'U'.charCodeAt(0)
-            || musfileheader.id[2] !== 'S'.charCodeAt(0) || musfileheader.id[3] !== 0x1A) {
-            console.error('Invalid MUS header.');
+        const musHeader = readMusHeader(musDataView);
+
+        if (!isValidMusHeader(musHeader.id)) {
+            console.error(`Invalid MUS header: '${musHeader.id}'. Expected: '${MUS_HEADER_SIGNATURE}'`);
             return false;
         }
 
         // Seek to where the data is held
-        musDataPosition = musfileheader.scorestart;
+        musDataPosition = musHeader.scoreStart;
         // So, we can assume the MUS file is faintly legit. Let's start writing MIDI data...
 
         writeData(MIDI_HEADER_DATA);
         tracksize = 0;
 
         // Now, process the MUS file:
-        while (hitscoreend === 0) {
+        while (!hitScoreEnd) {
             // Handle a block of events:
 
-            while (hitscoreend === 0) {
+            while (!hitScoreEnd) {
                 // Fetch channel number and event code:
                 eventdescriptor = getMusByte8();
 
@@ -399,7 +396,7 @@ onmessage = (message) => {
 
                 case MUS_SCORE_END:
                     // console.log('musScoreEnd');
-                    hitscoreend = 1;
+                    hitScoreEnd = true;
                     break;
 
                 default:
@@ -412,7 +409,7 @@ onmessage = (message) => {
                 }
             }
             // Now we need to read the time code:
-            if (hitscoreend === 0) {
+            if (!hitScoreEnd) {
                 // console.log('read time code');
                 timedelay = 0;
                 // delayCounter = 0;
