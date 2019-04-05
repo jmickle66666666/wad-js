@@ -13,7 +13,7 @@ import Wad from '../models/Wad';
 import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 import mediaSessionSupport from '../lib/mediaSessionSupport';
-import MidiPlayer from '../lib/midi/MidiPlayer';
+import MidiPlayer from '../lib/MidiPlayer';
 import {
     MIDI_ERROR,
     MIDI_STATUS,
@@ -1156,10 +1156,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-            convertedMidis[wadId]
+        convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-        )
+    )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1168,11 +1168,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-            wads[wadId]
+        wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-        )
+    )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1197,78 +1197,78 @@ export default class App extends Component {
         }
 
         switch (event) {
-            default: {
-                if (message) {
-                    this.addGlobalMessage({
-                        type: 'info',
-                        id: MIDI_STATUS,
-                        text: `${midiPlayerMessagePrefix} ${message}`,
-                    });
-                }
-                break;
-            }
-            case MIDI_ERROR: {
-                this.dismissGlobalMessage(MIDI_STATUS);
+        default: {
+            if (message) {
                 this.addGlobalMessage({
-                    type: 'error',
-                    id: event,
+                    type: 'info',
+                    id: MIDI_STATUS,
                     text: `${midiPlayerMessagePrefix} ${message}`,
                 });
-
-                // reset the midi player
-                // creating a new instance can help with the MIDI player after it crashed
-                this.midiPlayer.stop();
-                this.initMidiPlayer();
-                break;
             }
-            case MIDI_PLAY: {
-                const { globalMessages } = this.state;
-                if (globalMessages[MIDI_STATUS]) {
-                    this.dismissGlobalMessage(MIDI_STATUS);
-                }
+            break;
+        }
+        case MIDI_ERROR: {
+            this.dismissGlobalMessage(MIDI_STATUS);
+            this.addGlobalMessage({
+                type: 'error',
+                id: event,
+                text: `${midiPlayerMessagePrefix} ${message}`,
+            });
 
-                const roundedDownTime = Math.floor(time);
-
-                const { selectedMidi: { time: previousTime = 0 } } = this.state;
-                // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
-                if (roundedDownTime >= previousTime) {
-                    this.setState(prevState => ({
-                        selectedMidi: {
-                            ...prevState.selectedMidi,
-                            time: roundedDownTime,
-                        },
-                    }));
-                }
-
-                if (this.dummyAudio.ended) {
-                    this.dummyAudio.play();
-                }
-
-                break;
+            // reset the midi player
+            // creating a new instance can help with the MIDI player after it crashed
+            this.midiPlayer.stop();
+            this.initMidiPlayer();
+            break;
+        }
+        case MIDI_PLAY: {
+            const { globalMessages } = this.state;
+            if (globalMessages[MIDI_STATUS]) {
+                this.dismissGlobalMessage(MIDI_STATUS);
             }
-            case MIDI_END: {
-                const roundedDownTime = Math.floor(time);
+
+            const roundedDownTime = Math.floor(time);
+
+            const { selectedMidi: { time: previousTime = 0 } } = this.state;
+            // The time played don't get updated exactly every second, but the line below is the best approximation we can get based on how MIDI work
+            if (roundedDownTime >= previousTime) {
                 this.setState(prevState => ({
                     selectedMidi: {
                         ...prevState.selectedMidi,
                         time: roundedDownTime,
-                        ended: true,
                     },
                 }));
+            }
 
-                const {
-                    settings,
-                    midis,
-                    wads,
-                    selectedMidi,
-                } = this.state;
+            if (this.dummyAudio.ended) {
+                this.dummyAudio.play();
+            }
 
-                if (settings.playNextTrack) {
-                    this.selectNextMidi();
-                } else if (settings.playbackLoop) {
-                    const { wadId, lumpType, lumpName } = selectedMidi;
-                    if (
-                        wads[wadId]
+            break;
+        }
+        case MIDI_END: {
+            const roundedDownTime = Math.floor(time);
+            this.setState(prevState => ({
+                selectedMidi: {
+                    ...prevState.selectedMidi,
+                    time: roundedDownTime,
+                    ended: true,
+                },
+            }));
+
+            const {
+                settings,
+                midis,
+                wads,
+                selectedMidi,
+            } = this.state;
+
+            if (settings.playNextTrack) {
+                this.selectNextMidi();
+            } else if (settings.playbackLoop) {
+                const { wadId, lumpType, lumpName } = selectedMidi;
+                if (
+                    wads[wadId]
                         && wads[wadId].lumps
                         && wads[wadId].lumps[lumpType]
                         && wads[wadId].lumps[lumpType][lumpName]
@@ -1276,20 +1276,20 @@ export default class App extends Component {
                         && midis.converted
                         && midis.converted[wadId]
                         && midis.converted[wadId][lumpName]
-                    ) {
-                        const lump = wads[wadId].lumps[lumpType][lumpName];
-                        const data = midis.converted[wadId][lumpName];
-                        const midiURL = URL.createObjectURL(new Blob([data]));
-                        this.selectMidi({
-                            midiURL,
-                            lump,
-                            wadId,
-                        });
-                    }
+                ) {
+                    const lump = wads[wadId].lumps[lumpType][lumpName];
+                    const data = midis.converted[wadId][lumpName];
+                    const midiURL = URL.createObjectURL(new Blob([data]));
+                    this.selectMidi({
+                        midiURL,
+                        lump,
+                        wadId,
+                    });
                 }
-
-                break;
             }
+
+            break;
+        }
         }
     }
 
@@ -1323,7 +1323,9 @@ export default class App extends Component {
             });
         }
 
-        this.dummyAudio.play();
+        if (this.dummyAudio.paused) {
+            this.dummyAudio.play();
+        }
 
         this.setState(() => {
             const selectedMidi = {
@@ -1361,7 +1363,9 @@ export default class App extends Component {
             return;
         }
 
-        this.dummyAudio.play();
+        if (this.dummyAudio.paused) {
+            this.dummyAudio.play();
+        }
 
         const { globalMessages } = this.state;
         if (globalMessages[MIDI_STATUS]) {
@@ -1391,7 +1395,10 @@ export default class App extends Component {
                 return {};
             }
 
-            this.dummyAudio.pause();
+
+            if (!this.dummyAudio.paused && this.dummyAudio.currentTime) {
+                this.dummyAudio.pause();
+            }
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
@@ -1426,7 +1433,9 @@ export default class App extends Component {
                 return {};
             }
 
-            this.dummyAudio.pause();
+            if (!this.dummyAudio.paused && this.dummyAudio.currentTime) {
+                this.dummyAudio.pause();
+            }
 
             const selectedMidi = {
                 ...prevState.selectedMidi,
@@ -1443,7 +1452,9 @@ export default class App extends Component {
     clearMidiPlayer = () => {
         if (this.midiPlayer) {
             this.midiPlayer.stop();
-            this.dummyAudio.pause();
+            if (!this.dummyAudio.paused) {
+                this.dummyAudio.pause();
+            }
             if (this.selectedMidi && this.selectedMidi.data) {
                 this.setState(() => ({
                     selectedMidi: {},
