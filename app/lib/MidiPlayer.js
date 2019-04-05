@@ -11,7 +11,7 @@ import {
     MIDI_RESUME,
     MIDI_STOP,
     MIDI_END,
-} from '../constants';
+} from './constants';
 
 function browserVersion() {
     const nAgt = navigator.userAgent;
