@@ -1,4 +1,7 @@
+## v0.1.36:
+
 ## v0.1.35: Various
+
 * Catch errors from localForage. So if the JSON of your WADs is getting too big, you should get an error.
 * MIDI player will loop within same WAD (by clicking on the next track button or by allowing in the settings to play the next available track automatically) if it didn't find any other uploaded WADs to look for MIDIs.
 * Deleting all WADs will stop MIDI playback.

@@ -205,6 +205,7 @@ export const TRANSPARENT_PIXEL = -1;
 /* MUS -> MIDI conversion */
 
 export const MUS_HEADER = 'MUS';
+export const MUS_HEADER_SIGNATURE = ['M'.charCodeAt(0), 'U'.charCodeAt(0), 'S'.charCodeAt(0), 0x1A].join(' ');
 export const MIDI_HEADER = 'MThd';
 export const MIDI_HEADER_SIZE = 4;
 export const MIDI_HEADER_DATA = [
