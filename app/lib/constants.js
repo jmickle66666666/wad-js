@@ -147,6 +147,18 @@ export const STATUS_BAR_LUMPS = new RegExp(/(ST|AMM|BRDR_)[0-9a-zA-Z_]{1,}$/);
 
 /* Unique lumps */
 
+export const ANSI_LUMPS = [
+    // Doom or Chex Quest
+    'ENDOOM',
+    // Heretic
+    'ENDTEXT',
+    // Strife
+    'ENDSTRF',
+    // Boom
+    'ENDBOOM',
+    // lack of ANSI lump in IWAD = Hexen
+];
+
 export const MAPINFO = ['MAPINFO', 'ZMAPINFO'];
 
 export const PLAYPAL = 'PLAYPAL';
@@ -201,6 +213,10 @@ export const IMAGE_DATA_HEADER_SIZE = 8;
 export const IMAGE_DATA_BOUNDARY = 255;
 
 export const TRANSPARENT_PIXEL = -1;
+
+/* Worker internal errors */
+
+export const INVALID_TEXT = 'INVALID_TEXT';
 
 /* MUS -> MIDI conversion */
 
