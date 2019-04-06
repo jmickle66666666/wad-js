@@ -423,7 +423,7 @@ export default class App extends Component {
 
     convertLumps = ({ wad }) => {
         this.addToMidiConversionQueue({ wad });
-        // this.addToSimpleImageConversionQueue({ wad });
+        this.addToSimpleImageConversionQueue({ wad });
         this.addToTextConversionQueue({ wad });
     }
 
