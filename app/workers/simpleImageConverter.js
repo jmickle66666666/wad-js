@@ -66,7 +66,7 @@ onmessage = async (message) => {
         name, data, width, height,
     } = lump;
 
-    console.log(`Converting '${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
 
     const colorIndexReferences = buildColorIndexReferences(data);
 
@@ -78,7 +78,7 @@ onmessage = async (message) => {
     );
 
     if (blob) {
-        console.log(`Converted '${name}' from simple color index references to blob (WAD: '${wadId}').`);
+        // console.log(`Converted '${name}' from simple color index references to blob (WAD: '${wadId}').`);
     } else {
         console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
     }
