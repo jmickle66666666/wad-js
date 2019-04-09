@@ -1,8 +1,13 @@
-import { PNAMES, IMAGE_LUMPS } from '../lib/constants';
+import {
+    PNAMES,
+    IMAGE_LUMPS,
+    SNDINFO,
+} from '../lib/constants';
 
 export default class Lump {
     setIndexData({
         name,
+        description,
         type,
         originalFormat,
         index,
@@ -14,9 +19,10 @@ export default class Lump {
         yOffset,
         count,
         data,
-        midi,
+        lineIndex,
     }) {
         this.name = name;
+        this.description = description;
         this.type = type;
         this.originalFormat = originalFormat;
         this.index = index;
@@ -28,7 +34,7 @@ export default class Lump {
         this.yOffset = yOffset;
         this.count = count;
         this.data = data;
-        this.midi = midi;
+        this.lineIndex = lineIndex;
     }
 
     get sizeInBytes() {
@@ -54,5 +60,9 @@ export default class Lump {
 
     get isTEXTUREx() {
         return /TEXTURE[0-9a-zA-Z]$/.test(this.name);
+    }
+
+    get isSNDINFO() {
+        return this.name === SNDINFO;
     }
 }

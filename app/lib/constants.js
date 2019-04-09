@@ -27,6 +27,10 @@ export const EXTENSIONS = {
     png: 'png',
 };
 
+/* Environment */
+
+export const NO_BRAND_ENV = 'development-no-brand';
+
 /* File formats */
 
 export const SUPPORTED_FORMATS = [
@@ -107,9 +111,12 @@ export const OPENGL_MAP_LUMPS = [
     'GL_PVS',
 ];
 
-export const INTERMISSION_LUMPS = new RegExp(/WI[0-9a-zA-Z_]{1,}$/);
+export const INTERMISSION_LUMPS = new RegExp(/^WI[0-9a-zA-Z_]{1,}$/);
 
-export const STATUS_BAR_LUMPS = new RegExp(/(ST|AMM|BRDR_)[0-9a-zA-Z_]{1,}$/);
+// Doom II
+export const INTERMISSION_MAP_NAME_LUMPS = new RegExp(/^CWILV[0-9a-zA-Z_]{1,}$/);
+
+export const STATUS_BAR_LUMPS = new RegExp(/^(ST|AMM|BRDR_)[0-9a-zA-Z_]{1,}$/);
 
 /* Unique lumps */
 
@@ -134,7 +141,8 @@ export const PNAMES = 'PNAMES';
 
 export const SBARINFO = 'SBARINFO';
 
-export const SNDINFO = 'SNDINFO'; // Hexen only
+// Hexen only
+export const SNDINFO = 'SNDINFO';
 
 export const MENU_SCREENS = [
     'TITLEPIC',
@@ -144,7 +152,16 @@ export const MENU_SCREENS = [
     'CREDIT',
 ];
 
-export const INTERMISSION_SCREEN = 'INTERPIC';
+export const INTER_SCREENS = [
+    'INTERPIC',
+    // Doom 1 registered
+    'ENDPIC',
+    'VICTORY2',
+    'PFUB1',
+    'PFUB2',
+    // Doom 2
+    'BOSSBACK',
+];
 
 export const MUSIC_LUMPS = [
     'GENMIDI',
@@ -158,6 +175,8 @@ export const DEMO_LUMPS = [
     'DEMO3',
     'DEMO4',
 ];
+
+export const END_LUMPS = new RegExp(/^END[0-9]{1,}$/);
 
 /* Lump original formats */
 
@@ -183,6 +202,12 @@ export const IMAGE_DATA_HEADER_SIZE = 8;
 export const IMAGE_DATA_BOUNDARY = 255;
 
 export const TRANSPARENT_PIXEL = -1;
+
+export const HEXEN_SOUND_ARCHIVE_PATH = '$ARCHIVEPATH';
+
+export const HEXEN_SOUND_REGISTERED = '$REGISTERED';
+
+export const HEXEN_MUSIC_KEYWORD = '$MAP';
 
 /* Worker internal errors */
 

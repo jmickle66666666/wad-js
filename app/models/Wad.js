@@ -37,6 +37,7 @@ import {
     MIDI_HEADER,
     INTERMISSION,
     INTERMISSION_LUMPS,
+    INTERMISSION_MAP_NAME_LUMPS,
     STATUS_BAR_LUMPS,
     STATUS_BAR,
     SBARINFO,
@@ -44,9 +45,14 @@ import {
     MAP,
     MENU_SCREENS,
     MENU,
-    INTERMISSION_SCREEN,
+    INTER_SCREENS,
+    END_LUMPS,
     ANSI,
     ANSI_LUMPS,
+    SNDINFO,
+    HEXEN_SOUND_ARCHIVE_PATH,
+    HEXEN_SOUND_REGISTERED,
+    HEXEN_MUSIC_KEYWORD,
 } from '../lib/constants';
 
 export default class Wad {
@@ -354,6 +360,109 @@ export default class Wad {
         return new TextDecoder().decode(data).replace(/\u0000/g, ' ');
     }
 
+    readSoundInfo(data) {
+        try {
+            const decodedText = decodeURI(new TextDecoder('utf-8').decode(data).replace(/\u0000/g, ' '));
+            const lines = decodedText.split('\n');
+
+            const linesWithIndex = lines
+                // add line numbers
+                .map((line, lineIndex) => ({
+                    data: line,
+                    lineIndex,
+                }));
+
+            const filteredLines = linesWithIndex
+                // remove comment lines
+                .filter(line => !line.data.match(/^;/g))
+                // remove empty lines
+                .filter(line => line.data.length > 1
+                    || (line.data.length === 1 && line.data.charCodeAt(0) !== 13))
+                // remove lines that do not contain sound info
+                .filter(line => !line.data.includes(HEXEN_SOUND_ARCHIVE_PATH)
+                    && !line.data.includes(HEXEN_SOUND_REGISTERED));
+
+            const sanitizedLines = filteredLines.map((line) => {
+                const sanitizedData = line.data
+                    // remove inline comments
+                    .replace(/;.*./, '')
+                    .trimRight()
+                    // remove tabs
+                    .replace(/\t/g, ' ')
+                    // remove extra spaces
+                    .replace(/ {1,}/g, ' ');
+
+                return {
+                    ...line,
+                    data: sanitizedData,
+                };
+            });
+
+            const soundArray = sanitizedLines.map((line, index) => {
+                const splitLine = line.data.split(' ');
+                if (splitLine.length === 2) {
+                    // this is a sound
+                    const description = splitLine[0];
+                    const name = String(splitLine[1]).toUpperCase();
+
+                    const audioObject = {
+                        name,
+                        description,
+                        type: 'sounds',
+                        lineIndex: line.lineIndex,
+                    };
+
+                    // add references to the lump in SNDINFO
+                    linesWithIndex[line.lineIndex] = {
+                        ...linesWithIndex[line.lineIndex],
+                        ...audioObject,
+                    };
+
+                    return { ...audioObject };
+                } if (splitLine.length === 3 && splitLine[0] === HEXEN_MUSIC_KEYWORD) {
+                    // this is music
+                    const description = `map${splitLine[1]}`;
+                    const name = String(splitLine[2]).toUpperCase();
+
+                    const audioObject = {
+                        name,
+                        description,
+                        type: 'music',
+                        lineIndex: line.lineIndex,
+                    };
+
+                    // add references to the lump in SNDINFO
+                    linesWithIndex[line.lineIndex] = {
+                        ...linesWithIndex[line.lineIndex],
+                        ...audioObject,
+                    };
+
+                    return audioObject;
+                }
+
+                console.warn(`SNDINFO: Unrecognized sound data (sound #${index}). Expected pattern 'sounddescription soundlump' or '$MAP 15 musiclump' but got:`, { line, length: line.length });
+
+                return null;
+            }).filter(line => line);
+
+            const sounds = {};
+            for (let i = 0; i < soundArray.length; i++) {
+                const sound = soundArray[i];
+                sounds[sound.name] = sound;
+            }
+
+            return {
+                sounds,
+                soundInfoData: linesWithIndex,
+            };
+        } catch (error) {
+            const errorMessage = `Could not convert '${SNDINFO}' to text.`;
+            console.error({ errorMessage, error });
+
+            return { soundInfoData: data };
+        }
+    }
+
     readPalettes(data) {
         const size = data.byteLength;
         const paletteCount = size / PALETTE_SIZE;
@@ -633,6 +742,19 @@ export default class Wad {
         };
     }
 
+    disambiguateMusicFormat(data) {
+        let format;
+
+        const musicHeader = this.readMusicHeader(data);
+        if (musicHeader === MIDI_HEADER) {
+            format = 'MIDI';
+        } else if (musicHeader.includes(MUS_HEADER)) {
+            format = 'MUS';
+        }
+
+        return { format };
+    }
+
     readMusicHeader(data) {
         const header = [];
         for (let i = 0; i < MIDI_HEADER_SIZE; i++) {
@@ -687,6 +809,7 @@ export default class Wad {
         let indexLumpCount = 0;
         let paletteData = iwad.palettes ? iwad.palettes.data[0] : [];
         let patchNames = [];
+        let soundInfo = {};
 
         for (let i = 0; i < this.headerLumpCount; i++) {
             try {
@@ -814,42 +937,42 @@ export default class Wad {
                         lumpClusterType = '';
                     } else if (lumpClusterType) {
                         switch (lumpClusterType) {
-                            default: {
-                                break;
-                            }
-                            case 'colormaps': {
-                                parsedLumpData = this.readColormaps(lumpData, name);
-                                break;
-                            }
-                            case 'flats': {
-                                const { metadata } = this.readFlat(lumpData, name, paletteData);
-                                parsedLumpData = lumpData;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
-                                break;
-                            }
-                            case 'patches': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = lumpData;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
-                            case 'sprites': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
+                            break;
+                        }
                         }
 
                         // we know the type of this lump because it belongs to a cluster
@@ -870,12 +993,8 @@ export default class Wad {
                             if (/^D_[0-9a-zA-Z_]{1,}$/.test(name) || /^MUS_[0-9a-zA-Z_]{1,}$/.test(name)) {
                                 lumpType = 'music';
 
-                                const musicHeader = this.readMusicHeader(lumpData);
-                                if (musicHeader === MIDI_HEADER) {
-                                    originalFormat = 'MIDI';
-                                } else if (musicHeader.includes(MUS_HEADER)) {
-                                    originalFormat = 'MUS';
-                                }
+                                const { format } = this.disambiguateMusicFormat(lumpData);
+                                originalFormat = format;
 
                                 parsedLumpData = lumpData;
                                 // DS* (DMX) and DP* (speaker)
@@ -892,7 +1011,12 @@ export default class Wad {
                                     ...lumpIndexData,
                                     ...metadata,
                                 };
-                            } else if ((INTERMISSION_LUMPS.test(name) || name === INTERMISSION_SCREEN) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
+                            } else if ((
+                                INTERMISSION_LUMPS.test(name)
+                                || INTERMISSION_MAP_NAME_LUMPS.test(name)
+                                || INTER_SCREENS.includes(name)
+                                || END_LUMPS.test(name)
+                            ) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = INTERMISSION;
                                 const { image, metadata } = this.readImageData(
                                     lumpData, name, paletteData,
@@ -929,9 +1053,14 @@ export default class Wad {
                             }
                         }
 
-                        // this lump is uncategorized
-                        // this also includes lumps that contain map names since we have not figured out that they are map lumps yet.
-                        if (!lumpType) {
+                        if (name === SNDINFO) {
+                            const { sounds, soundInfoData } = this.readSoundInfo(lumpData);
+                            soundInfo = { ...sounds };
+                            parsedLumpData = soundInfoData;
+                        } else if (!lumpType) {
+                            // this lump is uncategorized
+                            // this also includes lumps that contain map names
+                            // since we have not figured out that they are map lumps yet.
                             parsedLumpData = lumpData;
                         }
 
@@ -960,6 +1089,33 @@ export default class Wad {
         if (this.errorIds.length > 0) {
             callback(this);
             return false;
+        }
+
+        // enrich lumps according to what we have found in SNDINFO
+        const soundNames = Object.keys(soundInfo || {});
+        if (soundNames.length > 0) {
+            const lumpNames = Object.keys(lumps);
+            for (let i = 0; i < lumpNames.length; i++) {
+                const lumpName = lumpNames[i];
+                if (soundNames.includes(lumpName)) {
+                    const incompleteLump = lumps[lumpName];
+
+                    const soundName = soundNames.find(sndNme => sndNme === lumpName);
+                    const sound = soundInfo[soundName];
+
+                    if (sound.type === 'music') {
+                        const { format } = this.disambiguateMusicFormat(incompleteLump.data);
+                        incompleteLump.originalFormat = format;
+                    }
+
+                    const lump = this.createLumpIndex({
+                        ...incompleteLump,
+                        ...sound,
+                    });
+
+                    lumps[lumpName] = lump;
+                }
+            }
         }
 
         const organizedLumps = this.organizeLumps(lumps);

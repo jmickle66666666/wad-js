@@ -18,6 +18,7 @@ const plugins = [
         VERSION: JSON.stringify(info.version),
         ISSUES: JSON.stringify(info.bugs.url),
         REPO: JSON.stringify(info.homepage),
+        TARGET: JSON.stringify(TARGET),
     }),
 ];
 

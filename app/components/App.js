@@ -432,11 +432,13 @@ export default class App extends Component {
     stopConvertingWadItems = ({ wadId }) => {
         this.removeWadFromTargetObject({ targetObject: 'midis', wadId }, this.updateMidiSelection);
         this.removeWadFromTargetObject({ targetObject: 'simpleImages', wadId });
+        this.removeWadFromTargetObject({ targetObject: 'text', wadId });
     }
 
     stopConvertingAllWads = () => {
         this.clearTargetObject({ targetObject: 'midis' });
         this.clearTargetObject({ targetObject: 'simpleImages' });
+        this.removeWadFromTargetObject({ targetObject: 'text' });
     }
 
     updateMidiSelection = (wadId) => {
@@ -495,7 +497,7 @@ export default class App extends Component {
                 this.textConverter.postMessage({
                     wadId: wad.id,
                     lumpId,
-                    data,
+                    input: data,
                 });
             }
 
@@ -514,10 +516,10 @@ export default class App extends Component {
 
 
     saveConvertedText = (payload) => {
-        const { wadId, lumpId, text: textData } = payload.data;
+        const { wadId, lumpId, output } = payload.data;
 
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
-        if (!textData) {
+        if (!output) {
             this.removeItemFromQueue({
                 targetObject: 'text',
                 wadId,
@@ -533,7 +535,7 @@ export default class App extends Component {
                 wadId,
                 lumpId,
                 items: text,
-                newItem: textData,
+                newItem: output,
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
@@ -545,7 +547,7 @@ export default class App extends Component {
                 this.textConverter.postMessage({
                     wadId: nextWadId,
                     lumpId: nextLump.name,
-                    data: nextLump.data,
+                    input: nextLump.data,
                 });
             }
         });
@@ -590,7 +592,7 @@ export default class App extends Component {
                 this.midiConverter.postMessage({
                     wadId: wad.id,
                     lumpId,
-                    data,
+                    input: data,
                 });
             }
         }
@@ -626,10 +628,10 @@ export default class App extends Component {
     }
 
     saveConvertedMidi = (payload) => {
-        const { wadId, lumpId, midi } = payload.data;
+        const { wadId, lumpId, output } = payload.data;
 
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
-        if (!midi) {
+        if (!output) {
             this.removeItemFromQueue({
                 targetObject: 'midis',
                 wadId,
@@ -645,7 +647,7 @@ export default class App extends Component {
                 wadId,
                 lumpId,
                 items: midis,
-                newItem: midi,
+                newItem: output,
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
@@ -657,7 +659,7 @@ export default class App extends Component {
                 this.midiConverter.postMessage({
                     wadId: nextWadId,
                     lumpId: nextLump.name,
-                    data: nextLump.data,
+                    input: nextLump.data,
                 });
             }
 
@@ -728,10 +730,10 @@ export default class App extends Component {
     }
 
     saveConvertedSimpleImage = (payload) => {
-        const { wadId, lumpId, image } = payload.data;
+        const { wadId, lumpId, output } = payload.data;
 
         // didn't work
-        if (!image) {
+        if (!output) {
             this.removeItemFromQueue({
                 targetObject: 'simpleImages',
                 wadId,
@@ -747,7 +749,7 @@ export default class App extends Component {
                 wadId,
                 lumpId,
                 items: simpleImages,
-                newItem: image,
+                newItem: output,
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
@@ -962,8 +964,9 @@ export default class App extends Component {
         });
     }
 
-    selectLump = (lumpName, init) => {
+    selectLump = (lumpName, init, newLumpType) => {
         this.setState((prevState) => {
+            const lumpType = newLumpType || prevState.selectedLumpType;
             if (!prevState.selectedWad) {
                 return {};
             }
@@ -972,20 +975,26 @@ export default class App extends Component {
                 return {};
             }
 
-            if (!prevState.selectedLumpType) {
+            if (!lumpType) {
                 return {};
             }
 
-            const selectedLump = prevState.selectedWad.lumps[prevState.selectedLumpType][lumpName];
-            if (!selectedLump) {
-                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType}`;
+            if (!prevState.selectedWad.lumps[lumpType]) {
                 return {};
             }
 
-            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType} / ${selectedLump.name}`;
+            const selectedLump = prevState.selectedWad.lumps[lumpType][lumpName];
+
+            if (!selectedLump && !newLumpType) {
+                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${lumpType}`;
+                return {};
+            }
+
+            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${lumpType} / ${selectedLump.name}`;
 
             return {
                 selectedLump,
+                ...newLumpType && { selectedLumpType: newLumpType },
             };
         }, () => {
             if (init) {

@@ -89,6 +89,7 @@ export default ({
             selectedMidi={selectedMidi}
             selectMidi={selectMidi}
             stopMidi={stopMidi}
+            selectLump={selectLump}
             focusOnLump={focusOnLump}
         />
     );

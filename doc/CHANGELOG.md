@@ -1,3 +1,10 @@
+## v0.1.38: SNDINFO
+
+* wadJS is now able to parse music and sounds from the Hexen IWAD correctly. I added some logic to get this data from the `SNDINFO` lump, since we can't rely on pattern-matching on the name of the lumps to know which lumps represent audio data.
+* ANSI lumps got some minor improvements. They will now shrink if they do not fit the width of the browser's window.
+* The application recognizes more intermission / final image lumps and will put them in the Intermission category.
+
+
 ## v0.1.37: ANSI Screen
 * wadJS can now display in the app the end screens that were displayed after quitting the game.
 

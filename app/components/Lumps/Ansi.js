@@ -13,7 +13,7 @@ const getClassNames = ({ foreground, background, blinking }) => (
 export default ({ lump, text }) => (
     <pre className={style.ansiOuter}>
         {text && text.map((line, i) => (
-            <div key={i}>
+            <div key={i} className={style.ansiLine}>
                 {line.map((block, j) => (
                     <span
                         key={i + j}
