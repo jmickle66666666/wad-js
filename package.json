@@ -1,6 +1,6 @@
 {
     "name": "wadjs",
-    "version": "0.1.36",
+    "version": "0.1.37",
     "repository": {
         "type": "git",
         "url": "https://github.com/yvesgurcan/wadjs"
@@ -67,9 +67,11 @@
         "jszip": "^3.2.0",
         "localforage": "^1.7.3",
         "moment": "^2.24.0",
+        "prop-types": "^15.7.2",
         "react": "^16.8.3",
         "react-dom": "^16.8.3",
         "react-pose": "^4.0.8",
-        "react-router-dom": "^4.3.1"
+        "react-router-dom": "^4.3.1",
+        "react-router-prop-types": "^1.0.4"
     }
 }

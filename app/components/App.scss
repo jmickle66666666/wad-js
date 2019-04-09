@@ -5,6 +5,11 @@
     src: url('../assets/doom.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'IBM VGA8';
+    src: url('../assets/IBM_VGA8.ttf') format('truetype');
+}
+
 body {
     margin: 0;
     background: black;

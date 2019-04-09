@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import ReactRouterPropTypes from 'react-router-prop-types';
 import moment from 'moment';
 
 import style from './App.scss';
@@ -47,6 +48,10 @@ const {
 } = mediaSessionSupport();
 
 export default class App extends Component {
+    static propTypes = {
+        match: ReactRouterPropTypes.match.isRequired,
+    }
+
     state = {
         globalMessages: {},
         wads: {},
@@ -199,6 +204,7 @@ export default class App extends Component {
         onmessage = () => { },
         onerror = this.workerError,
     }) {
+        // eslint-disable-next-line new-cap
         this[workerId] = new workerClass();
         this[workerId].onmessage = onmessage;
         this[workerId].onerror = onerror;
@@ -417,7 +423,7 @@ export default class App extends Component {
 
     convertLumps = ({ wad }) => {
         this.addToMidiConversionQueue({ wad });
-        // this.addToSimpleImageConversionQueue({ wad });
+        this.addToSimpleImageConversionQueue({ wad });
         this.addToTextConversionQueue({ wad });
     }
 

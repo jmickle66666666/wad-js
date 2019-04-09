@@ -9,6 +9,143 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <title>wadJS</title>
     </head>
+    <style>
+    body {
+        margin: 0;
+        background: black;
+    }
+
+    #placeholder {
+        font-family: Roboto;
+        z-index: -1;
+        position: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 80px;
+        min-height: 100vh;
+        min-width: 100vw;
+        color: white;
+        animation: .25s fade-in .25s;
+        opacity: 0;
+    }
+
+    @keyframes fade-in {
+        from: {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .ansi-background-black {
+        background: black;
+    }
+
+    .ansi-background-blue {
+        background: #0000AA;
+    }
+
+    .ansi-background-green {
+        background: #00AA00;
+    }
+
+    .ansi-background-cyan {
+        background: #00AAAA;
+    }
+
+    .ansi-background-red {
+        background: #AA0000;
+    }
+
+    .ansi-background-magenta {
+        background: #AA00AA;
+    }
+
+    .ansi-background-brown {
+        background: #AA5500;
+    }
+
+    .ansi-background-light-gray {
+        background: #AAAAAA;
+    }
+
+    .ansi-foreground-black {
+        color: black;
+    }
+
+    .ansi-foreground-blue {
+        color: #0000AA;
+    }
+
+    .ansi-foreground-green {
+        color: #00AA00;
+    }
+
+    .ansi-foreground-cyan {
+        color: #00AAAA;
+    }
+
+    .ansi-foreground-red {
+        color: #AA0000;
+    }
+
+    .ansi-foreground-magenta {
+        color: #AA00AA;
+    }
+
+    .ansi-foreground-brown {
+        color: #AA5500;
+    }
+
+    .ansi-foreground-light-gray {
+        color: #AAAAAA;
+    }
+
+    .ansi-foreground-dark-gray {
+        color: #555555;
+    }
+
+    .ansi-foreground-light-blue {
+        color: #5555FF;
+    }
+
+    .ansi-foreground-light-green {
+        color: #55FF55;
+    }
+
+    .ansi-foreground-light-cyan {
+        color: #55FFFF;
+    }
+
+    .ansi-foreground-light-red {
+        color: #FF5555;
+    }
+
+    .ansi-foreground-light-magenta {
+        color: #FF55FF;
+    }
+
+    .ansi-foreground-yellow {
+        color: #FFFF55;
+    }
+
+    .ansi-foreground-white {
+        color: white;
+    }
+
+    .ansi-blinking {
+        animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+    </style>
     <!-- Global Site Tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-136207852-1
 "></script>
@@ -21,6 +158,9 @@
     </script>
     <body>
         <section id="app"></section>
+        <section id="placeholder">
+            Loading...
+        </section>
         <script id="libtimidity" src="/public/midi/libtimidity.js"></script>
     </body>
 </html>

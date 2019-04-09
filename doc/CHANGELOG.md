@@ -1,4 +1,9 @@
-## v0.1.36:
+## v0.1.37: ANSI Screen
+* wadJS can now display in the app the end screens that were displayed after quitting the game.
+
+## v0.1.36
+* The app will show a message if storing uploaded WADs in your browser raises an error.
+* MIDI player can now loop through all the MIDIs in your uploaded WADs.
 
 ## v0.1.35: Various
 

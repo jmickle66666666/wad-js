@@ -27,40 +27,6 @@ export const EXTENSIONS = {
     png: 'png',
 };
 
-/* MIDI player */
-
-export const MAX_I16 = 2 ** 15;
-
-export const MIDI_AUDIO_BUFFER_SIZE = 8192;
-
-export const ARCHIE = '/public/archie.png';
-
-// signed 16-bit samples
-export const MIDI_AUDIO_S16LSB = 0x8010;
-
-export const MIDI_PATCH_URL = '/public/midi/pat/';
-
-export const MIDI_ERROR = 'MIDI_ERROR';
-
-export const MIDI_STATUS = 'MIDI_STATUS';
-
-export const MIDI_PRELOAD = 'MIDI_PRELOAD';
-
-export const MIDI_LOAD_FILE = 'MIDI_LOAD_FILE';
-
-export const MIDI_LOAD_PATCH = 'MIDI_LOAD_PATCH';
-
-export const MIDI_PLAY = 'MIDI_PLAY';
-
-export const MIDI_PAUSE = 'MIDI_PAUSE';
-
-export const MIDI_RESUME = 'MIDI_RESUME';
-
-export const MIDI_STOP = 'MIDI_STOP';
-
-export const MIDI_END = 'MIDI_END';
-
-
 /* File formats */
 
 export const SUPPORTED_FORMATS = [
@@ -147,6 +113,18 @@ export const STATUS_BAR_LUMPS = new RegExp(/(ST|AMM|BRDR_)[0-9a-zA-Z_]{1,}$/);
 
 /* Unique lumps */
 
+export const ANSI_LUMPS = [
+    // Doom or Chex Quest
+    'ENDOOM',
+    // Heretic
+    'ENDTEXT',
+    // Strife
+    'ENDSTRF',
+    // Boom
+    'ENDBOOM',
+    // lack of ANSI lump in IWAD = Hexen
+];
+
 export const MAPINFO = ['MAPINFO', 'ZMAPINFO'];
 
 export const PLAYPAL = 'PLAYPAL';
@@ -181,6 +159,10 @@ export const DEMO_LUMPS = [
     'DEMO4',
 ];
 
+/* Lump original formats */
+
+export const ANSI = 'ANSI';
+
 /* Lump special values */
 
 export const LUMP_INDEX_ENTRY_SIZE = 16;
@@ -201,6 +183,10 @@ export const IMAGE_DATA_HEADER_SIZE = 8;
 export const IMAGE_DATA_BOUNDARY = 255;
 
 export const TRANSPARENT_PIXEL = -1;
+
+/* Worker internal errors */
+
+export const INVALID_TEXT = 'INVALID_TEXT';
 
 /* MUS -> MIDI conversion */
 
@@ -241,3 +227,85 @@ export const MIDI_PRESS_KEY = 0x90;
 export const MIDI_CHANGE_CONTROLLER = 0xB0;
 export const MIDI_CHANGE_PATCH = 0xC0;
 export const MIDI_PITCH_WHEEL = 0xE0;
+
+/* MIDI player */
+
+export const MAX_I16 = 2 ** 15;
+
+export const MIDI_AUDIO_BUFFER_SIZE = 8192;
+
+// signed 16-bit samples
+export const MIDI_AUDIO_S16LSB = 0x8010;
+
+export const MIDI_PATCH_URL = '/public/midi/pat/';
+
+export const MIDI_ERROR = 'MIDI_ERROR';
+
+export const MIDI_STATUS = 'MIDI_STATUS';
+
+export const MIDI_PRELOAD = 'MIDI_PRELOAD';
+
+export const MIDI_LOAD_FILE = 'MIDI_LOAD_FILE';
+
+export const MIDI_LOAD_PATCH = 'MIDI_LOAD_PATCH';
+
+export const MIDI_PLAY = 'MIDI_PLAY';
+
+export const MIDI_PAUSE = 'MIDI_PAUSE';
+
+export const MIDI_RESUME = 'MIDI_RESUME';
+
+export const MIDI_STOP = 'MIDI_STOP';
+
+export const MIDI_END = 'MIDI_END';
+
+/* ANSI conversion */
+
+export const ANSI_CODE_PAGE_437_TABLES = [
+    '', '☺', '☻', '♥', '♦', '♣', '♠', '•', '◘', '○', '◙', '♂', '♀', '♪', '♫', '☼',
+    '►', '◄', '↕', '‼', '¶', '§', '▬', '↨', '↑', '↓', '→', '←', '∟', '↔', '▲', '▼',
+    ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+    '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+    '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+    'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', '⌂',
+    'Ç', 'ü', 'é', 'â', 'ä', 'à', 'å', 'ç', 'ê', 'ë', 'è', 'ï', 'î', 'ì', 'Ä', 'Å',
+    'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù', 'ÿ', 'Ö', 'Ü', '¢', '£', '¥', '₧', 'ƒ',
+    'á', 'í', 'ó', 'ú', 'ñ', 'Ñ', 'ª', 'º', '¿', '⌐', '¬', '½', '¼', '¡', '«', '»',
+    '░', '▒', '▓', '│', '┤', '╡', '╢', '╖', '╕', '╣', '║', '╗', '╝', '╜', '╛', '┐',
+    '└', '┴', '┬', '├', '─', '┼', '╞', '╟', '╚', '╔', '╩', '╦', '╠', '═', '╬', '╧',
+    '╨', '╤', '╥', '╙', '╘', '╒', '╓', '╫', '╪', '┘', '┌', '█', '▄', '▌', '▐', '▀',
+    'α', 'ß', 'Γ', 'π', 'Σ', 'σ', 'µ', 'τ', 'Φ', 'Θ', 'Ω', 'δ', '∞', 'φ', 'ε', '∩',
+    '≡', '±', '≥', '≤', '⌠', '⌡', '÷', '≈', '°', '∙', '·', '√', 'ⁿ', '²', '■', ' ',
+];
+
+export const ANSI_BACKGROUND_COLOR_CODES = [
+    'black',
+    'blue',
+    'green',
+    'cyan',
+    'red',
+    'magenta',
+    'brown',
+    'light-gray',
+];
+
+export const ANSI_FOREGROUND_COLOR_CODES = [
+    'black',
+    'blue',
+    'green',
+    'cyan',
+    'red',
+    'magenta',
+    'brown',
+    'light-gray',
+    'dark-gray',
+    'light-blue',
+    'light-green',
+    'light-cyan',
+    'light-red',
+    'light-magenta',
+    'yellow',
+    'white',
+];
