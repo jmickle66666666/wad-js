@@ -73,14 +73,14 @@ onmessage = async (message) => {
 
     const colorIndexReferences = buildColorIndexReferences(data);
 
-    const blob = await convertColorIndexesReferencesToBlob(
+    const output = await convertColorIndexesReferencesToBlob(
         colorIndexReferences,
         width,
         height,
         palette,
     );
 
-    if (blob) {
+    if (output) {
         // console.log(`Converted '${name}' from simple color index references to blob (WAD: '${wadId}').`);
     } else {
         console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
@@ -89,6 +89,6 @@ onmessage = async (message) => {
     postMessage({
         wadId,
         lumpId: name,
-        image: blob,
+        output,
     });
 };

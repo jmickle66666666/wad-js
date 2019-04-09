@@ -45,7 +45,7 @@ function isValidMusHeader(id) {
 // TODO: Send the error string in postMessage
 
 onmessage = (message) => {
-    const { wadId, lumpId, data } = message.data;
+    const { wadId, lumpId, input } = message.data;
 
     // console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
 
@@ -438,14 +438,14 @@ onmessage = (message) => {
         return outputDataView.buffer;
     }
 
-    const masterOutput = convertMusToMidi(data);
-    if (masterOutput === false) {
+    const output = convertMusToMidi(input);
+    if (output === false) {
         console.error(`Failed to convert '${lumpId}' from MUS to MIDI (WAD: '${wadId}').`, { musDataPosition });
     }
 
     postMessage({
         wadId,
         lumpId,
-        midi: masterOutput,
+        output,
     });
 };
