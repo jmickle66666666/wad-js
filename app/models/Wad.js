@@ -37,6 +37,7 @@ import {
     MIDI_HEADER,
     INTERMISSION,
     INTERMISSION_LUMPS,
+    INTERMISSION_MAP_NAME_LUMPS,
     STATUS_BAR_LUMPS,
     STATUS_BAR,
     SBARINFO,
@@ -44,7 +45,8 @@ import {
     MAP,
     MENU_SCREENS,
     MENU,
-    INTERMISSION_SCREEN,
+    INTER_SCREENS,
+    END_LUMPS,
     ANSI,
     ANSI_LUMPS,
 } from '../lib/constants';
@@ -814,42 +816,42 @@ export default class Wad {
                         lumpClusterType = '';
                     } else if (lumpClusterType) {
                         switch (lumpClusterType) {
-                            default: {
-                                break;
-                            }
-                            case 'colormaps': {
-                                parsedLumpData = this.readColormaps(lumpData, name);
-                                break;
-                            }
-                            case 'flats': {
-                                const { metadata } = this.readFlat(lumpData, name, paletteData);
-                                parsedLumpData = lumpData;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
-                                break;
-                            }
-                            case 'patches': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                        default: {
+                            break;
+                        }
+                        case 'colormaps': {
+                            parsedLumpData = this.readColormaps(lumpData, name);
+                            break;
+                        }
+                        case 'flats': {
+                            const { metadata } = this.readFlat(lumpData, name, paletteData);
+                            parsedLumpData = lumpData;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
+                            break;
+                        }
+                        case 'patches': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
-                            case 'sprites': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
-                                lumpIndexData = {
-                                    ...lumpIndexData,
-                                    ...metadata,
-                                };
+                            break;
+                        }
+                        case 'sprites': {
+                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                            parsedLumpData = image;
+                            lumpIndexData = {
+                                ...lumpIndexData,
+                                ...metadata,
+                            };
 
-                                break;
-                            }
+                            break;
+                        }
                         }
 
                         // we know the type of this lump because it belongs to a cluster
@@ -892,7 +894,12 @@ export default class Wad {
                                     ...lumpIndexData,
                                     ...metadata,
                                 };
-                            } else if ((INTERMISSION_LUMPS.test(name) || name === INTERMISSION_SCREEN) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
+                            } else if ((
+                                INTERMISSION_LUMPS.test(name)
+                                || INTERMISSION_MAP_NAME_LUMPS.test(name)
+                                || INTER_SCREENS.includes(name)
+                                || END_LUMPS.test(name)
+                            ) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = INTERMISSION;
                                 const { image, metadata } = this.readImageData(
                                     lumpData, name, paletteData,
