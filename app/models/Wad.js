@@ -45,6 +45,8 @@ import {
     MENU_SCREENS,
     MENU,
     INTERMISSION_SCREEN,
+    ANSI,
+    ANSI_LUMPS,
 } from '../lib/constants';
 
 export default class Wad {
@@ -812,42 +814,42 @@ export default class Wad {
                         lumpClusterType = '';
                     } else if (lumpClusterType) {
                         switch (lumpClusterType) {
-                        default: {
-                            break;
-                        }
-                        case 'colormaps': {
-                            parsedLumpData = this.readColormaps(lumpData, name);
-                            break;
-                        }
-                        case 'flats': {
-                            const { metadata } = this.readFlat(lumpData, name, paletteData);
-                            parsedLumpData = lumpData;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
-                            break;
-                        }
-                        case 'patches': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                            default: {
+                                break;
+                            }
+                            case 'colormaps': {
+                                parsedLumpData = this.readColormaps(lumpData, name);
+                                break;
+                            }
+                            case 'flats': {
+                                const { metadata } = this.readFlat(lumpData, name, paletteData);
+                                parsedLumpData = lumpData;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                                break;
+                            }
+                            case 'patches': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
 
-                            break;
-                        }
-                        case 'sprites': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                                break;
+                            }
+                            case 'sprites': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
 
-                            break;
-                        }
+                                break;
+                            }
                         }
 
                         // we know the type of this lump because it belongs to a cluster
@@ -931,6 +933,10 @@ export default class Wad {
                         // this also includes lumps that contain map names since we have not figured out that they are map lumps yet.
                         if (!lumpType) {
                             parsedLumpData = lumpData;
+                        }
+
+                        if (ANSI_LUMPS.includes(name)) {
+                            originalFormat = ANSI;
                         }
 
                         const lumpIndexDataWithType = {
