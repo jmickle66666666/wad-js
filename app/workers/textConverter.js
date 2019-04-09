@@ -4,6 +4,7 @@ import {
     ANSI_BACKGROUND_COLOR_CODES,
     ANSI_FOREGROUND_COLOR_CODES,
     ANSI_CODE_PAGE_437_TABLES,
+    SNDINFO,
 } from '../lib/constants';
 
 const interpolateBackgroundAnsiCode = int => (
@@ -62,10 +63,20 @@ const processNewLines = text => text.split('\n');
 onmessage = (message) => {
     const { wadId, lumpId, input } = message.data;
 
-    console.log(`Converting '${lumpId}' to text (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${lumpId}' to text (WAD: '${wadId}') ...`);
 
     let output = null;
     let convertedFormat = 'text';
+
+    if (lumpId === SNDINFO) {
+        postMessage({
+            wadId,
+            lumpId,
+            ignored: true,
+        });
+
+        return;
+    }
 
     if (ANSI_LUMPS.includes(lumpId)) {
         // ANSI
@@ -91,9 +102,10 @@ onmessage = (message) => {
             postMessage({
                 wadId,
                 lumpId,
-                text: null,
                 error,
             });
+
+            return;
         }
 
         output = splitText;
