@@ -63,7 +63,10 @@ onmessage = async (message) => {
     } = message.data;
 
     const {
-        name, data, width, height,
+        name,
+        data,
+        width,
+        height,
     } = lump;
 
     // console.log(`Converting '${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
