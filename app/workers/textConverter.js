@@ -55,7 +55,7 @@ const parseAnsiScreen = (input) => {
     return blocks;
 };
 
-const decodeText = input => decodeURI(new TextDecoder('utf-8').decode(input).replace(/\u0000/g, ' '));
+const firstDecodeTextMethod = input => decodeURI(new TextDecoder('utf-8').decode(input).replace(/\u0000/g, ' '));
 
 const processNewLines = text => text.split('\n');
 
@@ -76,7 +76,7 @@ onmessage = (message) => {
         // rules out certain lumps that are definitively not meant to be rendered as text
         let splitText = null;
         try {
-            const decodedText = decodeText(input);
+            const decodedText = firstDecodeTextMethod(input);
             splitText = processNewLines(decodedText);
         } catch (err) {
             const errorMessage = `Could not convert '${lumpId}' to text (WAD: '${wadId}').`;
