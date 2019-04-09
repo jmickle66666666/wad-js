@@ -7,15 +7,17 @@ import {
 } from '../../lib/constants';
 
 import TextLump from '../Lumps/TextLump';
-import Ansi from '../Lumps/Ansi';
 import Palettes from '../Lumps/Palettes';
 import Colormaps from '../Lumps/Colormaps';
 import Map from '../Lumps/Map';
-import PatchNames from '../Lumps/PatchNames';
-import TextureNames from '../Lumps/TextureNames';
 import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
 import Music from '../Lumps/Music';
+
+import PatchNames from '../Lumps/PatchNames';
+import TextureNames from '../Lumps/TextureNames';
+import Ansi from '../Lumps/Ansi';
+import SoundInfo from '../Lumps/SoundInfo';
 
 export default ({
     wad,
@@ -26,6 +28,7 @@ export default ({
     selectedMidi,
     selectMidi,
     stopMidi,
+    selectLump,
 }) => {
     switch (lump.type) {
     default: {
@@ -37,6 +40,16 @@ export default ({
                 <Ansi
                     lump={lump}
                     text={text}
+                />
+            );
+        }
+
+        if (lump.isSNDINFO) {
+            return (
+                <SoundInfo
+                    lump={lump}
+                    wad={wad}
+                    selectLump={selectLump}
                 />
             );
         }

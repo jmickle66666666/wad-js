@@ -203,6 +203,12 @@ export const IMAGE_DATA_BOUNDARY = 255;
 
 export const TRANSPARENT_PIXEL = -1;
 
+export const HEXEN_SOUND_ARCHIVE_PATH = '$ARCHIVEPATH';
+
+export const HEXEN_SOUND_REGISTERED = '$REGISTERED';
+
+export const HEXEN_MUSIC_KEYWORD = '$MAP';
+
 /* Worker internal errors */
 
 export const INVALID_TEXT = 'INVALID_TEXT';
