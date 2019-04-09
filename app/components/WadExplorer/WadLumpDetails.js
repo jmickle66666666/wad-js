@@ -14,6 +14,7 @@ export default ({
     selectMidi,
     stopMidi,
     focusOnLump,
+    selectLump,
 }) => (
     <Fragment>
         <span id="lumpDetails" className={style.wadLumpDetailsAnchor} />
@@ -41,6 +42,7 @@ export default ({
                     selectedMidi={selectedMidi}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}
+                    selectLump={selectLump}
                 />
             </div>
         </div>

@@ -964,8 +964,9 @@ export default class App extends Component {
         });
     }
 
-    selectLump = (lumpName, init) => {
+    selectLump = (lumpName, init, newLumpType) => {
         this.setState((prevState) => {
+            const lumpType = newLumpType || prevState.selectedLumpType;
             if (!prevState.selectedWad) {
                 return {};
             }
@@ -974,25 +975,26 @@ export default class App extends Component {
                 return {};
             }
 
-            if (!prevState.selectedLumpType) {
+            if (!lumpType) {
                 return {};
             }
 
-            if (!prevState.selectedWad.lumps[prevState.selectedLumpType]) {
+            if (!prevState.selectedWad.lumps[lumpType]) {
                 return {};
             }
 
-            const selectedLump = prevState.selectedWad.lumps[prevState.selectedLumpType][lumpName];
+            const selectedLump = prevState.selectedWad.lumps[lumpType][lumpName];
 
-            if (!selectedLump) {
-                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType}`;
+            if (!selectedLump && !newLumpType) {
+                document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${lumpType}`;
                 return {};
             }
 
-            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${prevState.selectedLumpType} / ${selectedLump.name}`;
+            document.title = `${prefixWindowtitle} / ${prevState.selectedWad.name} / ${lumpType} / ${selectedLump.name}`;
 
             return {
                 selectedLump,
+                ...newLumpType && { selectedLumpType: newLumpType },
             };
         }, () => {
             if (init) {
