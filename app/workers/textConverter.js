@@ -70,7 +70,7 @@ onmessage = (message) => {
     if (ANSI_LUMPS.includes(lumpId)) {
         // ANSI
         output = parseAnsiScreen(input);
-        convertedFormat = 'PNG';
+        convertedFormat = 'ANSI';
     } else {
         // text
         // rules out certain lumps that are definitively not meant to be rendered as text
