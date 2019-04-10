@@ -104,13 +104,27 @@ export default class App extends Component {
         }
 
         if (serviceWorkerSupported) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-                    console.log('SW registered: ', registration);
-                }).catch((registrationError) => {
-                    console.log('SW registration failed: ', registrationError);
+            if (TARGET !== 'production' && TARGET !== 'development-service-workers') {
+                // unregsiter service workers if any in development
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        for (let i = 0; i < registrations.length; i++) {
+                            const registration = registrations[i];
+                            registration.unregister();
+                        }
+                    }).catch((registrationError) => {
+                        console.log('SW getRegistrations failed: ', registrationError);
+                    });
                 });
-            });
+            } else {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+                        console.log('SW registered: ', registration);
+                    }).catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+                });
+            }
         } else {
             this.addGlobalMessage({
                 type: 'warning',
