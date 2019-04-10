@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const info = require('./package.json');
 
@@ -19,6 +20,22 @@ const plugins = [
         ISSUES: JSON.stringify(info.bugs.url),
         REPO: JSON.stringify(info.homepage),
         TARGET: JSON.stringify(TARGET),
+    }),
+    // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
+    new GenerateSW({
+        swDest: 'service-worker.js',
+        clientsClaim: true,
+        skipWaiting: true,
+        offlineGoogleAnalytics: true,
+        runtimeCaching: [{
+            urlPattern: new RegExp('public'),
+            handler: 'networkFirst',
+            options: {
+                cacheableResponse: {
+                    statuses: [0, 200],
+                },
+            },
+        }],
     }),
 ];
 

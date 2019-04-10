@@ -14,6 +14,7 @@ import Wad from '../models/Wad';
 import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 import mediaSessionSupport from '../lib/mediaSessionSupport';
+import serviceWorkerSupport from '../lib/serviceWorkerSupport';
 import MidiPlayer from '../lib/MidiPlayer';
 import {
     MIDI_ERROR,
@@ -46,6 +47,11 @@ const {
     ignored: mediaSessionIgnored,
     message: mediaSessionMessage,
 } = mediaSessionSupport();
+
+const {
+    supported: serviceWorkerSupported,
+    message: serviceWorkerSupportMessage,
+} = serviceWorkerSupport();
 
 export default class App extends Component {
     static propTypes = {
@@ -94,6 +100,22 @@ export default class App extends Component {
                 type: 'error',
                 id: 'offscreenCanvasSupport',
                 text: offscreenCanvasSupportMessage,
+            });
+        }
+
+        if (serviceWorkerSupported) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+                    console.log('SW registered: ', registration);
+                }).catch((registrationError) => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        } else {
+            this.addGlobalMessage({
+                type: 'warning',
+                id: 'serviceWorker',
+                text: serviceWorkerSupportMessage,
             });
         }
 
