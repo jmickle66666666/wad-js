@@ -23,7 +23,7 @@ const plugins = [
     }),
     // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
     new GenerateSW({
-        swDest: 'service-worker.js',
+        swDest: './service-worker.js',
         clientsClaim: true,
         skipWaiting: true,
         offlineGoogleAnalytics: true,
@@ -39,9 +39,7 @@ const plugins = [
     }),
 ];
 
-if (isProduction) {
-    plugins.unshift(new CleanWebpackPlugin());
-} else {
+if (!isProduction) {
     plugins.push(new BundleAnalyzerPlugin({
         openAnalyzer: false,
     }));
