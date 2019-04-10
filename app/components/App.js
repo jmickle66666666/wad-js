@@ -118,8 +118,7 @@ export default class App extends Component {
                 });
             } else {
                 window.addEventListener('load', () => {
-                    const path = TARGET === 'build' ? './dist/service-worker.js' : './service-worker.js';
-                    navigator.serviceWorker.register(path).then((registration) => {
+                    navigator.serviceWorker.register('service-worker.js').then((registration) => {
                         console.log('SW registered: ', registration);
                     }).catch((registrationError) => {
                         console.log('SW registration failed: ', registrationError);

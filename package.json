@@ -24,7 +24,7 @@
         "start:no-brand": "TARGET=development-no-brand webpack-dev-server app --mode development",
         "start:service-workers": "TARGET=development-service-workers webpack-dev-server app --mode development",
         "start:prod": "TARGET=development webpack-dev-server app --mode production",
-        "build": "sudo rm -rf ./dist; sudo TARGET=build webpack app --mode production",
+        "build": "TARGET=build webpack app --mode production",
         "lint": "eslint app"
     },
     "devDependencies": {
