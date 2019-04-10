@@ -104,7 +104,7 @@ export default class App extends Component {
         }
 
         if (serviceWorkerSupported) {
-            if (TARGET !== 'production' && TARGET !== 'development-service-workers') {
+            if (TARGET !== 'build' && TARGET !== 'development-service-workers') {
                 // unregsiter service workers if any in development
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.getRegistrations().then((registrations) => {
