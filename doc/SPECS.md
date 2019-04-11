@@ -17,7 +17,7 @@ The website will be hosted on GitHub Pages servers for free. The integration wit
 
 ## Scope of this project
 
-This app will emphasize a great experience thanks to modern JavaScript features such as Workers, OffscreenCanvas, MediaSession, AudioContext, and more. Additional technologies will ensure that the content is responsive and fits all screen sizes. The code will also follow a11y standards to improve a cessibility.
+This app will emphasize a great experience thanks to modern JavaScript features such as Workers, OffscreenCanvas, MediaSession, AudioContext, and more. Additional technologies will ensure that the content is responsive and fits all screen sizes. The code will also follow a11y standards to improve acessibility.
 
 wadJS will be at least capable of unpacking the following IWADs: doom.wad, doom1.wad, doom2.wad, tnt.wad, plutonia.wad, freedoom1.wad, freedoom2.wad, heretic.wad, and hexen.wad. More IWADs (Chex Quest, Strife, etc.) might be supported in the future.
 
