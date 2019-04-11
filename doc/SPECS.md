@@ -29,4 +29,4 @@ Due to the use of bleeding edge features, the app primary goal is not to be comp
 
 Given the fact that the app is contained within the limits of the browser, the amount of user data stored in memory might be limited. We remain convinced that modern clients can handle the task at hand here and we will research ways to circumvent these limits.
 
-Since target users are gamers with fast machines up-to-date browsers, 
+Since target users are gamers with fast machines, wasJS will not be too concerned with how demanding 
