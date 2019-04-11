@@ -2,7 +2,7 @@
 
 ## General goal
 
-The aim of this app is to allow users to view and edit the content of Doom WAD files regardless of their Operating System.
+The aim of this app is to allow users to view and edit the content of Doom WAD files regardless of their Operating System and device.
 
 ## Why is it important?
 
