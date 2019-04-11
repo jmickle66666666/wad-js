@@ -15,3 +15,10 @@ The app will be written purely in JavaScript and fully contained in the user's c
 
 The website will be hosted on GitHub Pages servers for free. The integration with GitHub will allow faster development cycles. New versions of the app will be made available within seconds after compilation.
 
+## Scope of this project
+
+The aim of this app is to emphasize a great experience thanks to modern JavaScript features such as Workers, OffscreenCanvas, MediaSession, AudioContext, and more.
+
+wadJS will be at least capable of unpacking the following IWADs: doom.wad, doom1.wad, doom2.wad, tnt.wad, plutonia.wad, freedoom1.wad, freedoom2.wad, heretic.wad, and hexen.wad. More IWADs (Chex Quest, Strife, etc.) might be supported in the future.
+
+The app will also be able to unpack PWADs that are vanilla compatible. It will also unpack non-vanilla compatible PWADs wirhint certain limits.
