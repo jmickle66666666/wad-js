@@ -20,10 +20,10 @@
     },
     "scripts": {
         "start": "npm run start:dev",
-        "start:dev": "echo \"Bundle Analyzer: \\033[35mhttp://localhost:8888\\033[0m\"; TARGET=development webpack-dev-server app --mode development",
-        "start:no-brand": "TARGET=development-no-brand webpack-dev-server app --mode development",
-        "start:service-workers": "TARGET=development-service-workers webpack-dev-server app --mode development",
-        "start:prod": "TARGET=development webpack-dev-server app --mode production",
+        "start:dev": "echo \"Bundle Analyzer: \\033[35mhttp://localhost:8888\\033[0m\"; TARGET=development webpack-dev-server app --mode development --progress",
+        "start:no-brand": "TARGET=development-no-brand webpack-dev-server app --mode development --progress",
+        "start:service-workers": "TARGET=development-service-workers webpack-dev-server app --mode development --progress",
+        "start:prod": "TARGET=development webpack-dev-server app --mode production --progress",
         "build": "TARGET=build webpack app --mode production",
         "lint": "eslint app"
     },
