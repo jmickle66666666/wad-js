@@ -1,3 +1,5 @@
+importScripts("precache-manifest.5faf2f0f9aad17d962afdbdf26f33cbd.js", "https://storage.googleapis.com/workbox-cdn/releases/4.2.0/workbox-sw.js");
+
 /**
  * Welcome to your Workbox-powered service worker!
  *
@@ -11,12 +13,6 @@
  * See https://goo.gl/2aRDsh
  */
 
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.2.0/workbox-sw.js");
-
-importScripts(
-  "precache-manifest.5faf2f0f9aad17d962afdbdf26f33cbd.js"
-);
-
 workbox.core.skipWaiting();
 
 workbox.core.clientsClaim();
@@ -29,6 +25,7 @@ workbox.core.clientsClaim();
 self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerRoute(/public/, new workbox.strategies.NetworkFirst({ plugins: [new workbox.cacheableResponse.Plugin({ statuses: [ 0, 200 ] })] }), 'GET');
+workbox.routing.registerRoute(/public/, new workbox.strategies.NetworkFirst({ plugins: [new workbox.cacheableResponse.Plugin({ statuses: [0, 200] })] }), 'GET');
 
 workbox.googleAnalytics.initialize({});
+
