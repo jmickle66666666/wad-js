@@ -30,17 +30,16 @@ const plugins = [
         manifestTransforms: [
             // Basic transformation to remove a certain URL:
             (originalManifest) => {
-                console.log({ originalManifest })
                 const manifest = originalManifest.map(
-                    (entry) => ({
+                    entry => ({
                         ...entry,
-                        url: 'public/' + entry.url
-                    })
+                        url: `public/${entry.url}`,
+                    }),
                 );
                 // Optionally, set warning messages.
                 const warnings = [];
                 return { manifest, warnings };
-            }
+            },
         ],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
     }),
@@ -127,8 +126,4 @@ module.exports = () => ({
     },
     plugins,
     devtool: 'cheap-module-eval-source-map',
-    devServer: {
-        host: 'localhost',
-        port: 8080,
-    },
 });
