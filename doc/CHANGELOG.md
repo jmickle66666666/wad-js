@@ -1,3 +1,7 @@
+## v0.2.0: Service Worker
+
+* It was time to upgrade the minor version of wadJS since we now have offline support for the app thanks to service workers!!! Yes, that's right. Once you visit the website, you should be able to use it at any time even if you have no connectivity. And that includes the MIDI player :)
+
 ## v0.1.38: SNDINFO
 
 * wadJS is now able to parse music and sounds from the Hexen IWAD correctly. I added some logic to get this data from the `SNDINFO` lump, since we can't rely on pattern-matching on the name of the lumps to know which lumps represent audio data.
