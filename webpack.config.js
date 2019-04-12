@@ -25,7 +25,6 @@ const plugins = [
     new InjectManifest({
         swSrc: './app/templates/service-worker.js',
         swDest: isProduction ? '../service-worker.js' : './service-worker.js',
-        importsDirectory: isProduction ? '../dist' : './',
     }),
 ];
 
@@ -41,7 +40,7 @@ module.exports = () => ({
     output: {
         filename: '[name].[hash].js',
         hashDigestLength: 8,
-        publicPath: isProduction ? 'https://wad.yvesgurcan.com/' : 'http://localhost:8080/',
+        publicPath: isProduction ? 'dist/' : '',
     },
     optimization: {
         minimize: true,
