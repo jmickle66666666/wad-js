@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const { GenerateSW } = require('workbox-webpack-plugin');
+const { GenerateSW, InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const info = require('./package.json');
 
@@ -22,21 +22,10 @@ const plugins = [
         TARGET: JSON.stringify(TARGET),
     }),
     // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
-    new GenerateSW({
-        swDest: isProduction ? '../service-worker.js' : 'service-worker.js',
-        importsDirectory: isProduction ? '../' : './',
-        clientsClaim: true,
-        skipWaiting: true,
-        offlineGoogleAnalytics: true,
-        runtimeCaching: [{
-            urlPattern: new RegExp('public'),
-            handler: 'networkFirst',
-            options: {
-                cacheableResponse: {
-                    statuses: [0, 200],
-                },
-            },
-        }],
+    new InjectManifest({
+        swSrc: './app/templates/service-worker.js',
+        swDest: isProduction ? `${__dirname}/service-worker.js` : 'service-worker.js',
+        importsDirectory: './',
     }),
 ];
 
