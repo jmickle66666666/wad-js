@@ -25,6 +25,24 @@ const plugins = [
     new InjectManifest({
         swSrc: './app/templates/service-worker.js',
         swDest: isProduction ? '../service-worker.js' : './service-worker.js',
+        globDirectory: 'public/',
+        globPatterns: ['**/*'],
+        manifestTransforms: [
+            // Basic transformation to remove a certain URL:
+            (originalManifest) => {
+                console.log({ originalManifest })
+                const manifest = originalManifest.map(
+                    (entry) => ({
+                        ...entry,
+                        url: 'public/' + entry.url
+                    })
+                );
+                // Optionally, set warning messages.
+                const warnings = [];
+                return { manifest, warnings };
+            }
+        ],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
     }),
 ];
 
