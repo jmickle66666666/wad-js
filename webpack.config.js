@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const { GenerateSW, InjectManifest } = require('workbox-webpack-plugin');
+const { InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const info = require('./package.json');
 
@@ -24,8 +24,8 @@ const plugins = [
     // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
     new InjectManifest({
         swSrc: './app/templates/service-worker.js',
-        swDest: isProduction ? `${__dirname}/service-worker.js` : 'service-worker.js',
-        importsDirectory: './',
+        swDest: isProduction ? '../service-worker.js' : './service-worker.js',
+        importsDirectory: isProduction ? '../dist' : './',
     }),
 ];
 
@@ -41,6 +41,7 @@ module.exports = () => ({
     output: {
         filename: '[name].[hash].js',
         hashDigestLength: 8,
+        publicPath: isProduction ? 'https://wad.yvesgurcan.com/' : 'http://localhost:8080/',
     },
     optimization: {
         minimize: true,
@@ -109,4 +110,8 @@ module.exports = () => ({
     },
     plugins,
     devtool: 'cheap-module-eval-source-map',
+    devServer: {
+        host: 'localhost',
+        port: 8080,
+    },
 });
