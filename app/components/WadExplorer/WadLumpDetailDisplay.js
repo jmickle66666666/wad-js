@@ -31,120 +31,120 @@ export default ({
     selectLump,
 }) => {
     switch (lump.type) {
-    default: {
-        return null;
-    }
-    case 'uncategorized': {
-        if (lump.originalFormat === ANSI) {
+        default: {
+            return null;
+        }
+        case 'uncategorized': {
+            if (lump.originalFormat === ANSI) {
+                return (
+                    <Ansi
+                        lump={lump}
+                        text={text}
+                    />
+                );
+            }
+
+            if (lump.isSNDINFO) {
+                return (
+                    <SoundInfo
+                        lump={lump}
+                        wad={wad}
+                        selectLump={selectLump}
+                    />
+                );
+            }
+
             return (
-                <Ansi
+                <TextLump
                     lump={lump}
                     text={text}
                 />
             );
         }
-
-        if (lump.isSNDINFO) {
+        case 'palettes': {
             return (
-                <SoundInfo
-                    lump={lump}
+                <Palettes lump={lump} />
+            );
+        }
+        case 'colormaps': {
+            return (
+                <Colormaps wad={wad} lump={lump} />
+            );
+        }
+        case 'maps': {
+            return (
+                <Map wad={wad} lump={lump} />
+            );
+        }
+        case 'flats': {
+            return (
+                <ImageLump
                     wad={wad}
-                    selectLump={selectLump}
+                    lump={lump}
+                    simpleImage={simpleImage}
                 />
             );
         }
-
-        return (
-            <TextLump
-                lump={lump}
-                text={text}
-            />
-        );
-    }
-    case 'palettes': {
-        return (
-            <Palettes lump={lump} />
-        );
-    }
-    case 'colormaps': {
-        return (
-            <Colormaps wad={wad} lump={lump} />
-        );
-    }
-    case 'maps': {
-        return (
-            <Map wad={wad} lump={lump} />
-        );
-    }
-    case 'flats': {
-        return (
-            <ImageLump
-                wad={wad}
-                lump={lump}
-                simpleImage={simpleImage}
-            />
-        );
-    }
-    case 'patches': {
-        if (lump.isPNAMES) {
+        case 'patches': {
+            if (lump.isPNAMES) {
+                return (
+                    <PatchNames lump={lump} />
+                );
+            }
             return (
-                <PatchNames lump={lump} />
+                <ImageLump wad={wad} lump={lump} />
             );
         }
-        return (
-            <ImageLump wad={wad} lump={lump} />
-        );
-    }
-    case 'textures': {
-        if (lump.isTEXTUREx) {
+        case 'textures': {
+            if (lump.isTEXTUREx) {
+                return (
+                    <TextureNames lump={lump} />
+                );
+            }
             return (
-                <TextureNames lump={lump} />
+                <Texture wad={wad} lump={lump} />
             );
         }
-        return (
-            <Texture wad={wad} lump={lump} />
-        );
-    }
-    case 'sprites': {
-        return (
-            <ImageLump wad={wad} lump={lump} />
-        );
-    }
-    case 'menu': {
-        return (
-            <ImageLump
-                wad={wad}
-                lump={lump}
-            />
-        );
-    }
-    case INTERMISSION: {
-        return (
-            <ImageLump
-                wad={wad}
-                lump={lump}
-            />
-        );
-    }
-    case STATUS_BAR: {
-        return (
-            <ImageLump
-                wad={wad}
-                lump={lump}
-            />
-        );
-    }
-    case 'music': {
-        return (
-            <Music
-                wad={wad}
-                lump={lump}
-                midi={midi}
-                selectedMidi={selectedMidi}
-                selectMidi={selectMidi}
-                stopMidi={stopMidi}
-            />
-        );
-    }
+        case 'sprites': {
+            return (
+                <ImageLump wad={wad} lump={lump} />
+            );
+        }
+        case 'menu': {
+            return (
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                />
+            );
+        }
+        case INTERMISSION: {
+            return (
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                />
+            );
+        }
+        case STATUS_BAR: {
+            return (
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                />
+            );
+        }
+        case 'music': {
+            return (
+                <Music
+                    wad={wad}
+                    lump={lump}
+                    midi={midi}
+                    selectedMidi={selectedMidi}
+                    selectMidi={selectMidi}
+                    stopMidi={stopMidi}
+                />
+            );
+        }
     }
 };
