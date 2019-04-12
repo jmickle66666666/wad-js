@@ -2,7 +2,7 @@ import React from 'react';
 
 import style from './SettingsMenu.scss';
 
-import Help from './Help';
+import Help from '../Help';
 
 export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
     <div className={style.settingsMenuOuter}>
