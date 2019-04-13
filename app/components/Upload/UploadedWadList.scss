@@ -16,6 +16,12 @@
     margin-left: 50px;
 }
 
+.light-theme {
+    .wadListTitle, .wadListSubtitle {
+        color: rgb(45, 45, 45);
+    }
+}
+
 .wadListInner {
     display: flex;
     flex-wrap: wrap;

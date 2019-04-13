@@ -3,6 +3,12 @@
     text-align: center;
 }
 
+.light-theme {
+    .wadLumpTypeTitle {
+        color: rgb(45, 45, 45)
+    }
+}
+
 .wadLumpTypes {
     display: flex;
     flex-wrap: wrap;

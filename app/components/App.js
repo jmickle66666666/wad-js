@@ -11,6 +11,7 @@ import MapParser from '../workers/mapParser';
 
 import Wad from '../models/Wad';
 
+import { ThemeContext } from '../lib/Context';
 import LocalStorageManager from '../lib/LocalStorageManager';
 import offscreenCanvasSupport from '../lib/offscreenCanvasSupport';
 import mediaSessionSupport from '../lib/mediaSessionSupport';
@@ -21,6 +22,7 @@ import {
     MIDI_STATUS,
     MIDI_PLAY,
     MIDI_END,
+    CHECKBOX,
 } from '../lib/constants';
 
 import Header from './Header';
@@ -53,6 +55,7 @@ const {
     message: serviceWorkerSupportMessage,
 } = serviceWorkerSupport();
 
+
 export default class App extends Component {
     static propTypes = {
         match: ReactRouterPropTypes.match.isRequired,
@@ -80,6 +83,7 @@ export default class App extends Component {
         },
         showSettings: false,
         settings: {
+            theme: 'dark',
             playbackLoop: true,
             playNextTrack: true,
         },
@@ -143,8 +147,11 @@ export default class App extends Component {
 
         const { result: settings } = await this.getSettingsFromLocalMemory();
         if (settings) {
-            this.setState(() => ({
-                settings,
+            this.setState(prevState => ({
+                settings: {
+                    ...prevState.settings,
+                    ...settings,
+                },
             }));
         }
 
@@ -1265,10 +1272,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-        convertedMidis[wadId]
+            convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-    )
+        )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1277,11 +1284,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-        wads[wadId]
+            wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-    )
+        )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1686,12 +1693,12 @@ export default class App extends Component {
         }));
     }
 
-    handleSettingChange = ({ toggle }) => {
-        if (toggle) {
+    handleSettingChange = ({ key, value, type }) => {
+        if (type === CHECKBOX) {
             this.setState(prevState => ({
                 settings: {
                     ...prevState.settings,
-                    [toggle]: !prevState.settings[toggle],
+                    [key]: value,
                 },
             }), () => {
                 const { settings } = this.state;
@@ -1703,6 +1710,13 @@ export default class App extends Component {
     getSettingsFromLocalMemory = async () => localStorageManager.get('settings')
 
     saveSettingsInLocalMemory = settings => localStorageManager.set('settings', settings)
+
+    getThemeClass = () => {
+        const { settings: { theme } } = this.state;
+        const themeClass = `${theme}-theme`;
+        const themeClassRules = style[themeClass];
+        return themeClassRules;
+    }
 
     componentDidCatch(error, info) {
         document.title = `${prefixWindowtitle} / oops!`;
@@ -1727,145 +1741,149 @@ export default class App extends Component {
 
         if (displayError.error) {
             return (
-                <div className={style.app}>
-                    <Header />
-                    <div className={style.errorScreenOuter}>
-                        <div className={style.errorScreenInner}>
-                            <div className={style.errorMessage}>
-                                <h2>An error occurred :(</h2>
-                                Please
-                                {' '}
-                                <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    href={this.getWADsAsObjectURL()}
-                                    download={`wadjs_error_${moment().utc().format('YYYY_MM_DD_HH_mm_ss')}.json`}
-                                >
-                                    download this file
-                                </a>
-                                {' '}
-                                and use it with the message below to
-                                {' '}
-                                <a target="_blank" rel="noopener noreferrer" href={ISSUES}>report the issue</a>
-                                {' '}
-                                on GitHub.
+                <ThemeContext.Provider value={settings.theme}>
+                    <div className={`${style.app} ${this.getThemeClass()}`}>
+                        <Header />
+                        <div className={style.errorScreenOuter}>
+                            <div className={style.errorScreenInner}>
+                                <div className={style.errorMessage}>
+                                    <h2>An error occurred :(</h2>
+                                    Please
+                                    {' '}
+                                    <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        href={this.getWADsAsObjectURL()}
+                                        download={`wadjs_error_${moment().utc().format('YYYY_MM_DD_HH_mm_ss')}.json`}
+                                    >
+                                        download this file
+                                    </a>
+                                    {' '}
+                                    and use it with the message below to
+                                    {' '}
+                                    <a target="_blank" rel="noopener noreferrer" href={ISSUES}>report the issue</a>
+                                    {' '}
+                                    on GitHub.
+                                </div>
+                                <code>
+                                    Error:
+                                    {' '}
+                                    {displayError.error.message}
+                                    <br />
+                                    <br />
+                                    {displayError.error.stack && displayError.error.stack.split('\n').map((stack, index) => (
+                                        <Fragment key={index}>
+                                            {stack.replace('webpack-internal:///', '').replace('@', ' @ ')}
+                                            <br />
+                                        </Fragment>
+                                    ))}
+                                    {displayError.info.componentStack && displayError.info.componentStack.split('\n').map((stack, index) => (
+                                        <Fragment key={index}>
+                                            {stack}
+                                            <br />
+                                        </Fragment>
+                                    ))}
+                                    <br />
+                                    URL:
+                                    {' '}
+                                    {document.location.href}
+                                </code>
+                                <a className={style.errorBackLink} href="/">Reload the app.</a>
                             </div>
-                            <code>
-                                Error:
-                                {' '}
-                                {displayError.error.message}
-                                <br />
-                                <br />
-                                {displayError.error.stack && displayError.error.stack.split('\n').map((stack, index) => (
-                                    <Fragment key={index}>
-                                        {stack.replace('webpack-internal:///', '').replace('@', ' @ ')}
-                                        <br />
-                                    </Fragment>
-                                ))}
-                                {displayError.info.componentStack && displayError.info.componentStack.split('\n').map((stack, index) => (
-                                    <Fragment key={index}>
-                                        {stack}
-                                        <br />
-                                    </Fragment>
-                                ))}
-                                <br />
-                                URL:
-                                {' '}
-                                {document.location.href}
-                            </code>
-                            <a className={style.errorBackLink} href="/">Reload the app.</a>
                         </div>
                     </div>
-                </div>
+                </ThemeContext.Provider>
             );
         }
 
         return (
-            <div className={style.app}>
-                <Header />
-                <GlobalMessages
-                    messages={globalMessages}
-                    dismissGlobalMessage={this.dismissGlobalMessage}
-                />
-                <div className={style.main}>
-                    <Logo />
-                    <div className={style.top}>
-                        <WadUploader
-                            wads={wads}
-                            addWad={this.addWad}
-                            deselectAll={this.deselectAll}
-                        />
-                        {Object.keys(wads).length > 0 && (
-                            <UploadedWadList
+            <ThemeContext.Provider value={settings.theme}>
+                <div className={`${style.app} ${this.getThemeClass()}`}>
+                    <Header />
+                    <GlobalMessages
+                        messages={globalMessages}
+                        dismissGlobalMessage={this.dismissGlobalMessage}
+                    />
+                    <div className={style.main}>
+                        <Logo />
+                        <div className={style.top}>
+                            <WadUploader
                                 wads={wads}
-                                selectedWad={selectedWad}
-                                selectedLumpType={selectedLumpType}
-                                selectedLump={selectedLump}
-                                selectWad={this.selectWad}
-                                deleteWad={this.deleteWad}
-                                deleteWads={this.deleteWads}
+                                addWad={this.addWad}
+                                deselectAll={this.deselectAll}
                             />
-                        )}
-                    </div>
-                    {selectedWad.id
-                        && (
-                            <WadDetails
-                                selectedWad={selectedWad}
-                                selectedLump={selectedLump}
-                                selectedLumpType={selectedLumpType}
-                                selectedMidi={selectedMidi}
-                                midis={midis.converted[selectedWad.id]}
-                                simpleImages={simpleImages.converted[selectedWad.id]}
-                                text={text.converted[selectedWad.id]}
-                                selectWad={this.selectWad}
-                                selectLump={this.selectLump}
-                                selectLumpType={this.selectLumpType}
-                                selectMidi={this.selectMidi}
-                                stopMidi={this.stopMidi}
-                                deleteWad={this.deleteWad}
-                                updateFilename={this.updateFilename}
-                                updateSelectedWadFromList={this.updateSelectedWadFromList}
-                                focusOnWad={this.focusOnWad}
-                                focusOnLump={this.focusOnLump}
-                            />
-                        )}
-                </div>
-                {
-                    showSettings && (
-                        <SettingsMenu
-                            settings={settings}
-                            handleSettingChange={this.handleSettingChange}
-                            toggleSettingsMenu={this.toggleSettingsMenu}
-                        />
-                    )
-                }
-                <div className={style.helper}>
-                    {selectedWad.name && (
-                        <div className={style.selectedWadOuter}>
-                            <a
-                                href={`#/${selectedWad.id}${selectedLumpType ? `/${selectedLumpType}` : ''}${selectedLump.name ? `/${selectedLump.name}` : ''}`}
-                                className={style.selectedWadInner}
-                                onClick={this.focusOnWad}
-                            >
-                                {selectedWad.name}
-                            </a>
+                            {Object.keys(wads).length > 0 && (
+                                <UploadedWadList
+                                    wads={wads}
+                                    selectedWad={selectedWad}
+                                    selectedLumpType={selectedLumpType}
+                                    selectedLump={selectedLump}
+                                    selectWad={this.selectWad}
+                                    deleteWad={this.deleteWad}
+                                    deleteWads={this.deleteWads}
+                                />
+                            )}
                         </div>
-                    )}
-                    {selectedMidi.lumpName && (
-                        <PortablePlayer
-                            selectedMidi={selectedMidi}
-                            selectedLumpType={selectedLumpType}
-                            selectedWad={selectedWad}
-                            selectNextMidi={this.selectNextMidi}
-                            resumeMidi={this.resumeMidi}
-                            pauseMidi={this.pauseMidi}
-                            stopMidi={this.stopMidi}
-                            selectWadAndLump={this.selectWadAndLump}
-                        />
-                    )}
-                    <SettingsIcon toggleSettingsMenu={this.toggleSettingsMenu} />
+                        {selectedWad.id
+                            && (
+                                <WadDetails
+                                    selectedWad={selectedWad}
+                                    selectedLump={selectedLump}
+                                    selectedLumpType={selectedLumpType}
+                                    selectedMidi={selectedMidi}
+                                    midis={midis.converted[selectedWad.id]}
+                                    simpleImages={simpleImages.converted[selectedWad.id]}
+                                    text={text.converted[selectedWad.id]}
+                                    selectWad={this.selectWad}
+                                    selectLump={this.selectLump}
+                                    selectLumpType={this.selectLumpType}
+                                    selectMidi={this.selectMidi}
+                                    stopMidi={this.stopMidi}
+                                    deleteWad={this.deleteWad}
+                                    updateFilename={this.updateFilename}
+                                    updateSelectedWadFromList={this.updateSelectedWadFromList}
+                                    focusOnWad={this.focusOnWad}
+                                    focusOnLump={this.focusOnLump}
+                                />
+                            )}
+                    </div>
+                    {
+                        showSettings && (
+                            <SettingsMenu
+                                settings={settings}
+                                handleSettingChange={this.handleSettingChange}
+                                toggleSettingsMenu={this.toggleSettingsMenu}
+                            />
+                        )
+                    }
+                    <div className={style.helper}>
+                        {selectedWad.name && (
+                            <div className={style.selectedWadOuter}>
+                                <a
+                                    href={`# /${selectedWad.id} ${selectedLumpType ? `/${selectedLumpType}` : ''} ${selectedLump.name ? `/${selectedLump.name}` : ''} `}
+                                    className={style.selectedWadInner}
+                                    onClick={this.focusOnWad}
+                                >
+                                    {selectedWad.name}
+                                </a>
+                            </div>
+                        )}
+                        {selectedMidi.lumpName && (
+                            <PortablePlayer
+                                selectedMidi={selectedMidi}
+                                selectedLumpType={selectedLumpType}
+                                selectedWad={selectedWad}
+                                selectNextMidi={this.selectNextMidi}
+                                resumeMidi={this.resumeMidi}
+                                pauseMidi={this.pauseMidi}
+                                stopMidi={this.stopMidi}
+                                selectWadAndLump={this.selectWadAndLump}
+                            />
+                        )}
+                        <SettingsIcon toggleSettingsMenu={this.toggleSettingsMenu} />
+                    </div>
                 </div>
-            </div>
+            </ThemeContext.Provider>
         );
     }
 }
