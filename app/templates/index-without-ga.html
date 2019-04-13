@@ -150,26 +150,25 @@
             Loading...
         </section>
         <script id="libtimidity" src="/public/midi/libtimidity.js"></script>
-
         <script>
-        function toggleThemeOnBody (theme) {
-            if (theme === 'light') {
-                const body = document.getElementsByTagName('body')[0];
-                if (body) {
-                    body.classList.add('light-theme')
-                }
-            } else {
-                const body = document.getElementsByTagName('body')[0];
-                if (body) {
-                    body.classList.remove('light-theme')
+            function toggleThemeOnBody (theme) {
+                if (theme === 'light') {
+                    const body = document.getElementsByTagName('body')[0];
+                    if (body) {
+                        body.classList.add('light-theme')
+                    }
+                } else {
+                    const body = document.getElementsByTagName('body')[0];
+                    if (body) {
+                        body.classList.remove('light-theme')
+                    }
                 }
             }
-        }
-        
-        if (localStorage) {
-            const theme = localStorage.getItem('wadjs-theme');
-            toggleThemeOnBody(theme);
-        }
+            
+            if (localStorage) {
+                const theme = localStorage.getItem('wadjs-theme');
+                toggleThemeOnBody(theme);
+            }
         </script>
     </body>
 </html>
