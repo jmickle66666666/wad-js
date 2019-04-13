@@ -97,7 +97,7 @@ onmessage = (message) => {
                 message: errorMessage,
             };
 
-            console.error(error, { err });
+            // console.error(error, { err });
 
             postMessage({
                 wadId,
