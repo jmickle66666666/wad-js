@@ -86,6 +86,7 @@ export default class App extends Component {
             theme: 'dark',
             playbackLoop: true,
             playNextTrack: true,
+            serviceWorker: true,
         },
         displayError: {},
     }
@@ -107,43 +108,7 @@ export default class App extends Component {
             });
         }
 
-        if (serviceWorkerSupported) {
-            if (TARGET !== 'build' && TARGET !== 'development-service-workers') {
-                // unregsiter service workers if any in development
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.getRegistrations().then((registrations) => {
-                        for (let i = 0; i < registrations.length; i++) {
-                            const registration = registrations[i];
-                            registration.unregister();
-                        }
-                    }).catch((registrationError) => {
-                        console.log('SW getRegistrations failed: ', registrationError);
-                    });
-                });
-            } else {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('service-worker.js').then((registration) => {
-                        console.log('SW registered: ', registration);
-                    }).catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-                });
-            }
-        } else {
-            this.addGlobalMessage({
-                type: 'warning',
-                id: 'serviceWorker',
-                text: serviceWorkerSupportMessage,
-            });
-        }
-
         this.initMediaSession();
-
-        this.addGlobalMessage({
-            type: 'info',
-            id: 'savedWads',
-            text: 'Loading WADs from previous session...',
-        });
 
         const { result: settings } = await this.getSettingsFromLocalMemory();
         if (settings) {
@@ -152,8 +117,27 @@ export default class App extends Component {
                     ...prevState.settings,
                     ...settings,
                 },
-            }));
+            }), () => {
+                const { settings: newSettings } = this.state;
+                if (serviceWorkerSupported) {
+                    if (newSettings.serviceWorker) {
+                        this.registerServiceWorker();
+                    }
+                } else {
+                    this.addGlobalMessage({
+                        type: 'warning',
+                        id: 'serviceWorker',
+                        text: serviceWorkerSupportMessage,
+                    });
+                }
+            });
         }
+
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'savedWads',
+            text: 'Loading WADs from previous session...',
+        });
 
         const { wads, error } = await this.getWadsFromLocalMemory();
         if (error) {
@@ -197,6 +181,40 @@ export default class App extends Component {
 
         if (lumpName) {
             this.selectLump(lumpName, true);
+        }
+    }
+
+    registerServiceWorker() {
+        if (serviceWorkerSupported) {
+            navigator.serviceWorker.register('service-worker.js').then((registration) => {
+                console.log('SW registered: ', registration);
+            }).catch((registrationError) => {
+                console.error('SW registration failed: ', registrationError);
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: 'serviceWorker',
+                    text: 'An error occured while enabling offline mode',
+                });
+            });
+        }
+    }
+
+    unregisterServiceWorker() {
+        if (serviceWorkerSupported) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                for (let i = 0; i < registrations.length; i++) {
+                    const registration = registrations[i];
+                    registration.unregister();
+                    console.log('SW unregistered.');
+                }
+            }).catch((registrationError) => {
+                console.error('SW getRegistrations failed: ', registrationError);
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: 'serviceWorker',
+                    text: 'An error occured while disabling offline mode',
+                });
+            });
         }
     }
 
@@ -1704,9 +1722,20 @@ export default class App extends Component {
                 const { settings } = this.state;
                 this.saveSettingsInLocalMemory(settings);
 
-                if (key === 'theme' && localStorage) {
+                if (key === 'theme') {
                     toggleThemeOnBody(value);
-                    localStorage.setItem('wadjs-theme', value);
+
+                    if (localStorage) {
+                        localStorage.setItem('wadjs-theme', value);
+                    }
+                }
+
+                if (key === 'serviceWorker') {
+                    if (value) {
+                        this.registerServiceWorker();
+                    } else {
+                        this.unregisterServiceWorker();
+                    }
                 }
             });
         }

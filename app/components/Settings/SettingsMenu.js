@@ -33,6 +33,12 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
             className={style.setting}
         />
         <Checkbox
+            label="Enable offline access."
+            valueObject={{ serviceWorker: settings.serviceWorker }}
+            handleChange={handleSettingChange}
+            className={style.setting}
+        />
+        <Checkbox
             label="Play music in a loop."
             valueObject={{ playbackLoop: settings.playbackLoop }}
             handleChange={handleSettingChange}
