@@ -2,7 +2,10 @@ import React from 'react';
 
 import style from './SettingsMenu.scss';
 
+import { DARK_THEME, LIGHT_THEME } from '../../lib/constants';
+
 import Help from '../Help';
+import Checkbox from '../Input/Checkbox';
 
 export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
     <div className={style.settingsMenuOuter}>
@@ -19,23 +22,27 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
                 </h2>
             </Help>
         </div>
-        <label className={style.setting} htmlFor="playbackLoop">
-            <input
-                type="checkbox"
-                id="playbackLoop"
-                checked={settings.playbackLoop}
-                onChange={() => handleSettingChange({ toggle: 'playbackLoop' })}
-            />
-            Play music in a loop.
-        </label>
-        <label className={style.setting} htmlFor="playNextTrack">
-            <input
-                type="checkbox"
-                id="playNextTrack"
-                checked={settings.playNextTrack}
-                onChange={() => handleSettingChange({ toggle: 'playNextTrack' })}
-            />
-            Play next available track.
-        </label>
+        <Checkbox
+            label="Dark theme."
+            valueObject={{ theme: settings.theme === DARK_THEME }}
+            handleChange={({ key, value, type }) => handleSettingChange({
+                key,
+                value: value ? DARK_THEME : LIGHT_THEME,
+                type,
+            })}
+            className={style.setting}
+        />
+        <Checkbox
+            label="Play music in a loop."
+            valueObject={{ playbackLoop: settings.playbackLoop }}
+            handleChange={handleSettingChange}
+            className={style.setting}
+        />
+        <Checkbox
+            label="Play next available track."
+            valueObject={{ playNextTrack: settings.playNextTrack }}
+            handleChange={handleSettingChange}
+            className={style.setting}
+        />
     </div>
 );
