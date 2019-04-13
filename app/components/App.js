@@ -1703,6 +1703,11 @@ export default class App extends Component {
             }), () => {
                 const { settings } = this.state;
                 this.saveSettingsInLocalMemory(settings);
+
+                if (key === 'theme' && localStorage) {
+                    toggleThemeOnBody(value);
+                    localStorage.setItem('wadjs-theme', value);
+                }
             });
         }
     }
