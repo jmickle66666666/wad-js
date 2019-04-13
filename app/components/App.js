@@ -111,27 +111,26 @@ export default class App extends Component {
         this.initMediaSession();
 
         const { result: settings } = await this.getSettingsFromLocalMemory();
-        if (settings) {
-            this.setState(prevState => ({
-                settings: {
-                    ...prevState.settings,
-                    ...settings,
-                },
-            }), () => {
-                const { settings: newSettings } = this.state;
-                if (serviceWorkerSupported) {
-                    if (newSettings.serviceWorker) {
-                        this.registerServiceWorker();
-                    }
-                } else {
-                    this.addGlobalMessage({
-                        type: 'warning',
-                        id: 'serviceWorker',
-                        text: serviceWorkerSupportMessage,
-                    });
+
+        this.setState(prevState => ({
+            settings: {
+                ...prevState.settings,
+                ...settings && { settings },
+            },
+        }), () => {
+            const { settings: newSettings } = this.state;
+            if (serviceWorkerSupported) {
+                if (newSettings.serviceWorker) {
+                    this.registerServiceWorker();
                 }
-            });
-        }
+            } else {
+                this.addGlobalMessage({
+                    type: 'warning',
+                    id: 'serviceWorker',
+                    text: serviceWorkerSupportMessage,
+                });
+            }
+        });
 
         this.addGlobalMessage({
             type: 'info',
@@ -186,7 +185,9 @@ export default class App extends Component {
 
     registerServiceWorker() {
         if (serviceWorkerSupported) {
-            navigator.serviceWorker.register('service-worker.js').then((registration) => {
+            navigator.serviceWorker.register('service-worker.js', {
+                updateViaCache: 'all',
+            }).then((registration) => {
                 console.log('SW registered: ', registration);
             }).catch((registrationError) => {
                 console.error('SW registration failed: ', registrationError);
