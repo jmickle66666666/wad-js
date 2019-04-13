@@ -15,6 +15,10 @@
         background: black;
     }
 
+    body.light-theme {
+        background: white;
+    }
+
     #placeholder {
         font-family: Roboto;
         z-index: -1;
@@ -28,6 +32,10 @@
         color: white;
         animation: .25s fade-in .25s;
         opacity: 0;
+    }
+
+    .light-theme #placeholder {
+        color: rgb(45, 45, 45);
     }
 
     @keyframes fade-in {
@@ -152,5 +160,25 @@
             Loading...
         </section>
         <script id="libtimidity" src="/public/midi/libtimidity.js"></script>
-    <script type="text/javascript" src="dist/main.cdec6ac1.js"></script></body>
+        <script>
+            function toggleThemeOnBody (theme) {
+                if (theme === 'light') {
+                    const body = document.getElementsByTagName('body')[0];
+                    if (body) {
+                        body.classList.add('light-theme')
+                    }
+                } else {
+                    const body = document.getElementsByTagName('body')[0];
+                    if (body) {
+                        body.classList.remove('light-theme')
+                    }
+                }
+            }
+            
+            if (localStorage) {
+                const theme = localStorage.getItem('wadjs-theme');
+                toggleThemeOnBody(theme);
+            }
+        </script>
+    <script type="text/javascript" src="dist/main.d39d5055.js"></script></body>
 </html>
