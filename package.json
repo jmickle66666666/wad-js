@@ -1,6 +1,6 @@
 {
     "name": "wadjs",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/yvesgurcan/wadjs"
@@ -22,7 +22,6 @@
         "start": "npm run start:dev",
         "start:dev": "echo \"Bundle Analyzer: \\033[35mhttp://localhost:8888\\033[0m\"; TARGET=development webpack-dev-server app --mode development --progress",
         "start:no-brand": "TARGET=development-no-brand webpack-dev-server app --mode development --progress",
-        "start:service-workers": "TARGET=development-service-workers webpack-dev-server app --mode development --progress",
         "start:prod": "TARGET=development webpack-dev-server app --mode production --progress",
         "build": "TARGET=build webpack app --mode production",
         "lint": "eslint app"

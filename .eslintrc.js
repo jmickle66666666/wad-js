@@ -8,6 +8,7 @@ module.exports = {
         ecmaVersion: 2018,
         sourceType: 'module',
     },
+    parser: "babel-eslint",
     rules: {
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "react/jsx-indent": ["error", 4],
@@ -17,5 +18,6 @@ module.exports = {
         "class-methods-use-this": 0,
         "react/sort-comp": 0,
         "no-bitwise": 0,
+        "react/forbid-prop-types": 0,
     },
 };

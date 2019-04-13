@@ -41,7 +41,7 @@ const plugins = [
                 return { manifest, warnings };
             },
         ],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
     }),
 ];
 

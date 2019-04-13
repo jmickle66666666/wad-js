@@ -31,6 +31,16 @@ export const EXTENSIONS = {
 
 export const NO_BRAND_ENV = 'development-no-brand';
 
+/* Themes */
+
+export const DARK_THEME = 'dark';
+
+export const LIGHT_THEME = 'light';
+
+/* Input types */
+
+export const CHECKBOX = 'checkbox';
+
 /* File formats */
 
 export const SUPPORTED_FORMATS = [

@@ -11,6 +11,12 @@
     cursor: pointer;
 }
 
+.light-theme {
+    .wadDetailsTitle {
+        color: rgb(45, 45, 45)
+    }
+}
+
 .wadDetailsAnchor {
     margin-top: -62px;
     position: absolute;

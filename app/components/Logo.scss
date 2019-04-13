@@ -10,6 +10,9 @@
         z-index: 1;
         height: 250px;
         margin-bottom: 160px;
+        background: black;
+        padding: 50px;
+        border-radius: 15px;
     }
     
     h1 {
@@ -32,4 +35,10 @@
 
 .js {
     color: rgb(160, 0, 0);
+}
+
+.light-theme {
+    img {
+        border: 1px solid rgb(150, 150, 150);
+    }
 }
