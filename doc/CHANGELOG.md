@@ -1,3 +1,8 @@
+## v0.2.1: Light theme and Offline model
+
+* If for some silly reason, you need to switch to a theme that is not all dark, now you can!
+* You can also turn the offline access ON and OFF. That way, you can control if the app can be used while offline or not. This setting should solve cache-related problems if any.
+
 ## v0.2.0: Service Worker
 
 * It was time to upgrade the minor version of wadJS since we now have offline support for the app thanks to service workers!!! Yes, that's right. Once you visit the website, you should be able to use it at any time even if you have no connectivity. And that includes the MIDI player :)
