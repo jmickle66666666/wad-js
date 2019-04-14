@@ -124,3 +124,13 @@ h4 {
         color: rgb(140, 140, 140);
     }
 }
+
+.focusableInfo {
+    cursor: pointer;
+    color: rgb(0, 100, 200);
+
+    &:hover {
+        color: rgb(0, 50, 255);
+        text-decoration: none;
+    }
+}

@@ -121,7 +121,7 @@ export default class App extends Component {
             const { settings: newSettings } = this.state;
             if (newSettings.serviceWorker) {
                 if (serviceWorkerSupported) {
-                    this.registerServiceWorker();
+                    this.registerServiceWorkerAndListenForUpdate();
                 } else {
                     this.addGlobalMessage({
                         type: 'warning',
@@ -183,21 +183,104 @@ export default class App extends Component {
         }
     }
 
+    activateUpdatedWorker = (registration) => {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'serviceWorker',
+            text: 'Activating update...',
+        });
+    }
+
+    promptUserToRefreshApp(registration) {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'serviceWorker',
+            text: (
+                <div>
+                    A new version of
+                    {' '}
+                    {PROJECT_DISPLAY_NAME}
+                    {' '}
+                    is available.
+                    {' '}
+                    <span
+                        role="button"
+                        className={style.focusableInfo}
+                        onClick={() => this.activateUpdatedWorker(registration)}
+                        onKeyPress={() => this.activateUpdatedWorker(registration)}
+                        tabIndex={0}
+                    >
+                        Please click here to activate the update.
+                    </span>
+                </div>
+            ),
+        });
+    }
+
+    listenForServiceWokerUpdate(registration) {
+        if (!registration) return null;
+
+        // look for SW updates
+        registration.addEventListener('updatefound', () => {
+            // the state of the installing SW has changed
+            registration.installing.addEventListener('statechange', (event) => {
+                console.log('statechange', event.target.state);
+                // ready for activation
+                if (event.target.state === 'installed') {
+                    this.promptUserToRefreshApp(registration);
+                }
+
+                // activated
+                if (event.target.state === 'activated') {
+                    window.location.reload();
+                }
+            });
+        });
+
+        if (registration.waiting) return this.promptUserToRefreshApp(registration);
+        return null;
+    }
+
+    registerServiceWorkerAndListenForUpdate() {
+        if (serviceWorkerSupported) {
+            this.registerServiceWorker()
+                .then((result) => {
+                    if (result.error) {
+                        return;
+                    }
+
+                    this.listenForServiceWokerUpdate(result.registration);
+                }).catch((error) => {
+                    console.error('SW registration update failed: ', error);
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'serviceWorker',
+                        text: 'An error occured while listening for app updates.',
+                    });
+                });
+        }
+    }
+
     registerServiceWorker() {
         if (serviceWorkerSupported) {
-            navigator.serviceWorker.register('service-worker.js', {
+            return navigator.serviceWorker.register('service-worker.js', {
                 updateViaCache: 'all',
             }).then((registration) => {
                 console.log('SW registered: ', registration);
-            }).catch((registrationError) => {
-                console.error('SW registration failed: ', registrationError);
+                return { registration };
+            }).catch((error) => {
+                console.error('SW registration failed: ', error);
                 this.addGlobalMessage({
                     type: 'error',
                     id: 'serviceWorker',
-                    text: 'An error occured while enabling offline mode',
+                    text: 'An error occured while enabling offline mode.',
                 });
+                return { error };
             });
         }
+
+        return null;
     }
 
     unregisterServiceWorker() {
@@ -213,7 +296,7 @@ export default class App extends Component {
                 this.addGlobalMessage({
                     type: 'error',
                     id: 'serviceWorker',
-                    text: 'An error occured while disabling offline mode',
+                    text: 'An error occured while disabling offline mode.',
                 });
             });
         }
@@ -1291,10 +1374,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-        convertedMidis[wadId]
+            convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-    )
+        )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1303,11 +1386,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-        wads[wadId]
+            wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-    )
+        )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
