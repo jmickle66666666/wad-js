@@ -35,7 +35,16 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
         <Checkbox
             label="Enable offline access."
             valueObject={{ serviceWorker: settings.serviceWorker }}
-            handleChange={handleSettingChange}
+            handleChange={({ key, value, type }) => {
+                let confirmed = false;
+                if (!navigator.onLine) {
+                    confirmed = confirm('You are currently offline. If you turn this setting off, the app will be unavailable when you refresh the page while offline.');
+                }
+
+                if (navigator.onLine || confirmed) {
+                    handleSettingChange({ key, value, type });
+                }
+            }}
             className={style.setting}
         />
         <Checkbox
