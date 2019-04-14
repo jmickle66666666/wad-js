@@ -1,3 +1,7 @@
+## v0.2.2: Service Worker update
+
+* This version adds a better way to handle app changes when service workers are enabled. The new service worker will now be installed in the background and a message will prompt the user to activate it. This should minimize exposure to stale versions of the app.
+
 ## v0.2.1: Light theme and Offline model
 
 * If for some silly reason, you need to switch to a theme that is not all dark, now you can!
