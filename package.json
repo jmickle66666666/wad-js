@@ -1,5 +1,6 @@
 {
     "name": "wadjs",
+    "name-display": "wadJS",
     "version": "0.2.2",
     "repository": {
         "type": "git",
