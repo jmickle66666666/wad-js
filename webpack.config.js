@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const { InjectManifest } = require('workbox-webpack-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const info = require('./package.json');
 
@@ -16,19 +16,18 @@ const plugins = [
     }),
     new webpack.DefinePlugin({
         PROJECT: JSON.stringify(info.name),
+        PROJECT_DISPLAY_NAME: JSON.stringify(info['name-display']),
         VERSION: JSON.stringify(info.version),
         ISSUES: JSON.stringify(info.bugs.url),
         REPO: JSON.stringify(info.homepage),
         TARGET: JSON.stringify(TARGET),
     }),
     // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
-    new InjectManifest({
-        swSrc: './app/templates/service-worker.js',
+    new GenerateSW({
         swDest: isProduction ? '../service-worker.js' : './service-worker.js',
         globDirectory: 'public/',
         globPatterns: ['**/*'],
         manifestTransforms: [
-            // Basic transformation to remove a certain URL:
             (originalManifest) => {
                 const manifest = originalManifest.map(
                     entry => ({
@@ -36,12 +35,11 @@ const plugins = [
                         url: `public/${entry.url}`,
                     }),
                 );
-                // Optionally, set warning messages.
-                const warnings = [];
-                return { manifest, warnings };
+                return { manifest };
             },
         ],
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
+        clientsClaim: true,
     }),
 ];
 
