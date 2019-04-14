@@ -115,20 +115,20 @@ export default class App extends Component {
         this.setState(prevState => ({
             settings: {
                 ...prevState.settings,
-                ...settings && { settings },
+                ...settings && { ...settings },
             },
         }), () => {
             const { settings: newSettings } = this.state;
-            if (serviceWorkerSupported) {
-                if (newSettings.serviceWorker) {
+            if (newSettings.serviceWorker) {
+                if (serviceWorkerSupported) {
                     this.registerServiceWorker();
+                } else {
+                    this.addGlobalMessage({
+                        type: 'warning',
+                        id: 'serviceWorker',
+                        text: serviceWorkerSupportMessage,
+                    });
                 }
-            } else {
-                this.addGlobalMessage({
-                    type: 'warning',
-                    id: 'serviceWorker',
-                    text: serviceWorkerSupportMessage,
-                });
             }
         });
 
@@ -1291,10 +1291,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-            convertedMidis[wadId]
+        convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-        )
+    )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1303,11 +1303,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-            wads[wadId]
+        wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-        )
+    )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
