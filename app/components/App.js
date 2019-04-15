@@ -4,10 +4,10 @@ import moment from 'moment';
 
 import style from './App.scss';
 
-import MidiConverter from '../workers/midiConverter';
-import SimpleImageConverter from '../workers/simpleImageConverter';
-import TextConverter from '../workers/textConverter';
-import MapParser from '../workers/mapParser';
+import MidiConverter from '../webWorkers/midiConverter';
+import SimpleImageConverter from '../webWorkers/simpleImageConverter';
+import TextConverter from '../webWorkers/textConverter';
+import MapParser from '../webWorkers/mapParser';
 
 import Wad from '../models/Wad';
 
@@ -274,7 +274,7 @@ export default class App extends Component {
                 this.addGlobalMessage({
                     type: 'error',
                     id: 'serviceWorker',
-                    text: 'An error occured while enabling offline mode.',
+                    text: `An error occured while enabling offline mode. ${error.message}`,
                 });
                 return { error };
             });
@@ -1374,10 +1374,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-            convertedMidis[wadId]
+        convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-        )
+    )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1386,11 +1386,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-            wads[wadId]
+        wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-        )
+    )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1795,7 +1795,18 @@ export default class App extends Component {
         }));
     }
 
-    handleSettingChange = ({ key, value, type }) => {
+    handleSettingChange = async ({ key, value, type }) => {
+        if (key === 'serviceWorker') {
+            if (value) {
+                const { error } = await this.registerServiceWorker();
+                if (error) {
+                    return;
+                }
+            } else {
+                this.unregisterServiceWorker();
+            }
+        }
+
         if (type === CHECKBOX) {
             this.setState(prevState => ({
                 settings: {
@@ -1808,17 +1819,8 @@ export default class App extends Component {
 
                 if (key === 'theme') {
                     toggleThemeOnBody(value);
-
                     if (localStorage) {
                         localStorage.setItem('wadjs-theme', value);
-                    }
-                }
-
-                if (key === 'serviceWorker') {
-                    if (value) {
-                        this.registerServiceWorker();
-                    } else {
-                        this.unregisterServiceWorker();
                     }
                 }
             });
@@ -1971,6 +1973,7 @@ export default class App extends Component {
                                 settings={settings}
                                 handleSettingChange={this.handleSettingChange}
                                 toggleSettingsMenu={this.toggleSettingsMenu}
+                                addGlobalMessage={this.addGlobalMessage}
                             />
                         )
                     }

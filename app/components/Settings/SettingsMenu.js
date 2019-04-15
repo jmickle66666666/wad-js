@@ -37,11 +37,11 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
             valueObject={{ serviceWorker: settings.serviceWorker }}
             handleChange={({ key, value, type }) => {
                 let confirmed = false;
-                if (!navigator.onLine) {
+                if (!value && !navigator.onLine) {
                     confirmed = confirm('You are currently offline. If you turn this setting off, the app will be unavailable when you refresh the page while offline.');
                 }
 
-                if (navigator.onLine || confirmed) {
+                if (navigator.onLine || confirmed || value) {
                     handleSettingChange({ key, value, type });
                 }
             }}
