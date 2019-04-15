@@ -34,7 +34,7 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
         />
         <Checkbox
             label="Enable offline access."
-            valueObject={{ serviceWorker: settings.serviceWorker }}
+            valueObject={{ offlineMode: settings.offlineMode }}
             handleChange={({ key, value, type }) => {
                 let confirmed = false;
                 if (!value && !navigator.onLine) {
@@ -45,6 +45,12 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
                     handleSettingChange({ key, value, type });
                 }
             }}
+            className={style.setting}
+        />
+        <Checkbox
+            label="Save converted lumps in browser cache."
+            valueObject={{ convertedLumpsCaching: settings.convertedLumpsCaching }}
+            handleChange={handleSettingChange}
             className={style.setting}
         />
         <Checkbox

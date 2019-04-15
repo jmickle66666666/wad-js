@@ -18,6 +18,8 @@ import mediaSessionSupport from '../lib/mediaSessionSupport';
 import serviceWorkerSupport from '../lib/serviceWorkerSupport';
 import MidiPlayer from '../lib/MidiPlayer';
 import {
+    SERVICE_WORKER_CORE,
+    SERVICE_WORKER_CONVERSIONS,
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
@@ -86,7 +88,8 @@ export default class App extends Component {
             theme: 'dark',
             playbackLoop: true,
             playNextTrack: true,
-            serviceWorker: true,
+            offlineMode: true,
+            convertedLumpsCaching: true,
         },
         displayError: {},
     }
@@ -119,13 +122,13 @@ export default class App extends Component {
             },
         }), () => {
             const { settings: newSettings } = this.state;
-            if (newSettings.serviceWorker) {
+            if (newSettings.offlineMode) {
                 if (serviceWorkerSupported) {
-                    this.registerServiceWorkerAndListenForUpdate();
+                    this.registerCoreServiceWorkerAndListenForUpdate();
                 } else {
                     this.addGlobalMessage({
                         type: 'warning',
-                        id: 'serviceWorker',
+                        id: 'offlineMode',
                         text: serviceWorkerSupportMessage,
                     });
                 }
@@ -183,11 +186,11 @@ export default class App extends Component {
         }
     }
 
-    activateUpdatedWorker = (registration) => {
+    activateUpdatedCoreServiceWorker = (registration) => {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         this.addGlobalMessage({
             type: 'info',
-            id: 'serviceWorker',
+            id: 'offlineMode',
             text: 'Activating update...',
         });
     }
@@ -195,7 +198,7 @@ export default class App extends Component {
     promptUserToRefreshApp(registration) {
         this.addGlobalMessage({
             type: 'info',
-            id: 'serviceWorker',
+            id: 'offlineMode',
             text: (
                 <div>
                     A new version of
@@ -207,8 +210,8 @@ export default class App extends Component {
                     <span
                         role="button"
                         className={style.focusableInfo}
-                        onClick={() => this.activateUpdatedWorker(registration)}
-                        onKeyPress={() => this.activateUpdatedWorker(registration)}
+                        onClick={() => this.activateUpdatedCoreServiceWorker(registration)}
+                        onKeyPress={() => this.activateUpdatedCoreServiceWorker(registration)}
                         tabIndex={0}
                     >
                         Please click here to activate the update.
@@ -242,9 +245,9 @@ export default class App extends Component {
         return null;
     }
 
-    registerServiceWorkerAndListenForUpdate() {
+    registerCoreServiceWorkerAndListenForUpdate() {
         if (serviceWorkerSupported) {
-            this.registerServiceWorker()
+            this.registerCoreServiceWorker()
                 .then((result) => {
                     if (result.error) {
                         return;
@@ -252,30 +255,28 @@ export default class App extends Component {
 
                     this.listenForServiceWokerUpdate(result.registration);
                 }).catch((error) => {
-                    console.error('SW registration update failed: ', error);
+                    console.error('Core SW registration update failed: ', error);
                     this.addGlobalMessage({
                         type: 'error',
-                        id: 'serviceWorker',
+                        id: 'offlineMode',
                         text: 'An error occured while listening for app updates.',
                     });
                 });
         }
     }
 
-    registerServiceWorker() {
+    registerServiceWorker({ scriptURL, catchError }) {
         if (serviceWorkerSupported) {
-            return navigator.serviceWorker.register('service-worker.js', {
+            return navigator.serviceWorker.register(scriptURL, {
                 updateViaCache: 'all',
             }).then((registration) => {
-                console.log('SW registered: ', registration);
+                console.log(`${scriptURL} registered.`);
                 return { registration };
             }).catch((error) => {
-                console.error('SW registration failed: ', error);
-                this.addGlobalMessage({
-                    type: 'error',
-                    id: 'serviceWorker',
-                    text: `An error occured while enabling offline mode. ${error.message}`,
-                });
+                console.error(`${scriptURL} registration failed.`, error);
+                if (catchError) {
+                    catchError({ error });
+                }
                 return { error };
             });
         }
@@ -283,21 +284,62 @@ export default class App extends Component {
         return null;
     }
 
-    unregisterServiceWorker() {
+    registerCoreServiceWorker() {
+        return this.registerServiceWorker({
+            scriptURL: SERVICE_WORKER_CORE,
+            catchError: ({ error }) => this.addGlobalMessage({
+                type: 'error',
+                id: 'offlineMode',
+                text: `An error occured while enabling offline mode. ${error.message}`,
+            }),
+        });
+    }
+
+    registerConversionCacheServiceWorker() {
+        return this.registerServiceWorker({
+            scriptURL: SERVICE_WORKER_CONVERSIONS,
+            catchError: ({ error }) => this.addGlobalMessage({
+                type: 'error',
+                id: 'convertedLumpsCaching',
+                text: `An error occured while enabling caching of converted lumps. ${error.message}`,
+            }),
+        });
+    }
+
+    unregisterServiceWorkers({ targetScriptURL = '' } = {}) {
         if (serviceWorkerSupported) {
+            let workerScriptURL = '';
             navigator.serviceWorker.getRegistrations().then((registrations) => {
                 for (let i = 0; i < registrations.length; i++) {
                     const registration = registrations[i];
-                    registration.unregister();
-                    console.log('SW unregistered.');
+                    workerScriptURL = registration.active ? registration.active.scriptURL : '';
+                    if (!targetScriptURL || workerScriptURL.includes(targetScriptURL)) {
+                        registration.unregister();
+                        console.log(`${targetScriptURL || workerScriptURL} unregistered.`);
+                    }
                 }
-            }).catch((registrationError) => {
-                console.error('SW getRegistrations failed: ', registrationError);
-                this.addGlobalMessage({
-                    type: 'error',
-                    id: 'serviceWorker',
-                    text: 'An error occured while disabling offline mode.',
-                });
+            }).catch((error) => {
+                console.error(`SW unregistration failed (worker scriptURL: '${workerScriptURL}').`, error);
+
+                if (targetScriptURL === SERVICE_WORKER_CORE) {
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'offlineMode',
+                        text: `An error occured while disabling offline mode. ${error.message}`,
+                    });
+                } else if (targetScriptURL === SERVICE_WORKER_CONVERSIONS) {
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'convertedLumpsCaching',
+                        text: `An error occured while disabling caching for converted lump. ${error.message}`,
+                    });
+                } else {
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'serviceWorker',
+                        text: `An error occured while getting registrations and unregistering service workers. ${error.message}`,
+                    });
+                }
             });
         }
     }
@@ -1796,14 +1838,26 @@ export default class App extends Component {
     }
 
     handleSettingChange = async ({ key, value, type }) => {
-        if (key === 'serviceWorker') {
+        if (key === 'offlineMode') {
             if (value) {
-                const { error } = await this.registerServiceWorker();
+                const { error } = await this.registerCoreServiceWorker();
                 if (error) {
                     return;
                 }
             } else {
-                this.unregisterServiceWorker();
+                this.unregisterServiceWorkers({ targetScriptURL: SERVICE_WORKER_CORE });
+            }
+        }
+
+
+        if (key === 'convertedLumpsCaching') {
+            if (value) {
+                const { error } = await this.registerConversionCacheServiceWorker();
+                if (error) {
+                    return;
+                }
+            } else {
+                this.unregisterServiceWorkers({ targetScriptURL: SERVICE_WORKER_CONVERSIONS });
             }
         }
 
