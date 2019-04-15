@@ -111,7 +111,7 @@ module.exports = () => ({
             },
             {
                 test: /\.js$/,
-                include: /workers/,
+                include: /webWorkers/,
                 use: [{
                     loader: 'worker-loader',
                     options: {
