@@ -31,11 +31,9 @@ export const EXTENSIONS = {
 
 export const NO_BRAND_ENV = 'development-no-brand';
 
-/* Service workers */
+/* Workers */
 
 export const SERVICE_WORKER_CORE = 'service-worker-core.js';
-
-export const SERVICE_WORKER_CONVERSIONS = 'service-worker-conversions.js';
 
 /* Web worker internal errors */
 

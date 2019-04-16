@@ -19,6 +19,11 @@ import {
     MIDI_PITCH_WHEEL,
 } from '../lib/constants';
 
+import {
+    getCacheItemAsArrayBuffer,
+    setCacheItemAsBlob,
+} from '../lib/cacheManager';
+
 function readMusHeader(dataView) {
     const id = [];
 
@@ -44,8 +49,21 @@ function isValidMusHeader(id) {
 
 // TODO: Send the error string in postMessage
 
-onmessage = (message) => {
+onmessage = async (message) => {
     const { wadId, lumpId, input } = message.data;
+
+    const requestURL = `/midis/${wadId}/${lumpId}`;
+    const cachedItem = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL });
+
+    if (cachedItem) {
+        postMessage({
+            wadId,
+            lumpId,
+            output: requestURL,
+        });
+
+        return;
+    }
 
     // console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
 
@@ -331,77 +349,77 @@ onmessage = (message) => {
                 channel = getMIDIChannel(eventdescriptor & 0x0F);
                 musEvent = eventdescriptor & 0x70;
                 switch (musEvent) {
-                case MUS_RELEASE_KEY:
-                    // console.log('MUS_RELEASE_KEY');
-                    key = getMusByte8();
+                    case MUS_RELEASE_KEY:
+                        // console.log('MUS_RELEASE_KEY');
+                        key = getMusByte8();
 
-                    writeReleaseKey(channel, key);
+                        writeReleaseKey(channel, key);
 
-                    break;
+                        break;
 
-                case MUS_PRESS_KEY:
-                    key = getMusByte8();
+                    case MUS_PRESS_KEY:
+                        key = getMusByte8();
 
-                    if (key & 0x80) {
-                        channelvelocities[channel] = getMusByte8();
+                        if (key & 0x80) {
+                            channelvelocities[channel] = getMusByte8();
 
-                        channelvelocities[channel] &= 0x7F;
+                            channelvelocities[channel] &= 0x7F;
 
-                        // console.log('MUS_PRESS_KEY: '+key+ ' ' + channelvelocities[channel]);
-                    } else {
-                        // console.log('MUS_PRESS_KEY: '+key);
-                    }
+                            // console.log('MUS_PRESS_KEY: '+key+ ' ' + channelvelocities[channel]);
+                        } else {
+                            // console.log('MUS_PRESS_KEY: '+key);
+                        }
 
-                    writePressKey(channel, key, channelvelocities[channel]);
+                        writePressKey(channel, key, channelvelocities[channel]);
 
-                    break;
+                        break;
 
-                case MUS_PITCH_WHEEL:
-                    // console.log('MUS_PITCH_WHEEL');
-                    key = getMusByte8();
+                    case MUS_PITCH_WHEEL:
+                        // console.log('MUS_PITCH_WHEEL');
+                        key = getMusByte8();
 
-                    writePitchWheel(channel, key * 64);
+                        writePitchWheel(channel, key * 64);
 
-                    break;
+                        break;
 
-                case MUS_SYSTEM_EVENT:
-                    // console.log('MUS_SYSTEM_EVENT');
-                    controllernumber = getMusByte8();
+                    case MUS_SYSTEM_EVENT:
+                        // console.log('MUS_SYSTEM_EVENT');
+                        controllernumber = getMusByte8();
 
-                    if (controllernumber < 10 || controllernumber > 14) {
-                        console.error(`Controller number inaccurate 10-14: ${controllernumber}`);
-                        return false;
-                    }
-
-                    writeChangeControllerValueless(channel, MIDI_CONTROLLER_MAP[controllernumber]);
-
-                    break;
-
-                case MUS_CHANGE_CONTROLLER:
-                    controllernumber = getMusByte8();
-                    controllervalue = getMusByte8();
-                    // console.log('MUS_CHANGE_CONTROLLER: ' +controllernumber+' '+controllervalue);
-                    if (controllernumber == 0) {
-                        writeChangePatch(channel, controllervalue);
-                    } else {
-                        if (controllernumber < 1 || controllernumber > 9) {
-                            console.error(`Controller number inaccurate: ${controllernumber}`);
+                        if (controllernumber < 10 || controllernumber > 14) {
+                            console.error(`Controller number inaccurate 10-14: ${controllernumber}`);
                             return false;
                         }
 
-                        writeChangeControllerValued(channel, MIDI_CONTROLLER_MAP[controllernumber], controllervalue);
-                    }
+                        writeChangeControllerValueless(channel, MIDI_CONTROLLER_MAP[controllernumber]);
 
-                    break;
+                        break;
 
-                case MUS_SCORE_END:
-                    // console.log('musScoreEnd');
-                    hitScoreEnd = true;
-                    break;
+                    case MUS_CHANGE_CONTROLLER:
+                        controllernumber = getMusByte8();
+                        controllervalue = getMusByte8();
+                        // console.log('MUS_CHANGE_CONTROLLER: ' +controllernumber+' '+controllervalue);
+                        if (controllernumber == 0) {
+                            writeChangePatch(channel, controllervalue);
+                        } else {
+                            if (controllernumber < 1 || controllernumber > 9) {
+                                console.error(`Controller number inaccurate: ${controllernumber}`);
+                                return false;
+                            }
 
-                default:
-                    // console.log('eventdescriptor default: '+eventdescriptor + ' ' + (eventdescriptor & 0x80));
-                    return false;
+                            writeChangeControllerValued(channel, MIDI_CONTROLLER_MAP[controllernumber], controllervalue);
+                        }
+
+                        break;
+
+                    case MUS_SCORE_END:
+                        // console.log('musScoreEnd');
+                        hitScoreEnd = true;
+                        break;
+
+                    default:
+                        // console.log('eventdescriptor default: '+eventdescriptor + ' ' + (eventdescriptor & 0x80));
+                        return false;
                 }
                 if ((eventdescriptor & 0x80) != 0) {
                     // console.log('delay count');
@@ -438,14 +456,16 @@ onmessage = (message) => {
         return outputDataView.buffer;
     }
 
-    const output = convertMusToMidi(input);
-    if (output === false) {
+    const midi = convertMusToMidi(input);
+    if (!midi) {
         console.error(`Failed to convert '${lumpId}' from MUS to MIDI (WAD: '${wadId}').`, { musDataPosition });
     }
+
+    setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: midi });
 
     postMessage({
         wadId,
         lumpId,
-        output,
+        output: requestURL,
     });
 };

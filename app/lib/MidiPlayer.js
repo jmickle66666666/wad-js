@@ -236,6 +236,18 @@ export default class MidiPlayer {
         }
     }
 
+    initWebAudioPlayback = () => {
+        this.context = new AudioContext();
+        // create script Processor with auto buffer size and a single output channel
+        this.source = this.context.createScriptProcessor(MIDI_AUDIO_BUFFER_SIZE, 0, 1);
+        this.waveBuffer = Module._malloc(MIDI_AUDIO_BUFFER_SIZE * 2);
+        this.source.onaudioprocess = event => this.getNextWave(event); // add eventhandler for next buffer full of audio data
+        this.source.connect(this.context.destination); // connect the source to the context's destination (the speakers)
+        this.startTime = this.context.currentTime;
+
+        this.emitEvent({ event: MIDI_PLAY, time: 0 });
+    }
+
     loadMissingPatch(path, filename) {
         const request = new XMLHttpRequest();
         request.open('GET', `${path}${filename}`, true);
@@ -306,16 +318,80 @@ export default class MidiPlayer {
         request.send();
     }
 
-    initWebAudioPlayback = () => {
-        this.context = new AudioContext();
-        // create script Processor with auto buffer size and a single output channel
-        this.source = this.context.createScriptProcessor(MIDI_AUDIO_BUFFER_SIZE, 0, 1);
-        this.waveBuffer = Module._malloc(MIDI_AUDIO_BUFFER_SIZE * 2);
-        this.source.onaudioprocess = event => this.getNextWave(event); // add eventhandler for next buffer full of audio data
-        this.source.connect(this.context.destination); // connect the source to the context's destination (the speakers)
-        this.startTime = this.context.currentTime;
+    loadSong = (arrayBuffer) => {
+        this.midiFileArray = new Int8Array(arrayBuffer);
+        this.midiFileBuffer = Module._malloc(this.midiFileArray.length);
+        Module.writeArrayToMemory(this.midiFileArray, this.midiFileBuffer);
 
-        this.emitEvent({ event: MIDI_PLAY, time: 0 });
+        Module.ccall(
+            'mid_init',
+            'number',
+            [],
+            [],
+        );
+
+        this.stream = Module.ccall(
+            'mid_istream_open_mem',
+            'number',
+            ['number', 'number', 'number'],
+            [this.midiFileBuffer, this.midiFileArray.length, false],
+        );
+
+        const options = Module.ccall(
+            'mid_create_options',
+            'number',
+            ['number', 'number', 'number', 'number'],
+            [this.context.sampleRate, MIDI_AUDIO_S16LSB, 1, MIDI_AUDIO_BUFFER_SIZE * 2],
+        );
+
+        this.song = Module.ccall(
+            'mid_song_load',
+            'number',
+            ['number', 'number'],
+            [this.stream, options],
+        );
+        Module.ccall(
+            'mid_istream_close',
+            'number',
+            ['number'],
+            [this.stream],
+        );
+
+        this.missingPatchCount = Module.ccall(
+            'mid_song_get_num_missing_instruments',
+            'number',
+            ['number'],
+            [this.song],
+        );
+
+        if (this.missingPatchCount > 0) {
+            this.emitEvent({
+                event: MIDI_LOAD_PATCH,
+                message: 'Loading MIDI patches...',
+            });
+
+            for (let i = 0; i < this.missingPatchCount; i++) {
+                const missingPatch = Module.ccall(
+                    'mid_song_get_missing_instrument',
+                    'string',
+                    ['number', 'number'],
+                    [this.song, i],
+                );
+
+                this.loadMissingPatch(
+                    MIDI_PATCH_URL,
+                    missingPatch,
+                );
+            }
+        } else {
+            Module.ccall(
+                'mid_song_start',
+                'void', ['number'],
+                [this.song],
+            );
+
+            this.initWebAudioPlayback();
+        }
     }
 
     playWebAudioAPIWithScriptLoaded(url, name) {
@@ -345,79 +421,7 @@ export default class MidiPlayer {
                     return;
                 }
 
-                this.midiFileArray = new Int8Array(request.response);
-                this.midiFileBuffer = Module._malloc(this.midiFileArray.length);
-                Module.writeArrayToMemory(this.midiFileArray, this.midiFileBuffer);
-
-                Module.ccall(
-                    'mid_init',
-                    'number',
-                    [],
-                    [],
-                );
-
-                this.stream = Module.ccall(
-                    'mid_istream_open_mem',
-                    'number',
-                    ['number', 'number', 'number'],
-                    [this.midiFileBuffer, this.midiFileArray.length, false],
-                );
-
-                const options = Module.ccall(
-                    'mid_create_options',
-                    'number',
-                    ['number', 'number', 'number', 'number'],
-                    [this.context.sampleRate, MIDI_AUDIO_S16LSB, 1, MIDI_AUDIO_BUFFER_SIZE * 2],
-                );
-
-                this.song = Module.ccall(
-                    'mid_song_load',
-                    'number',
-                    ['number', 'number'],
-                    [this.stream, options],
-                );
-                Module.ccall(
-                    'mid_istream_close',
-                    'number',
-                    ['number'],
-                    [this.stream],
-                );
-
-                this.missingPatchCount = Module.ccall(
-                    'mid_song_get_num_missing_instruments',
-                    'number',
-                    ['number'],
-                    [this.song],
-                );
-
-                if (this.missingPatchCount > 0) {
-                    this.emitEvent({
-                        event: MIDI_LOAD_PATCH,
-                        message: 'Loading MIDI patches...',
-                    });
-
-                    for (let i = 0; i < this.missingPatchCount; i++) {
-                        const missingPatch = Module.ccall(
-                            'mid_song_get_missing_instrument',
-                            'string',
-                            ['number', 'number'],
-                            [this.song, i],
-                        );
-
-                        this.loadMissingPatch(
-                            MIDI_PATCH_URL,
-                            missingPatch,
-                        );
-                    }
-                } else {
-                    Module.ccall(
-                        'mid_song_start',
-                        'void', ['number'],
-                        [this.song],
-                    );
-
-                    this.initWebAudioPlayback();
-                }
+                this.loadSong(request.response);
             } catch (error) {
                 this.emitEvent({
                     event: MIDI_ERROR,
@@ -428,7 +432,7 @@ export default class MidiPlayer {
         request.send();
     }
 
-    playWebAudioAPI(url, name) {
+    playWebAudioAPI({ arrayBuffer, url, name }) {
         this.stop();
         if (navigator.platform === 'iPad' || navigator.platform === 'iPhone' || navigator.platform === 'iPod') {
             // Unmute works only after return of the user generated event. So we let the event return and play with delay
@@ -437,7 +441,21 @@ export default class MidiPlayer {
             this.unmuteiOSHack();
         }
 
-        this.playWebAudioAPIWithScriptLoaded(url, name);
+        if (url) {
+            this.playWebAudioAPIWithScriptLoaded(url, name);
+        } else if (arrayBuffer) {
+            this.emitEvent({
+                event: MIDI_LOAD_FILE,
+                message: `Loading '${name}'...`,
+            });
+            this.loadSong(arrayBuffer);
+        } else {
+            this.emitEvent({
+                event: MIDI_ERROR,
+                message: 'Unknown source. Must pass either url or arrayBuffer.',
+            });
+        }
+
         return true;
     }
 

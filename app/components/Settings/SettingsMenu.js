@@ -48,12 +48,6 @@ export default ({ settings, handleSettingChange, toggleSettingsMenu }) => (
             className={style.setting}
         />
         <Checkbox
-            label="Save converted lumps in browser cache."
-            valueObject={{ convertedLumpsCaching: settings.convertedLumpsCaching }}
-            handleChange={handleSettingChange}
-            className={style.setting}
-        />
-        <Checkbox
             label="Play music in a loop."
             valueObject={{ playbackLoop: settings.playbackLoop }}
             handleChange={handleSettingChange}

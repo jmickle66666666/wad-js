@@ -19,7 +19,6 @@ import serviceWorkerSupport from '../lib/serviceWorkerSupport';
 import MidiPlayer from '../lib/MidiPlayer';
 import {
     SERVICE_WORKER_CORE,
-    SERVICE_WORKER_CONVERSIONS,
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
@@ -36,6 +35,7 @@ import WadDetails from './WadExplorer/WadDetails';
 import PortablePlayer from './AudioPlayers/PortablePlayer';
 import SettingsMenu from './Settings/SettingsMenu';
 import SettingsIcon from './Settings/SettingsIcon';
+import { getCacheItemAsArrayBuffer, deleteCache, deleteAllCache } from '../lib/cacheManager';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -89,7 +89,6 @@ export default class App extends Component {
             playbackLoop: true,
             playNextTrack: true,
             offlineMode: true,
-            convertedLumpsCaching: true,
         },
         displayError: {},
     }
@@ -228,7 +227,7 @@ export default class App extends Component {
         registration.addEventListener('updatefound', () => {
             // the state of the installing SW has changed
             registration.installing.addEventListener('statechange', (event) => {
-                console.log('statechange', event.target.state);
+                console.log('statechange', event.target.state, registration);
                 // ready for activation
                 if (event.target.state === 'installed') {
                     this.promptUserToRefreshApp(registration);
@@ -250,6 +249,7 @@ export default class App extends Component {
             this.registerCoreServiceWorker()
                 .then((result) => {
                     if (result.error) {
+                        console.error('An error occurred while registering Core SW.', { error: result.error });
                         return;
                     }
 
@@ -281,7 +281,7 @@ export default class App extends Component {
             });
         }
 
-        return null;
+        return {};
     }
 
     registerCoreServiceWorker() {
@@ -291,17 +291,6 @@ export default class App extends Component {
                 type: 'error',
                 id: 'offlineMode',
                 text: `An error occured while enabling offline mode. ${error.message}`,
-            }),
-        });
-    }
-
-    registerConversionCacheServiceWorker() {
-        return this.registerServiceWorker({
-            scriptURL: SERVICE_WORKER_CONVERSIONS,
-            catchError: ({ error }) => this.addGlobalMessage({
-                type: 'error',
-                id: 'convertedLumpsCaching',
-                text: `An error occured while enabling caching of converted lumps. ${error.message}`,
             }),
         });
     }
@@ -326,12 +315,6 @@ export default class App extends Component {
                         type: 'error',
                         id: 'offlineMode',
                         text: `An error occured while disabling offline mode. ${error.message}`,
-                    });
-                } else if (targetScriptURL === SERVICE_WORKER_CONVERSIONS) {
-                    this.addGlobalMessage({
-                        type: 'error',
-                        id: 'convertedLumpsCaching',
-                        text: `An error occured while disabling caching for converted lump. ${error.message}`,
                     });
                 } else {
                     this.addGlobalMessage({
@@ -816,11 +799,12 @@ export default class App extends Component {
 
     saveConvertedMidi = (payload) => {
         const { wadId, lumpId, output } = payload.data;
+        const targetObject = 'midis';
 
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
         if (!output) {
             this.removeItemFromQueue({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
                 lumpId,
             });
@@ -830,7 +814,7 @@ export default class App extends Component {
         this.setState((prevState) => {
             const { midis } = prevState;
             return this.moveItemFromWadQueueToConvertedItems({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
                 lumpId,
                 items: midis,
@@ -838,7 +822,7 @@ export default class App extends Component {
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
             });
 
@@ -1083,6 +1067,8 @@ export default class App extends Component {
                 });
             }
 
+            deleteCache({ cacheId: wadId });
+
             return ({ wads: updatedWads });
         }, () => this.stopConvertingWadItems({ wadId }));
     }
@@ -1096,6 +1082,7 @@ export default class App extends Component {
             selectedMidi: {},
             preselectedMidi: false,
         }));
+        deleteAllCache();
         this.stopConvertingAllWads();
         this.clearMidiPlayer();
     }
@@ -1242,7 +1229,7 @@ export default class App extends Component {
 
                 this.setState(() => {
                     const newlySelectedMidi = {
-                        data: URL.createObjectURL(new Blob([firstMidiData])),
+                        data: firstMidiData,
                         lumpName: lump.name,
                         lumpType: lump.type,
                         wadId: firstWadId,
@@ -1399,7 +1386,7 @@ export default class App extends Component {
             });
 
             if (nextMidiLump) {
-                const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
+                const midiURL = nextMidiData;
                 return {
                     midiURL,
                     lump: nextMidiLump,
@@ -1416,10 +1403,10 @@ export default class App extends Component {
         wadId,
         midiName,
     }) => (
-        convertedMidis[wadId]
+            convertedMidis[wadId]
             && convertedMidis[wadId]
             && convertedMidis[wadId][midiName]
-    )
+        )
 
     // note: this will only get MIDIs that are in the same lumpType of the WAD as the selected MIDI
     getMidiLump = ({
@@ -1428,11 +1415,11 @@ export default class App extends Component {
         lumpType,
         midiName,
     }) => (
-        wads[wadId]
+            wads[wadId]
             && wads[wadId].lumps
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
-    )
+        )
 
     initMidiPlayer = () => {
         this.midiPlayer = new MidiPlayer({
@@ -1540,9 +1527,8 @@ export default class App extends Component {
                     ) {
                         const lump = wads[wadId].lumps[lumpType][lumpName];
                         const data = midis.converted[wadId][lumpName];
-                        const midiURL = URL.createObjectURL(new Blob([data]));
                         this.selectMidi({
-                            midiURL,
+                            midiURL: data,
                             lump,
                             wadId,
                         });
@@ -1554,7 +1540,7 @@ export default class App extends Component {
         }
     }
 
-    selectMidi = ({
+    selectMidi = async ({
         midiURL,
         lump,
         wadId,
@@ -1563,14 +1549,22 @@ export default class App extends Component {
             this.initMidiPlayer();
         }
 
-        const success = this.midiPlayer.play(midiURL, lump.name);
-        if (!success) {
-            return;
+        let arrayBuffer = null;
+        let objectURL = null;
+        if (midiURL instanceof DataView) {
+            // TODO: these items should be cached instead to allow full offline access
+            const blob = new Blob([midiURL]);
+            objectURL = URL.createObjectURL(blob);
+        } else {
+            arrayBuffer = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL: midiURL });
+            if (!arrayBuffer) {
+                console.error(`Could not find cache item '${midiURL}' in ${wadId}.`);
+            }
         }
 
-        const { globalMessages } = this.state;
-        if (globalMessages[MIDI_STATUS]) {
-            this.dismissGlobalMessage(MIDI_STATUS);
+        const success = this.midiPlayer.play({ arrayBuffer, url: objectURL, name: lump.name });
+        if (!success) {
+            return;
         }
 
         if (mediaSessionSupported && !mediaSessionIgnored) {
@@ -1846,18 +1840,6 @@ export default class App extends Component {
                 }
             } else {
                 this.unregisterServiceWorkers({ targetScriptURL: SERVICE_WORKER_CORE });
-            }
-        }
-
-
-        if (key === 'convertedLumpsCaching') {
-            if (value) {
-                const { error } = await this.registerConversionCacheServiceWorker();
-                if (error) {
-                    return;
-                }
-            } else {
-                this.unregisterServiceWorkers({ targetScriptURL: SERVICE_WORKER_CONVERSIONS });
             }
         }
 

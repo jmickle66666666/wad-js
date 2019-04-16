@@ -87,7 +87,6 @@ export default ({
         );
     }
 
-    const midiURL = URL.createObjectURL(new Blob([midi]));
     if (midi) {
         const handleStopMidi = () => {
             // we don't want to show the lump detailed view when interacting with the player
@@ -97,7 +96,7 @@ export default ({
         const handleSelectMidi = () => {
             // we don't want to show the lump detailed view when interacting with the player
             selectMidi({
-                midiURL,
+                midiURL: midi,
                 lump,
                 wadId: wad.id,
             });
