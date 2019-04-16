@@ -4,10 +4,10 @@ import moment from 'moment';
 
 import style from './App.scss';
 
-import MidiConverter from '../workers/midiConverter';
-import SimpleImageConverter from '../workers/simpleImageConverter';
-import TextConverter from '../workers/textConverter';
-import MapParser from '../workers/mapParser';
+import MidiConverter from '../webWorkers/midiConverter';
+import SimpleImageConverter from '../webWorkers/simpleImageConverter';
+import TextConverter from '../webWorkers/textConverter';
+import MapParser from '../webWorkers/mapParser';
 
 import Wad from '../models/Wad';
 
@@ -18,6 +18,7 @@ import mediaSessionSupport from '../lib/mediaSessionSupport';
 import serviceWorkerSupport from '../lib/serviceWorkerSupport';
 import MidiPlayer from '../lib/MidiPlayer';
 import {
+    SERVICE_WORKER_CORE,
     MIDI_ERROR,
     MIDI_STATUS,
     MIDI_PLAY,
@@ -34,6 +35,7 @@ import WadDetails from './WadExplorer/WadDetails';
 import PortablePlayer from './AudioPlayers/PortablePlayer';
 import SettingsMenu from './Settings/SettingsMenu';
 import SettingsIcon from './Settings/SettingsIcon';
+import { getCacheItemAsArrayBuffer, deleteCache, deleteAllCache } from '../lib/cacheManager';
 
 const localStorageManager = new LocalStorageManager();
 
@@ -86,7 +88,7 @@ export default class App extends Component {
             theme: 'dark',
             playbackLoop: true,
             playNextTrack: true,
-            serviceWorker: true,
+            offlineMode: true,
         },
         displayError: {},
     }
@@ -119,13 +121,13 @@ export default class App extends Component {
             },
         }), () => {
             const { settings: newSettings } = this.state;
-            if (newSettings.serviceWorker) {
+            if (newSettings.offlineMode) {
                 if (serviceWorkerSupported) {
-                    this.registerServiceWorkerAndListenForUpdate();
+                    this.registerCoreServiceWorkerAndListenForUpdate();
                 } else {
                     this.addGlobalMessage({
                         type: 'warning',
-                        id: 'serviceWorker',
+                        id: 'offlineMode',
                         text: serviceWorkerSupportMessage,
                     });
                 }
@@ -183,11 +185,11 @@ export default class App extends Component {
         }
     }
 
-    activateUpdatedWorker = (registration) => {
+    activateUpdatedCoreServiceWorker = (registration) => {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         this.addGlobalMessage({
             type: 'info',
-            id: 'serviceWorker',
+            id: 'offlineMode',
             text: 'Activating update...',
         });
     }
@@ -195,7 +197,7 @@ export default class App extends Component {
     promptUserToRefreshApp(registration) {
         this.addGlobalMessage({
             type: 'info',
-            id: 'serviceWorker',
+            id: 'offlineMode',
             text: (
                 <div>
                     A new version of
@@ -207,8 +209,8 @@ export default class App extends Component {
                     <span
                         role="button"
                         className={style.focusableInfo}
-                        onClick={() => this.activateUpdatedWorker(registration)}
-                        onKeyPress={() => this.activateUpdatedWorker(registration)}
+                        onClick={() => this.activateUpdatedCoreServiceWorker(registration)}
+                        onKeyPress={() => this.activateUpdatedCoreServiceWorker(registration)}
                         tabIndex={0}
                     >
                         Please click here to activate the update.
@@ -225,7 +227,7 @@ export default class App extends Component {
         registration.addEventListener('updatefound', () => {
             // the state of the installing SW has changed
             registration.installing.addEventListener('statechange', (event) => {
-                console.log('statechange', event.target.state);
+                console.log('statechange', event.target.state, registration);
                 // ready for activation
                 if (event.target.state === 'installed') {
                     this.promptUserToRefreshApp(registration);
@@ -242,62 +244,85 @@ export default class App extends Component {
         return null;
     }
 
-    registerServiceWorkerAndListenForUpdate() {
+    registerCoreServiceWorkerAndListenForUpdate() {
         if (serviceWorkerSupported) {
-            this.registerServiceWorker()
+            this.registerCoreServiceWorker()
                 .then((result) => {
                     if (result.error) {
+                        console.error('An error occurred while registering Core SW.', { error: result.error });
                         return;
                     }
 
                     this.listenForServiceWokerUpdate(result.registration);
                 }).catch((error) => {
-                    console.error('SW registration update failed: ', error);
+                    console.error('Core SW registration update failed: ', error);
                     this.addGlobalMessage({
                         type: 'error',
-                        id: 'serviceWorker',
+                        id: 'offlineMode',
                         text: 'An error occured while listening for app updates.',
                     });
                 });
         }
     }
 
-    registerServiceWorker() {
+    registerServiceWorker({ scriptURL, catchError }) {
         if (serviceWorkerSupported) {
-            return navigator.serviceWorker.register('service-worker.js', {
+            return navigator.serviceWorker.register(scriptURL, {
                 updateViaCache: 'all',
             }).then((registration) => {
-                console.log('SW registered: ', registration);
+                console.log(`${scriptURL} registered.`);
                 return { registration };
             }).catch((error) => {
-                console.error('SW registration failed: ', error);
-                this.addGlobalMessage({
-                    type: 'error',
-                    id: 'serviceWorker',
-                    text: 'An error occured while enabling offline mode.',
-                });
+                console.error(`${scriptURL} registration failed.`, error);
+                if (catchError) {
+                    catchError({ error });
+                }
                 return { error };
             });
         }
 
-        return null;
+        return {};
     }
 
-    unregisterServiceWorker() {
+    registerCoreServiceWorker() {
+        return this.registerServiceWorker({
+            scriptURL: SERVICE_WORKER_CORE,
+            catchError: ({ error }) => this.addGlobalMessage({
+                type: 'error',
+                id: 'offlineMode',
+                text: `An error occured while enabling offline mode. ${error.message}`,
+            }),
+        });
+    }
+
+    unregisterServiceWorkers({ targetScriptURL = '' } = {}) {
         if (serviceWorkerSupported) {
+            let workerScriptURL = '';
             navigator.serviceWorker.getRegistrations().then((registrations) => {
                 for (let i = 0; i < registrations.length; i++) {
                     const registration = registrations[i];
-                    registration.unregister();
-                    console.log('SW unregistered.');
+                    workerScriptURL = registration.active ? registration.active.scriptURL : '';
+                    if (!targetScriptURL || workerScriptURL.includes(targetScriptURL)) {
+                        registration.unregister();
+                        console.log(`${targetScriptURL || workerScriptURL} unregistered.`);
+                    }
                 }
-            }).catch((registrationError) => {
-                console.error('SW getRegistrations failed: ', registrationError);
-                this.addGlobalMessage({
-                    type: 'error',
-                    id: 'serviceWorker',
-                    text: 'An error occured while disabling offline mode.',
-                });
+            }).catch((error) => {
+                console.error(`SW unregistration failed (worker scriptURL: '${workerScriptURL}').`, error);
+
+                if (targetScriptURL === SERVICE_WORKER_CORE) {
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'offlineMode',
+                        text: `An error occured while disabling offline mode. ${error.message}`,
+                    });
+                } else {
+                    this.addGlobalMessage({
+                        type: 'error',
+                        id: 'serviceWorker',
+                        text: `An error occured while getting registrations and unregistering service workers. ${error.message}`,
+                    });
+                }
             });
         }
     }
@@ -774,11 +799,12 @@ export default class App extends Component {
 
     saveConvertedMidi = (payload) => {
         const { wadId, lumpId, output } = payload.data;
+        const targetObject = 'midis';
 
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
         if (!output) {
             this.removeItemFromQueue({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
                 lumpId,
             });
@@ -788,7 +814,7 @@ export default class App extends Component {
         this.setState((prevState) => {
             const { midis } = prevState;
             return this.moveItemFromWadQueueToConvertedItems({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
                 lumpId,
                 items: midis,
@@ -796,7 +822,7 @@ export default class App extends Component {
             });
         }, () => {
             const { nextLump, nextWadId, done } = this.getNextItemInQueue({
-                targetObject: 'midis',
+                targetObject,
                 wadId,
             });
 
@@ -1041,6 +1067,8 @@ export default class App extends Component {
                 });
             }
 
+            deleteCache({ cacheId: wadId });
+
             return ({ wads: updatedWads });
         }, () => this.stopConvertingWadItems({ wadId }));
     }
@@ -1054,6 +1082,7 @@ export default class App extends Component {
             selectedMidi: {},
             preselectedMidi: false,
         }));
+        deleteAllCache();
         this.stopConvertingAllWads();
         this.clearMidiPlayer();
     }
@@ -1200,7 +1229,7 @@ export default class App extends Component {
 
                 this.setState(() => {
                     const newlySelectedMidi = {
-                        data: URL.createObjectURL(new Blob([firstMidiData])),
+                        data: firstMidiData,
                         lumpName: lump.name,
                         lumpType: lump.type,
                         wadId: firstWadId,
@@ -1357,7 +1386,7 @@ export default class App extends Component {
             });
 
             if (nextMidiLump) {
-                const midiURL = URL.createObjectURL(new Blob([nextMidiData]));
+                const midiURL = nextMidiData;
                 return {
                     midiURL,
                     lump: nextMidiLump,
@@ -1498,9 +1527,8 @@ export default class App extends Component {
                     ) {
                         const lump = wads[wadId].lumps[lumpType][lumpName];
                         const data = midis.converted[wadId][lumpName];
-                        const midiURL = URL.createObjectURL(new Blob([data]));
                         this.selectMidi({
-                            midiURL,
+                            midiURL: data,
                             lump,
                             wadId,
                         });
@@ -1512,7 +1540,7 @@ export default class App extends Component {
         }
     }
 
-    selectMidi = ({
+    selectMidi = async ({
         midiURL,
         lump,
         wadId,
@@ -1521,14 +1549,22 @@ export default class App extends Component {
             this.initMidiPlayer();
         }
 
-        const success = this.midiPlayer.play(midiURL, lump.name);
-        if (!success) {
-            return;
+        let arrayBuffer = null;
+        let objectURL = null;
+        if (midiURL instanceof DataView) {
+            // TODO: these items should be cached instead to allow full offline access
+            const blob = new Blob([midiURL]);
+            objectURL = URL.createObjectURL(blob);
+        } else {
+            arrayBuffer = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL: midiURL });
+            if (!arrayBuffer) {
+                console.error(`Could not find cache item '${midiURL}' in ${wadId}.`);
+            }
         }
 
-        const { globalMessages } = this.state;
-        if (globalMessages[MIDI_STATUS]) {
-            this.dismissGlobalMessage(MIDI_STATUS);
+        const success = this.midiPlayer.play({ arrayBuffer, url: objectURL, name: lump.name });
+        if (!success) {
+            return;
         }
 
         if (mediaSessionSupported && !mediaSessionIgnored) {
@@ -1795,7 +1831,18 @@ export default class App extends Component {
         }));
     }
 
-    handleSettingChange = ({ key, value, type }) => {
+    handleSettingChange = async ({ key, value, type }) => {
+        if (key === 'offlineMode') {
+            if (value) {
+                const { error } = await this.registerCoreServiceWorker();
+                if (error) {
+                    return;
+                }
+            } else {
+                this.unregisterServiceWorkers({ targetScriptURL: SERVICE_WORKER_CORE });
+            }
+        }
+
         if (type === CHECKBOX) {
             this.setState(prevState => ({
                 settings: {
@@ -1808,17 +1855,8 @@ export default class App extends Component {
 
                 if (key === 'theme') {
                     toggleThemeOnBody(value);
-
                     if (localStorage) {
                         localStorage.setItem('wadjs-theme', value);
-                    }
-                }
-
-                if (key === 'serviceWorker') {
-                    if (value) {
-                        this.registerServiceWorker();
-                    } else {
-                        this.unregisterServiceWorker();
                     }
                 }
             });
@@ -1971,6 +2009,7 @@ export default class App extends Component {
                                 settings={settings}
                                 handleSettingChange={this.handleSettingChange}
                                 toggleSettingsMenu={this.toggleSettingsMenu}
+                                addGlobalMessage={this.addGlobalMessage}
                             />
                         )
                     }

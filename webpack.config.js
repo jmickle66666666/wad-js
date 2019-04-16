@@ -24,7 +24,7 @@ const plugins = [
     }),
     // https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config
     new GenerateSW({
-        swDest: isProduction ? '../service-worker.js' : './service-worker.js',
+        swDest: isProduction ? '../service-worker-core.js' : './service-worker-core.js',
         globDirectory: 'public/',
         globPatterns: ['**/*'],
         manifestTransforms: [
@@ -111,7 +111,7 @@ module.exports = () => ({
             },
             {
                 test: /\.js$/,
-                include: /workers/,
+                include: /webWorkers/,
                 use: [{
                     loader: 'worker-loader',
                     options: {

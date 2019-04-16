@@ -31,6 +31,14 @@ export const EXTENSIONS = {
 
 export const NO_BRAND_ENV = 'development-no-brand';
 
+/* Workers */
+
+export const SERVICE_WORKER_CORE = 'service-worker-core.js';
+
+/* Web worker internal errors */
+
+export const INVALID_TEXT = 'INVALID_TEXT';
+
 /* Themes */
 
 export const DARK_THEME = 'dark';
@@ -218,10 +226,6 @@ export const HEXEN_SOUND_ARCHIVE_PATH = '$ARCHIVEPATH';
 export const HEXEN_SOUND_REGISTERED = '$REGISTERED';
 
 export const HEXEN_MUSIC_KEYWORD = '$MAP';
-
-/* Worker internal errors */
-
-export const INVALID_TEXT = 'INVALID_TEXT';
 
 /* MUS -> MIDI conversion */
 
