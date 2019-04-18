@@ -6,6 +6,13 @@ export default ({ wad, lump }) => {
     console.log({ lump });
     return (
         <Fragment>
+            {lump.data && (
+                <div className={style.wadLumpDetailsEntry}>
+                    Map lumps:
+                    {' '}
+                    {Object.keys(lump.data || {}).map(lumpName => lumpName).join(', ')}
+                </div>
+            )}
             <div className={style.wadLumpDetailsEntry}>
                 Things:
             </div>
