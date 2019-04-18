@@ -53,6 +53,9 @@ import {
     HEXEN_SOUND_ARCHIVE_PATH,
     HEXEN_SOUND_REGISTERED,
     HEXEN_MUSIC_KEYWORD,
+    TEXTURE_LUMPS,
+    START_MARKERS,
+    END_MARKERS,
 } from '../lib/constants';
 
 export default class Wad {
@@ -895,8 +898,7 @@ export default class Wad {
                         patchNames = pNames;
                     } else if (patchNames.includes(name)) {
                         lumpType = 'patches';
-                        // TEXTURE*
-                    } else if (/^TEXTURE[0-9a-zA-Z]$/.test(name)) {
+                    } else if (TEXTURE_LUMPS.test(name)) {
                         lumpType = 'textures';
                         const { textureCount, textureNames, textures } = this.readTextures(lumpData, address);
                         parsedLumpData = textureNames;
@@ -917,8 +919,7 @@ export default class Wad {
                         lumpType = 'demos';
                     }
 
-                    // *_START
-                    if (/^[0-9a-zA-Z]{0,2}_START$/.test(name)) {
+                    if (START_MARKERS.test(name)) {
                         // P*_START
                         if (/^P[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                             lumpClusterType = 'patches';
@@ -932,47 +933,46 @@ export default class Wad {
                         } else if (/^C[0-9a-zA-Z]{0,1}_START$/.test(name)) {
                             lumpClusterType = 'colormaps';
                         }
-                        // *_END
-                    } else if (/^[0-9a-zA-Z]{0,2}_END$/.test(name)) {
+                    } else if (END_MARKERS.test(name)) {
                         lumpClusterType = '';
                     } else if (lumpClusterType) {
                         switch (lumpClusterType) {
-                        default: {
-                            break;
-                        }
-                        case 'colormaps': {
-                            parsedLumpData = this.readColormaps(lumpData, name);
-                            break;
-                        }
-                        case 'flats': {
-                            const { metadata } = this.readFlat(lumpData, name, paletteData);
-                            parsedLumpData = lumpData;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
-                            break;
-                        }
-                        case 'patches': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                            default: {
+                                break;
+                            }
+                            case 'colormaps': {
+                                parsedLumpData = this.readColormaps(lumpData, name);
+                                break;
+                            }
+                            case 'flats': {
+                                const { metadata } = this.readFlat(lumpData, name, paletteData);
+                                parsedLumpData = lumpData;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                                break;
+                            }
+                            case 'patches': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
 
-                            break;
-                        }
-                        case 'sprites': {
-                            const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                            parsedLumpData = image;
-                            lumpIndexData = {
-                                ...lumpIndexData,
-                                ...metadata,
-                            };
+                                break;
+                            }
+                            case 'sprites': {
+                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
+                                parsedLumpData = image;
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
 
-                            break;
-                        }
+                                break;
+                            }
                         }
 
                         // we know the type of this lump because it belongs to a cluster

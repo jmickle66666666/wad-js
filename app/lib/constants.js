@@ -129,6 +129,12 @@ export const OPENGL_MAP_LUMPS = [
     'GL_PVS',
 ];
 
+export const START_MARKERS = new RegExp(/^[0-9a-zA-Z]{0,2}_START$/);
+
+export const END_MARKERS = new RegExp(/^[0-9a-zA-Z]{0,2}_END$/);
+
+export const TEXTURE_LUMPS = new RegExp(/^TEXTURE[0-9a-zA-Z]$/);
+
 export const INTERMISSION_LUMPS = new RegExp(/^WI[0-9a-zA-Z_]{1,}$/);
 
 // Doom II

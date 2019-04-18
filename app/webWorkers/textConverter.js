@@ -7,6 +7,12 @@ import {
     SNDINFO,
 } from '../lib/constants';
 
+import {
+    getCacheItemAsJson,
+    getCacheItemAsText,
+    setCacheItemAsBlob,
+} from '../lib/cacheManager';
+
 const interpolateBackgroundAnsiCode = int => (
     int === Number.isNaN ? null : ANSI_BACKGROUND_COLOR_CODES[int]
 );
@@ -60,7 +66,7 @@ const firstDecodeTextMethod = input => decodeURI(new TextDecoder('utf-8').decode
 
 const processNewLines = text => text.split('\n');
 
-onmessage = (message) => {
+onmessage = async (message) => {
     const { wadId, lumpId, input } = message.data;
 
     // console.log(`Converting '${lumpId}' to text (WAD: '${wadId}') ...`);
@@ -78,11 +84,42 @@ onmessage = (message) => {
         return;
     }
 
+    const requestURL = `/text/${wadId}/${lumpId}`;
+
     if (ANSI_LUMPS.includes(lumpId)) {
         // ANSI
-        output = parseAnsiScreen(input);
         convertedFormat = 'ANSI';
+
+        const cachedItem = await getCacheItemAsJson({ cacheId: wadId, requestURL });
+
+        if (cachedItem) {
+            postMessage({
+                wadId,
+                lumpId,
+                output: cachedItem,
+                convertedFormat,
+            });
+
+            return;
+        }
+
+        output = parseAnsiScreen(input);
+
+        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: JSON.stringify(output) });
     } else {
+        const cachedItem = await getCacheItemAsText({ cacheId: wadId, requestURL });
+
+        if (cachedItem) {
+            postMessage({
+                wadId,
+                lumpId,
+                output: cachedItem,
+                convertedFormat,
+            });
+
+            return;
+        }
+
         // text
         // rules out certain lumps that are definitively not meant to be rendered as text
         let splitText = null;
@@ -109,6 +146,8 @@ onmessage = (message) => {
         }
 
         output = splitText;
+
+        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
     }
 
     postMessage({
