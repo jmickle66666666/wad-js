@@ -110,7 +110,6 @@ onmessage = async (message) => {
         const cachedItem = await getCacheItemAsText({ cacheId: wadId, requestURL });
 
         if (cachedItem) {
-            console.log('cached text', cachedItem);
             postMessage({
                 wadId,
                 lumpId,
