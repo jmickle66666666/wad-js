@@ -1,3 +1,7 @@
+## v0.2.4: Cache converted images and text
+
+* As a continuation of the previous update, simple images as well as text lumps are now cached when converted.
+
 ## v0.2.3: Lump cache
 
 * In addition to the Service Worker, a new system to cache lumps has been developed for wadJS. For now, it only keeps converted MUS files into the browser memory but soon all lumps will be systematically cached for super performances and full offline access to the app.
