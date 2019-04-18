@@ -83,9 +83,7 @@ export const deleteAllCache = async () => {
         const cacheKeys = await caches.keys();
         await cacheKeys.map(async (key) => {
             await caches.delete(key);
-            console.log('going');
         });
-        console.log('done');
         return true;
     } catch (error) {
         console.error('An error occurred while deleting the cache.', { error });
