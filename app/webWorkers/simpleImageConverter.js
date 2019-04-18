@@ -1,5 +1,10 @@
 import { COLOR_COUNT_PER_PALETTE } from '../lib/constants';
 
+import {
+    getCacheItemAsBlob,
+    setCacheItemAsBlob,
+} from '../lib/cacheManager';
+
 function buildColorIndexReferences(data) {
     const colorIndexReferences = [];
 
@@ -71,6 +76,19 @@ onmessage = async (message) => {
 
     // console.log(`Converting '${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
 
+    const requestURL = `/simpleImages/${wadId}/${name}`;
+    const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
+
+    if (cachedItem) {
+        postMessage({
+            wadId,
+            lumpId: name,
+            output: cachedItem,
+        });
+
+        return;
+    }
+
     const colorIndexReferences = buildColorIndexReferences(data);
 
     const output = await convertColorIndexesReferencesToBlob(
@@ -85,6 +103,8 @@ onmessage = async (message) => {
     } else {
         console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
     }
+
+    setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
 
     postMessage({
         wadId,

@@ -32,9 +32,11 @@ function readMusHeader(dataView) {
     }
 
     const musHeader = {
-        id: id.join(' '), // used to check that this is a valid MUS file
+        // used to check that this is a valid MUS file
+        id: id.join(' '),
         scoreLength: dataView.getUint16(4, true),
-        scoreStart: dataView.getUint16(6, true), // only this value is truly helpful to parse the MUS
+        // only this value is truly helpful to parse the MUS
+        scoreStart: dataView.getUint16(6, true),
         primaryChannels: dataView.getUint16(8, true),
         secondaryChannels: dataView.getUint16(10, true),
         instrumentCount: dataView.getUint16(12, true),
