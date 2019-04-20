@@ -72,6 +72,7 @@ export default class UploadedWadList extends Component {
                             <h2 className={style.wadListTitle}>Uploaded WADs</h2>
                             <div
                                 onClick={download ? this.getJSON : this.toggleDownload}
+                                onKeyPress={download ? this.getJSON : this.toggleDownload}
                                 className={style.exportWads}
                                 role="button"
                                 title="Export all WADs into a JSON file."
