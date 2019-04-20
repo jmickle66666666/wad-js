@@ -23,6 +23,7 @@
 }
 
 .deleteWad {
+    flex-shrink: 0;
     height: 20px;
     width: 18px;
     margin-left: 7px;
@@ -31,6 +32,7 @@
 }
 
 .exportWad {
+    flex-shrink: 0;
     height: 20px;
     width: 16px;
     margin-left: 7px;

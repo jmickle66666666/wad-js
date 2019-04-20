@@ -282,11 +282,16 @@ export default class Wad {
         const updatedLumps = { ...lumps };
 
         // we assume that 'THINGS' is the first lump that appears after the map name lump
+        // it's time to dump the map object (which holds data about the previous map) into the list of lumps
         if (lumpIndexData.name === THINGS) {
-            // it's time to dump the map object (which holds data about the previous map) into the list of lumps
+            // don't keep originalFormat as it is irrelevant and will trigger unwanted conversion attempts
+            const {
+                originalFormat,
+                ...nameLumpWithoutFormat
+            } = map.nameLump;
             if (map.nameLump.name !== '') {
                 const lump = this.createLumpIndex({
-                    ...map.nameLump,
+                    ...nameLumpWithoutFormat,
                     data: {
                         ...map.dataLumps,
                     },
@@ -337,8 +342,13 @@ export default class Wad {
 
         // it looks like we are not going to encounter another map name lump, so dump the data in the proper map name lump and reset the temporary map object
         if (nonMapLumps > 2) {
+            // don't keep originalFormat as it is irrelevant and will trigger unwanted conversion attempts
+            const {
+                originalFormat,
+                ...nameLumpWithoutFormat
+            } = map.nameLump;
             const lump = this.createLumpIndex({
-                ...map.nameLump,
+                ...nameLumpWithoutFormat,
                 data: {
                     ...map.dataLumps,
                 },
@@ -950,6 +960,7 @@ export default class Wad {
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
+                                    originalFormat: 'simpleImage',
                                 };
                                 break;
                             }
@@ -1062,6 +1073,7 @@ export default class Wad {
                             // this also includes lumps that contain map names
                             // since we have not figured out that they are map lumps yet.
                             parsedLumpData = lumpData;
+                            originalFormat = 'text';
                         }
 
                         if (ANSI_LUMPS.includes(name)) {

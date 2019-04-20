@@ -4,6 +4,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    max-width: 100vw;
+    box-sizing: border-box;
 
     img {
         position: absolute;
@@ -11,14 +13,13 @@
         height: 250px;
         margin-bottom: 160px;
         background: black;
-        padding: 50px;
         border-radius: 15px;
     }
     
     h1 {
         font-weight: bold;
         text-transform: uppercase;
-        font-size: 80px;
+        font-size: 70px;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -40,5 +41,6 @@
 .light-theme {
     img {
         border: 1px solid rgb(150, 150, 150);
+        padding: 20px;
     }
 }

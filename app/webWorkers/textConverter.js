@@ -67,9 +67,14 @@ const firstDecodeTextMethod = input => decodeURI(new TextDecoder('utf-8').decode
 const processNewLines = text => text.split('\n');
 
 onmessage = async (message) => {
-    const { wadId, lumpId, input } = message.data;
+    const {
+        wadId,
+        lumpType,
+        lumpId,
+        input,
+    } = message.data;
 
-    // console.log(`Converting '${lumpId}' to text (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${lumpType}/${lumpId}' to text (WAD: '${wadId}') ...`);
 
     let output = null;
     let convertedFormat = 'text';
@@ -77,6 +82,7 @@ onmessage = async (message) => {
     if (lumpId === SNDINFO) {
         postMessage({
             wadId,
+            lumpType,
             lumpId,
             ignored: true,
         });
@@ -95,6 +101,7 @@ onmessage = async (message) => {
         if (cachedItem) {
             postMessage({
                 wadId,
+                lumpType,
                 lumpId,
                 output: cachedItem,
                 convertedFormat,
@@ -112,6 +119,7 @@ onmessage = async (message) => {
         if (cachedItem) {
             postMessage({
                 wadId,
+                lumpType,
                 lumpId,
                 output: cachedItem,
                 convertedFormat,
@@ -138,6 +146,7 @@ onmessage = async (message) => {
 
             postMessage({
                 wadId,
+                lumpType,
                 lumpId,
                 error,
             });
@@ -150,8 +159,11 @@ onmessage = async (message) => {
         setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
     }
 
+    // console.log(`Converted '${lumpType}/${lumpId}' to text (WAD: '${wadId}').`);
+
     postMessage({
         wadId,
+        lumpType,
         lumpId,
         output,
         convertedFormat,
