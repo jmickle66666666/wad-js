@@ -66,6 +66,7 @@ export default class MediaPlayer extends Component {
         });
     }
 
+    // should not be necessary anymore: we have cache instead
     reconcileMidiLumpAndData = ({
         wads,
         wadId,
@@ -122,57 +123,6 @@ export default class MediaPlayer extends Component {
             && wads[wadId].lumps[lumpType]
             && wads[wadId].lumps[lumpType][midiName]
     )
-
-    selectFirstMidi = ({ midis }) => {
-        const { wads, selectedMidi } = this.state;
-
-        if (selectedMidi.name) {
-            return;
-        }
-
-        const wadIds = Object.keys(midis);
-
-        if (wadIds.length > 0) {
-            const firstWadId = wadIds[0];
-            const midiIds = Object.keys(midis[firstWadId]);
-
-            if (midiIds.length > 0) {
-                const firstMidiId = midiIds[0];
-                const firstMidiData = midis[firstWadId][firstMidiId];
-                const wad = wads[firstWadId];
-                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
-
-                if (!lump) {
-                    return;
-                }
-
-                if (mediaSessionSupported && !mediaSessionIgnored) {
-                    const wadName = wad ? wad.name : '';
-
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: lump.name,
-                        artist: wadName,
-                    });
-                }
-
-                this.setState(() => {
-                    const newlySelectedMidi = {
-                        data: firstMidiData,
-                        lumpName: lump.name,
-                        lumpType: lump.type,
-                        wadId: firstWadId,
-                        startedAt: 0,
-                        time: 0,
-                    };
-
-                    return {
-                        selectedMidi: newlySelectedMidi,
-                        preselectedMidi: true,
-                    };
-                });
-            }
-        }
-    }
 
     selectNextMidi = () => {
         const { wads, selectedMidi, midis } = this.state;
@@ -417,13 +367,12 @@ export default class MediaPlayer extends Component {
         let arrayBuffer = null;
         let objectURL = null;
         if (midiURL instanceof DataView) {
-            // TODO: these items should be cached instead to allow full offline access
             const blob = new Blob([midiURL]);
             objectURL = URL.createObjectURL(blob);
         } else {
             arrayBuffer = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL: midiURL });
             if (!arrayBuffer) {
-                console.error(`Could not find cache item '${midiURL}' in ${wadId}.`);
+                console.error(`Could not find cache item '${lump.type}/${lump.name}' in ${wadId}.`);
             }
         }
 
