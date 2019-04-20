@@ -1062,6 +1062,7 @@ export default class Wad {
                             // this also includes lumps that contain map names
                             // since we have not figured out that they are map lumps yet.
                             parsedLumpData = lumpData;
+                            originalFormat = 'text';
                         }
 
                         if (ANSI_LUMPS.includes(name)) {
