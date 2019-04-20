@@ -114,9 +114,9 @@ export default class WadDetails extends Component {
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
-                                    midis={selectedLumpType === 'music' && midis}
-                                    text={selectedLumpType === 'uncategorized' && text}
-                                    simpleImages={selectedLumpType === 'flats' && simpleImages}
+                                    midis={midis && midis[selectedLumpType]}
+                                    text={text && text[selectedLumpType]}
+                                    simpleImages={simpleImages && simpleImages[selectedLumpType]}
                                     selectLump={selectLump}
                                     selectMidi={selectMidi}
                                     stopMidi={stopMidi}
