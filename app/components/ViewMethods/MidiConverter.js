@@ -2,9 +2,14 @@ import TextConverter from './TextConverter';
 
 import MidiConverter from '../../webWorkers/midiConverter';
 
-export default class MidiConverterMethods extends TextConverter {
-    midiConverter = new MidiConverter()
+import mediaSessionSupport from '../../lib/mediaSessionSupport';
 
+const {
+    supported: mediaSessionSupported,
+    ignored: mediaSessionIgnored,
+} = mediaSessionSupport();
+
+export default class MidiConverterMethods extends TextConverter {
     startMidiConverterWorker() {
         this.startWorker({
             workerId: 'midiConverter',
@@ -14,111 +19,94 @@ export default class MidiConverterMethods extends TextConverter {
     }
 
     addToMidiConversionQueue({ wad }) {
-        if (!wad.lumps.music) {
-            return;
-        }
-
-        const {
-            lumps: musLumps,
-            firstLump: firstMusLump,
-            count: musLumpCount,
-        } = this.getLumps({
-            wad,
-            lumpType: 'music',
+        this.createAndStartQueue({
+            workerStarter: () => this.startMidiConverterWorker(),
             targetObject: 'midis',
-            originalFormat: 'MUS',
-        });
-
-        if (musLumpCount > 0) {
-            const { done } = this.getNextItemInQueue({
-                targetObject: 'midis',
-                wadId: wad.id,
-            });
-
-            // get the worker going if there is nothing in the queue
-            if (done && firstMusLump) {
-                const { name: lumpId, data } = firstMusLump;
-                this.startMidiConverterWorker();
-                this.midiConverter.postMessage({
-                    wadId: wad.id,
-                    lumpId,
-                    input: data,
-                });
-            }
-        }
-
-        const {
-            lumps: midiLumps,
-            count: midiLumpCount,
-        } = this.getLumps({
+            formatCheck: lumpFormat => lumpFormat === 'MUS' || lumpFormat === 'MIDI',
+            handleNextLump: this.sendNextMidiLump,
+            queueStarted: () => {
+                const { preselectedMidi } = this.state;
+                if (!preselectedMidi) {
+                    const { midis: { converted: convertedMidis } } = this.state;
+                    this.selectFirstMidi({ midis: convertedMidis });
+                }
+            },
             wad,
-            lumpType: 'music',
-            targetObject: 'midis',
-            originalFormat: 'MIDI',
-            extractLumpData: lump => lump.data,
         });
+    }
 
-        this.setState((prevState) => {
-            const { midis } = prevState;
-
-            return this.addItemsToTargetObject({
-                wad,
-                targetObject: 'midis',
-                items: midis,
-                newQueue: musLumps,
-                newConvertedItems: midiLumps,
-            });
-        }, () => {
-            // load the first MIDI into the portable player
-            const { preselectedMidi, midis: { converted: midis } } = this.state;
-            if (!preselectedMidi && midiLumpCount > 0) {
-                this.selectFirstMidi({ midis });
-            }
+    sendNextMidiLump = ({ nextLump, nextWadId }) => {
+        this.midiConverter.postMessage({
+            wadId: nextWadId,
+            lump: nextLump,
         });
     }
 
     saveConvertedMidi = (payload) => {
-        const { wadId, lumpId, output } = payload.data;
-        const targetObject = 'midis';
+        this.saveConvertedLump({
+            targetObject: 'midis',
+            handleNextLump: this.sendNextMidiLump,
+            lumpSaved: () => {
+                const { preselectedMidi } = this.state;
+                if (!preselectedMidi) {
+                    const { midis: { converted: convertedMidis } } = this.state;
+                    this.selectFirstMidi({ midis: convertedMidis });
+                }
+            },
+            payload,
+        });
+    }
 
-        // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
-        if (!output) {
-            this.removeItemFromQueue({
-                targetObject,
-                wadId,
-                lumpId,
-            });
+    // TODO: this method is now broken; it should look deeper into the midis object (wadId -> lumpType -> lump)
+    selectFirstMidi = ({ midis }) => {
+        const { wads, selectedMidi } = this.state;
+
+        if (selectedMidi.name) {
+            return;
         }
 
-        // it worked
-        this.setState((prevState) => {
-            const { midis } = prevState;
-            return this.moveItemFromWadQueueToConvertedItems({
-                targetObject,
-                wadId,
-                lumpId,
-                items: midis,
-                newItem: output,
-            });
-        }, () => {
-            const { nextLump, nextWadId, done } = this.getNextItemInQueue({
-                targetObject,
-                wadId,
-            });
+        const wadIds = Object.keys(midis);
 
-            if (!done) {
-                this.midiConverter.postMessage({
-                    wadId: nextWadId,
-                    lumpId: nextLump.name,
-                    input: nextLump.data,
+        if (wadIds.length > 0) {
+            const firstWadId = wadIds[0];
+
+            const midiIds = Object.keys(midis[firstWadId]);
+
+            if (midiIds.length > 0) {
+                const firstMidiId = midiIds[0];
+                const firstMidiData = midis[firstWadId][firstMidiId];
+                const wad = wads[firstWadId];
+                const lump = wad && wad.lumps && wad.lumps.music && wad.lumps.music[firstMidiId];
+
+                if (!lump) {
+                    return;
+                }
+
+                if (mediaSessionSupported && !mediaSessionIgnored) {
+                    const wadName = wad ? wad.name : '';
+
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: lump.name,
+                        artist: wadName,
+                    });
+                }
+
+                this.setState(() => {
+                    const newlySelectedMidi = {
+                        data: firstMidiData,
+                        lumpName: lump.name,
+                        lumpType: lump.type,
+                        wadId: firstWadId,
+                        startedAt: 0,
+                        time: 0,
+                    };
+
+                    return {
+                        selectedMidi: newlySelectedMidi,
+                        preselectedMidi: true,
+                    };
                 });
             }
-
-            const { preselectedMidi } = this.state;
-            if (!preselectedMidi) {
-                const { midis: { converted: midis } } = this.state;
-                this.selectFirstMidi({ midis });
-            }
-        });
+        }
     }
 }
