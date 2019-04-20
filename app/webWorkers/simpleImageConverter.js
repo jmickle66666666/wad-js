@@ -69,12 +69,13 @@ onmessage = async (message) => {
 
     const {
         name,
+        type,
         data,
         width,
         height,
     } = lump;
 
-    // console.log(`Converting '${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${type}/${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
 
     const requestURL = `/simpleImages/${wadId}/${name}`;
     const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
@@ -83,6 +84,7 @@ onmessage = async (message) => {
         postMessage({
             wadId,
             lumpId: name,
+            lumpType: type,
             output: cachedItem,
         });
 
@@ -99,7 +101,7 @@ onmessage = async (message) => {
     );
 
     if (output) {
-        // console.log(`Converted '${name}' from simple color index references to blob (WAD: '${wadId}').`);
+        // console.log(`Converted '${type}/${name}' from simple color index references to blob (WAD: '${wadId}').`);
     } else {
         console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
     }
@@ -109,6 +111,7 @@ onmessage = async (message) => {
     postMessage({
         wadId,
         lumpId: name,
+        lumpType: type,
         output,
     });
 };

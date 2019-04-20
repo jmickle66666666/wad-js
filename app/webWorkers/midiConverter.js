@@ -52,22 +52,47 @@ function isValidMusHeader(id) {
 // TODO: Send the error string in postMessage
 
 onmessage = async (message) => {
-    const { wadId, lumpId, input } = message.data;
+    const {
+        wadId,
+        lump,
+    } = message.data;
 
-    const requestURL = `/midis/${wadId}/${lumpId}`;
-    const cachedItem = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL });
+    const {
+        name,
+        type,
+        data,
+        originalFormat,
+    } = lump;
 
-    if (cachedItem) {
+    const requestURL = `/midis/${wadId}/${name}`;
+
+    if (originalFormat === 'MIDI') {
+        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: data });
+
         postMessage({
             wadId,
-            lumpId,
+            lumpId: name,
+            lumpType: type,
             output: requestURL,
         });
 
         return;
     }
 
-    // console.log(`Converting '${lumpId}' from MUS to MIDI (WAD: '${wadId}') ...`);
+    const cachedItem = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL });
+
+    if (cachedItem) {
+        postMessage({
+            wadId,
+            lumpId: name,
+            lumpType: type,
+            output: requestURL,
+        });
+
+        return;
+    }
+
+    // console.log(`Converting '${type}/${name}' from MUS to MIDI (WAD: '${wadId}') ...`);
 
     let musDataView;
     let musDataPosition;
@@ -458,16 +483,17 @@ onmessage = async (message) => {
         return outputDataView.buffer;
     }
 
-    const midi = convertMusToMidi(input);
+    const midi = convertMusToMidi(data);
     if (!midi) {
-        console.error(`Failed to convert '${lumpId}' from MUS to MIDI (WAD: '${wadId}').`, { musDataPosition });
+        console.error(`Failed to convert '${type}/${name}' from MUS to MIDI (WAD: '${wadId}').`, { musDataPosition });
     }
 
     setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: midi });
 
     postMessage({
         wadId,
-        lumpId,
+        lumpId: name,
+        lumpType: type,
         output: requestURL,
     });
 };
