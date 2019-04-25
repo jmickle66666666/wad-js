@@ -10,9 +10,10 @@ export default ({
     selectedLump,
     selectedLumpType,
     selectedMidi,
+    text,
     midis,
     simpleImages,
-    text,
+    complexImages,
     selectLump,
     selectMidi,
     stopMidi,
@@ -43,9 +44,10 @@ export default ({
                             && (
                                 <WadLumpItem
                                     key={lumpName}
+                                    text={text && text[lumpName]}
                                     midi={midis && midis[lumpName]}
                                     simpleImage={simpleImages && simpleImages[lumpName]}
-                                    text={text && text[lumpName]}
+                                    complexImage={complexImages && complexImages[lumpName]}
                                     lump={lump}
                                     wad={wad}
                                     selectedLump={selectedLump}

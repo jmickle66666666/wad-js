@@ -22,9 +22,10 @@ import SoundInfo from '../Lumps/SoundInfo';
 export default ({
     wad,
     lump,
+    text,
     midi,
     simpleImage,
-    text,
+    complexImage,
     selectedMidi,
     selectMidi,
     stopMidi,
@@ -81,7 +82,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
-                    simpleImage={simpleImage}
+                    image={simpleImage}
                 />
             );
         }
@@ -92,7 +93,11 @@ export default ({
                 );
             }
             return (
-                <ImageLump wad={wad} lump={lump} />
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                    image={simpleImage || complexImage}
+                />
             );
         }
         case 'textures': {
@@ -107,7 +112,11 @@ export default ({
         }
         case 'sprites': {
             return (
-                <ImageLump wad={wad} lump={lump} />
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                    image={simpleImage || complexImage}
+                />
             );
         }
         case 'menu': {
@@ -115,6 +124,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }
@@ -123,6 +133,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }
@@ -131,6 +142,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }

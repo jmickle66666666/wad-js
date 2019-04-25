@@ -56,6 +56,10 @@ export default class App extends AllMethods {
         selectedLumpType: '',
         selectedMidi: {},
         preselectedMidi: false,
+        text: {
+            queue: {},
+            converted: {},
+        },
         midis: {
             queue: {},
             converted: {},
@@ -64,7 +68,7 @@ export default class App extends AllMethods {
             queue: {},
             converted: {},
         },
-        text: {
+        complexImages: {
             queue: {},
             converted: {},
         },
@@ -289,10 +293,11 @@ export default class App extends AllMethods {
                 });
             }
 
-            deleteCache({ cacheId: wadId });
-
             return ({ wads: updatedWads });
-        }, () => this.stopConvertingWadItems({ wadId }));
+        }, () => {
+            this.stopConvertingWadItems({ wadId });
+            deleteCache({ cacheId: wadId });
+        });
     }
 
     deleteWads = () => {
@@ -304,6 +309,7 @@ export default class App extends AllMethods {
             selectedMidi: {},
             preselectedMidi: false,
         }));
+
         deleteAllCache();
         this.stopConvertingAllWads();
         this.clearMidiPlayer();
@@ -326,7 +332,10 @@ export default class App extends AllMethods {
             let selectedLump = {};
 
             if (prevState.selectedLump.name) {
-                if (selectedWad.lumps[prevState.selectedLumpType][prevState.selectedLump.name]) {
+                if (
+                    selectedWad.lumps[prevState.selectedLumpType]
+                    && selectedWad.lumps[prevState.selectedLumpType][prevState.selectedLump.name]
+                ) {
                     selectedLump = {
                         ...selectedWad.lumps[prevState.selectedLumpType][prevState.selectedLump.name],
                     };
@@ -584,9 +593,10 @@ export default class App extends AllMethods {
             selectedLump,
             selectedLumpType,
             selectedMidi,
+            text,
             midis,
             simpleImages,
-            text,
+            complexImages,
             globalMessages,
             showSettings,
             settings,
@@ -684,9 +694,10 @@ export default class App extends AllMethods {
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
+                                    text={text.converted[selectedWad.id]}
                                     midis={midis.converted[selectedWad.id]}
                                     simpleImages={simpleImages.converted[selectedWad.id]}
-                                    text={text.converted[selectedWad.id]}
+                                    complexImages={complexImages.converted[selectedWad.id]}
                                     selectWad={this.selectWad}
                                     selectLump={this.selectLump}
                                     selectLumpType={this.selectLumpType}

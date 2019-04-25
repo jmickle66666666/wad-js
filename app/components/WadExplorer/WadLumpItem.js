@@ -12,8 +12,8 @@ const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
 const isSelectedLump = ({ selectedLump, lump }) => selectedLump && selectedLump.name === lump.name;
 
-const renderImage = ({ lump, simpleImage }) => {
-    if (!offscreenCanvasSupported || simpleImage === null) {
+const renderImage = ({ lump, image }) => {
+    if (!offscreenCanvasSupported || image === null) {
         return (
             <div>
                 <ErrorMessage message="Could not load image." />
@@ -21,7 +21,7 @@ const renderImage = ({ lump, simpleImage }) => {
         );
     }
 
-    if (!simpleImage && lump.data.buffer) {
+    if (!image && lump.data.buffer) {
         return (
             <div className={style.loading}>Loading...</div>
         );
@@ -32,7 +32,7 @@ const renderImage = ({ lump, simpleImage }) => {
             <img
                 title={`${lump.name} (${lump.width}×${lump.height})`}
                 alt={lump.name}
-                src={simpleImage ? URL.createObjectURL(new Blob([simpleImage])) : lump.data}
+                src={image ? URL.createObjectURL(new Blob([image])) : lump.data}
             />
         </div>
     );
@@ -40,9 +40,10 @@ const renderImage = ({ lump, simpleImage }) => {
 
 export default ({
     lump,
+    text,
     midi,
     simpleImage,
-    text,
+    complexImage,
     wad,
     selectedLump,
     selectedLumpType,
@@ -61,7 +62,7 @@ export default ({
             >
                 <h4>{lump.name}</h4>
                 <div className={style.wadLumpSummary}>
-                    {lump.isImage && renderImage({ lump, simpleImage })}
+                    {lump.isImage && renderImage({ lump, image: simpleImage || complexImage })}
                     {lump.convertsToMidi && (
                         <Midi
                             midi={midi}
@@ -83,9 +84,10 @@ export default ({
         <WadLumpDetails
             lump={lump}
             wad={wad}
+            text={text}
             midi={midi}
             simpleImage={simpleImage}
-            text={text}
+            complexImage={complexImage}
             selectedMidi={selectedMidi}
             selectMidi={selectMidi}
             stopMidi={stopMidi}

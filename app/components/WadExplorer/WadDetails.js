@@ -38,9 +38,10 @@ export default class WadDetails extends Component {
             selectedLump,
             selectedLumpType,
             selectedMidi,
+            text,
             midis,
             simpleImages,
-            text,
+            complexImages,
             selectWad,
             selectLump,
             selectLumpType,
@@ -114,9 +115,10 @@ export default class WadDetails extends Component {
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
-                                    midis={midis && midis[selectedLumpType]}
                                     text={text && text[selectedLumpType]}
+                                    midis={midis && midis[selectedLumpType]}
                                     simpleImages={simpleImages && simpleImages[selectedLumpType]}
+                                    complexImages={complexImages && complexImages[selectedLumpType]}
                                     selectLump={selectLump}
                                     selectMidi={selectMidi}
                                     stopMidi={stopMidi}

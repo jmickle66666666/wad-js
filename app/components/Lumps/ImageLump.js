@@ -8,8 +8,8 @@ import ErrorMessage from '../Messages/ErrorMessage';
 
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
-const renderImage = ({ lump, simpleImage }) => {
-    if (!offscreenCanvasSupported || simpleImage === null) {
+const renderImage = ({ lump, image }) => {
+    if (!offscreenCanvasSupported || image === null) {
         return (
             <div>
                 <ErrorMessage message="Could not load image." />
@@ -17,7 +17,7 @@ const renderImage = ({ lump, simpleImage }) => {
         );
     }
 
-    if (!simpleImage && lump.data.buffer) {
+    if (!image && lump.data.buffer) {
         return (
             <div className={style.loading}>Loading...</div>
         );
@@ -27,14 +27,14 @@ const renderImage = ({ lump, simpleImage }) => {
         <img
             title={`${lump.name} (${lump.width}×${lump.height})`}
             alt={lump.name}
-            src={simpleImage ? URL.createObjectURL(new Blob([simpleImage])) : lump.data}
+            src={image ? URL.createObjectURL(new Blob([image])) : lump.data}
             width={lump.width * 2}
             height={lump.height * 2}
         />
     );
 };
 
-export default ({ wad, lump, simpleImage }) => (
+export default ({ lump, image }) => (
     <Fragment>
         <div className={style.wadLumpDetailsEntry}>
             Dimensions:
@@ -44,7 +44,7 @@ export default ({ wad, lump, simpleImage }) => (
             {lump.height}
         </div>
         <div className={style.image}>
-            {renderImage({ lump, simpleImage })}
+            {renderImage({ lump, image })}
         </div>
     </Fragment>
 );
