@@ -70,7 +70,6 @@ export const getCacheItemAsText = async ({ cacheId, requestURL }) => {
 export const deleteCache = async ({ cacheId }) => {
     try {
         await caches.delete(cacheId);
-        console.log(cacheId, 'deleted');
         return true;
     } catch (error) {
         console.error(`An error occurred while deleting cache of '${cacheId}'.`, { error });
