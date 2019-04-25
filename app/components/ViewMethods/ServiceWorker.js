@@ -102,7 +102,6 @@ export default class ServiceWorker extends WebWorkers {
     }
 
     registerCoreServiceWorkerAndListenForUpdate() {
-        console.log('oi');
         if (serviceWorkerSupported) {
             this.registerCoreServiceWorker()
                 .then((result) => {
