@@ -189,25 +189,41 @@ export default class WebWorkers extends MidiConverter {
         }));
     }
 
-    getNextItemInQueue = ({ targetObject, wadId }) => {
+    getNextItemInQueue = ({
+        targetObject,
+        lumpType,
+        wadId,
+    }) => {
         const { [targetObject]: { queue } } = this.state;
 
         let nextLump = {};
 
         const currentWadQueue = queue[wadId];
+        const currentWadQueueLumpNames = Object.keys(queue[wadId][lumpType] || {});
+        if (currentWadQueueLumpNames.length > 0) {
+            const nextLumpName = currentWadQueueLumpNames[0];
+            nextLump = queue[wadId][lumpType][nextLumpName];
+
+            return {
+                nextLump,
+                nextLumpType: lumpType,
+                nextWadId: wadId,
+            };
+        }
+
         const currentWadQueueLumpTypes = Object.keys(currentWadQueue || {});
 
         if (currentWadQueueLumpTypes.length > 0) {
             for (let i = 0; i < currentWadQueueLumpTypes.length; i++) {
-                const lumpType = currentWadQueueLumpTypes[i];
-                const currentWadQueueLumpNames = Object.keys(queue[wadId][lumpType] || {});
-                if (currentWadQueueLumpNames.length > 0) {
-                    const nextLumpName = currentWadQueueLumpNames[0];
-                    nextLump = queue[wadId][lumpType][nextLumpName];
+                const scrutinizedLumpType = currentWadQueueLumpTypes[i];
+                const scrutinizedWadQueueLumpNames = Object.keys(queue[wadId][scrutinizedLumpType] || {});
+                if (scrutinizedWadQueueLumpNames.length > 0) {
+                    const nextLumpName = scrutinizedWadQueueLumpNames[0];
+                    nextLump = queue[wadId][scrutinizedLumpType][nextLumpName];
 
                     return {
                         nextLump,
-                        nextLumpType: lumpType,
+                        nextLumpType: scrutinizedLumpType,
                         nextWadId: wadId,
                     };
                 }
@@ -234,7 +250,6 @@ export default class WebWorkers extends MidiConverter {
 
         let lumps = {};
         let totalLumpCount = 0;
-        let firstLump = null;
         for (let i = 0; i < lumpTypes.length; i++) {
             const lumpType = lumpTypes[i];
 
@@ -258,26 +273,16 @@ export default class WebWorkers extends MidiConverter {
 
             totalLumpCount += lumpCountInType;
 
-            if (!firstLump) {
-                firstLump = firstLumpInType;
+            if (firstLumpInType) {
+                workerStarter();
+                handleNextLump({
+                    nextLump: firstLumpInType,
+                    nextWadId: wad.id,
+                });
             }
         }
 
         if (totalLumpCount > 0) {
-            const { done } = this.getNextItemInQueue({
-                targetObject,
-                wadId: wad.id,
-            });
-
-            // get the worker going if there is nothing in the queue
-            if (done && firstLump) {
-                workerStarter();
-                handleNextLump({
-                    nextLump: firstLump,
-                    nextWadId: wad.id,
-                });
-            }
-
             this.setState((prevState) => {
                 const items = prevState[targetObject];
                 return this.addItemsToTargetObject({
@@ -326,6 +331,7 @@ export default class WebWorkers extends MidiConverter {
                     done,
                 } = this.getNextItemInQueue({
                     targetObject,
+                    lumpType,
                     wadId,
                 });
 
@@ -358,6 +364,7 @@ export default class WebWorkers extends MidiConverter {
                 done,
             } = this.getNextItemInQueue({
                 targetObject,
+                lumpType,
                 wadId,
             });
 
