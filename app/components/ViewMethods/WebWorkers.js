@@ -1,4 +1,5 @@
 import MidiConverter from './MidiConverter';
+import { deleteCache } from '../../lib/cacheManager';
 
 export default class WebWorkers extends MidiConverter {
     startWorker({
@@ -119,8 +120,8 @@ export default class WebWorkers extends MidiConverter {
             return {};
         }
 
-        const wadConverted = items.converted[wadId];
-        const wadQueueLumpNames = Object.keys(items.queue[wadId][lumpType] || {});
+        const wadConverted = items.converted[wadId] || {};
+        const wadQueueLumpNames = Object.keys((items.queue[wadId] && items.queue[wadId][lumpType]) || {});
         const updatedLumpTypeQueue = {};
         for (let i = 0; i < wadQueueLumpNames.length; i++) {
             const lumpName = wadQueueLumpNames[i];
@@ -226,7 +227,7 @@ export default class WebWorkers extends MidiConverter {
         targetObject,
         formatCheck,
         handleNextLump,
-        queueStarted = () => {},
+        queueStarted = () => { },
         wad,
     }) => {
         const lumpTypes = Object.keys(wad.lumps || {});
@@ -302,6 +303,11 @@ export default class WebWorkers extends MidiConverter {
             output,
         } = payload.data;
 
+        const { wads } = this.state;
+        if (!wads[wadId]) {
+            deleteCache({ cacheId: wadId });
+        }
+
         // didn't work: remove MUS from queue (otherwise, we get stuck in infinite loop)
         if (!output) {
             this.setState((prevState) => {
@@ -368,20 +374,23 @@ export default class WebWorkers extends MidiConverter {
     // Web worker instances control
 
     convertLumps = ({ wad }) => {
+        this.addToTextConversionQueue({ wad });
         this.addToMidiConversionQueue({ wad });
         this.addToSimpleImageConversionQueue({ wad });
-        this.addToTextConversionQueue({ wad });
+        this.addToComplexImageConversionQueue({ wad });
     }
 
     stopConvertingWadItems = ({ wadId }) => {
+        this.removeWadFromTargetObject({ targetObject: 'text', wadId });
         this.removeWadFromTargetObject({ targetObject: 'midis', wadId }, this.updateMidiSelection);
         this.removeWadFromTargetObject({ targetObject: 'simpleImages', wadId });
-        this.removeWadFromTargetObject({ targetObject: 'text', wadId });
+        this.removeWadFromTargetObject({ targetObject: 'complexImages', wadId });
     }
 
     stopConvertingAllWads = () => {
+        this.clearTargetObject({ targetObject: 'text' });
         this.clearTargetObject({ targetObject: 'midis' });
         this.clearTargetObject({ targetObject: 'simpleImages' });
-        this.removeWadFromTargetObject({ targetObject: 'text' });
+        this.clearTargetObject({ targetObject: 'complexImages' });
     }
 }
