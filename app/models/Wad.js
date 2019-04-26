@@ -977,6 +977,8 @@ export default class Wad {
                             // since we have not figured out that they are map lumps yet.
                             parsedLumpData = lumpData;
                             originalFormat = 'text';
+                        } else if (lumpType === 'sounds') {
+                            parsedLumpData = lumpData;
                         }
 
                         if (ANSI_LUMPS.includes(name)) {
