@@ -59,6 +59,14 @@ onmessage = async (message) => {
         // console.log(`Converted '${type}/${name}' from simple color index references to blob (WAD: '${wadId}').`);
     } else {
         console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
+
+        postMessage({
+            wadId,
+            lumpId: name,
+            lumpType: type,
+        });
+
+        return;
     }
 
     setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
