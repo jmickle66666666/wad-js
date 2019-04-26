@@ -1,7 +1,7 @@
-import MidiConverter from './MidiConverter';
+import PCMConverter from './PCMConverter';
 import { deleteCache } from '../../lib/cacheManager';
 
-export default class WebWorkers extends MidiConverter {
+export default class WebWorkers extends PCMConverter {
     startWorker({
         workerId,
         workerClass,
@@ -246,53 +246,70 @@ export default class WebWorkers extends MidiConverter {
         queueStarted = () => { },
         wad,
     }) => {
-        const lumpTypes = Object.keys(wad.lumps || {});
-
-        let lumps = {};
-        let totalLumpCount = 0;
-        for (let i = 0; i < lumpTypes.length; i++) {
-            const lumpType = lumpTypes[i];
-
-            const {
-                lumps: lumpsInType,
-                firstLump: firstLumpInType,
-                count: lumpCountInType,
-            } = this.getLumps({
-                wad,
-                lumpType,
-                targetObject,
-                formatCheck,
-            });
-
-            lumps = {
-                ...lumps,
-                [lumpType]: {
-                    ...lumpsInType,
-                },
-            };
-
-            totalLumpCount += lumpCountInType;
-
-            if (firstLumpInType) {
-                workerStarter();
-                handleNextLump({
-                    nextLump: firstLumpInType,
-                    nextWadId: wad.id,
-                });
+        this.setState((prevState) => {
+            const items = prevState[targetObject];
+            // the target object does not exist yet
+            // initialize with an empty queue and empty list of converted items
+            if (!items) {
+                return {
+                    [targetObject]: {
+                        converted: {},
+                        queue: {},
+                        ...prevState[targetObject],
+                    },
+                };
             }
-        }
 
-        if (totalLumpCount > 0) {
-            this.setState((prevState) => {
-                const items = prevState[targetObject];
-                return this.addItemsToTargetObject({
+            return {};
+        }, () => {
+            const lumpTypes = Object.keys(wad.lumps || {});
+
+            let lumps = {};
+            let totalLumpCount = 0;
+            for (let i = 0; i < lumpTypes.length; i++) {
+                const lumpType = lumpTypes[i];
+
+                const {
+                    lumps: lumpsInType,
+                    firstLump: firstLumpInType,
+                    count: lumpCountInType,
+                } = this.getLumps({
                     wad,
+                    lumpType,
                     targetObject,
-                    items,
-                    newQueue: lumps,
+                    formatCheck,
                 });
-            }, () => queueStarted());
-        }
+
+                lumps = {
+                    ...lumps,
+                    [lumpType]: {
+                        ...lumpsInType,
+                    },
+                };
+
+                totalLumpCount += lumpCountInType;
+
+                if (firstLumpInType) {
+                    workerStarter();
+                    handleNextLump({
+                        nextLump: firstLumpInType,
+                        nextWadId: wad.id,
+                    });
+                }
+            }
+
+            if (totalLumpCount > 0) {
+                this.setState((prevState) => {
+                    const prevItems = prevState[targetObject];
+                    return this.addItemsToTargetObject({
+                        wad,
+                        targetObject,
+                        items: prevItems,
+                        newQueue: lumps,
+                    });
+                }, () => queueStarted());
+            }
+        });
     }
 
     saveConvertedLump = ({
@@ -383,6 +400,7 @@ export default class WebWorkers extends MidiConverter {
     convertLumps = ({ wad }) => {
         this.addToTextConversionQueue({ wad });
         this.addToMidiConversionQueue({ wad });
+        this.addToPCMConversionQueue({ wad });
         this.addToSimpleImageConversionQueue({ wad });
         this.addToComplexImageConversionQueue({ wad });
     }
@@ -390,6 +408,7 @@ export default class WebWorkers extends MidiConverter {
     stopConvertingWadItems = ({ wadId }) => {
         this.removeWadFromTargetObject({ targetObject: 'text', wadId });
         this.removeWadFromTargetObject({ targetObject: 'midis', wadId }, this.updateMidiSelection);
+        this.removeWadFromTargetObject({ targetObject: 'pcms', wadId });
         this.removeWadFromTargetObject({ targetObject: 'simpleImages', wadId });
         this.removeWadFromTargetObject({ targetObject: 'complexImages', wadId });
     }
@@ -397,6 +416,7 @@ export default class WebWorkers extends MidiConverter {
     stopConvertingAllWads = () => {
         this.clearTargetObject({ targetObject: 'text' });
         this.clearTargetObject({ targetObject: 'midis' });
+        this.clearTargetObject({ targetObject: 'pcms' });
         this.clearTargetObject({ targetObject: 'simpleImages' });
         this.clearTargetObject({ targetObject: 'complexImages' });
     }
