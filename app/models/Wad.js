@@ -370,6 +370,12 @@ export default class Wad {
         return new TextDecoder().decode(data).replace(/\u0000/g, ' ');
     }
 
+    readDMX(data) {
+        const sampleRate = data.getUint16(2, true);
+        const metadata = { sampleRate };
+        return { metadata };
+    }
+
     readSoundInfo(data) {
         try {
             const decodedText = decodeURI(new TextDecoder('utf-8').decode(data).replace(/\u0000/g, ' '));
@@ -915,9 +921,21 @@ export default class Wad {
                                 originalFormat = format;
 
                                 parsedLumpData = lumpData;
-                                // DS* (DMX) and DP* (speaker)
-                            } else if (/^DS[0-9a-zA-Z_]{1,}$/.test(name) || /^DP[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                // DS* (DMX)
+                            } else if (/^DS[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                const { metadata } = this.readDMX(lumpData);
                                 lumpType = 'sounds';
+                                parsedLumpData = lumpData;
+                                originalFormat = 'DMX';
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                                // DP* (speaker sound data)
+                            } else if (/^DP[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                lumpType = 'sounds';
+                                parsedLumpData = lumpData;
+                                originalFormat = 'speakerSound';
                                 // M_*
                             } else if (/^M_[0-9a-zA-Z_]{1,}$/.test(name)) {
                                 lumpType = MENU;
@@ -977,8 +995,6 @@ export default class Wad {
                             // since we have not figured out that they are map lumps yet.
                             parsedLumpData = lumpData;
                             originalFormat = 'text';
-                        } else if (lumpType === 'sounds') {
-                            parsedLumpData = lumpData;
                         }
 
                         if (ANSI_LUMPS.includes(name)) {
