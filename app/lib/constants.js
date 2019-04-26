@@ -304,6 +304,12 @@ export const MIDI_STOP = 'MIDI_STOP';
 
 export const MIDI_END = 'MIDI_END';
 
+/* DMX -> PCM conversion */
+
+export const DMX_HEADER_SIZE = 18;
+
+export const DMX_TAIL_PADDING = 2;
+
 /* ANSI conversion */
 
 export const ANSI_CODE_PAGE_437_TABLES = [
