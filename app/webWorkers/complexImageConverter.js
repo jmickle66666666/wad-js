@@ -71,7 +71,7 @@ onmessage = async (message) => {
         height,
     } = lump;
 
-    console.log(`Converting '${type}/${name}' from complex image to PNG data URL (WAD: '${wadId}') ...`);
+    // console.log(`Converting '${type}/${name}' from complex image to PNG data URL (WAD: '${wadId}') ...`);
 
     const requestURL = `/complexImages/${wadId}/${name}`;
     const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
@@ -97,7 +97,7 @@ onmessage = async (message) => {
     );
 
     if (image && !image.error) {
-        console.log(`Converted '${type}/${name}' from complex image to blob (WAD: '${wadId}').`);
+        // console.log(`Converted '${type}/${name}' from complex image to blob (WAD: '${wadId}').`);
         setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: image });
         postMessage({
             wadId,
