@@ -17,9 +17,10 @@ export default class Lump {
         height,
         xOffset,
         yOffset,
+        sampleRate,
+        lineIndex,
         count,
         data,
-        lineIndex,
     }) {
         this.name = name;
         this.description = description;
@@ -32,9 +33,10 @@ export default class Lump {
         this.height = height;
         this.xOffset = xOffset;
         this.yOffset = yOffset;
+        this.sampleRate = sampleRate;
+        this.lineIndex = lineIndex;
         this.count = count;
         this.data = data;
-        this.lineIndex = lineIndex;
     }
 
     get sizeInBytes() {
