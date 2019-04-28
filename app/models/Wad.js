@@ -1039,6 +1039,10 @@ export default class Wad {
                     if (sound.type === 'music') {
                         const { format } = this.disambiguateMusicFormat(incompleteLump.data);
                         incompleteLump.originalFormat = format;
+                    } else {
+                        incompleteLump.originalFormat = 'DMX';
+                        const { metadata } = this.readDMX(incompleteLump.data);
+                        incompleteLump.sampleRate = metadata.sampleRate;
                     }
 
                     const lump = this.createLumpIndex({
