@@ -1,6 +1,8 @@
-## v0.2.6: Conversion of images happens after upload
+## v0.3.0: Ramping up for MVP
 
+* wadJS is now able to convert DMX files into PCM and play them seamlessy. Hooray!
 * From now on, images will be converted to PNG after the lump directory has been processed instead of doing it at upload time. This allows to load WADs much faster and also not overwhelm the main thread with heavy computations but comes at the cost of converting images more slowly.
+* Various refactor to abstract away more stuff!
 
 ## v0.2.5: More potent web workers and CSS tweaks
 
