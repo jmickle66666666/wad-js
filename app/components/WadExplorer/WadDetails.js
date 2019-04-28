@@ -38,8 +38,10 @@ export default class WadDetails extends Component {
             selectedLump,
             selectedLumpType,
             selectedMidi,
+            selectedPCM,
             text,
             midis,
+            pcms,
             simpleImages,
             complexImages,
             selectWad,
@@ -47,6 +49,8 @@ export default class WadDetails extends Component {
             selectLumpType,
             selectMidi,
             stopMidi,
+            playPCM,
+            stopPCM,
             deleteWad,
             updateFilename,
             focusOnWad,
@@ -115,13 +119,17 @@ export default class WadDetails extends Component {
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
+                                    selectedPCM={selectedPCM}
                                     text={text && text[selectedLumpType]}
                                     midis={midis && midis[selectedLumpType]}
+                                    pcms={pcms && pcms[selectedLumpType]}
                                     simpleImages={simpleImages && simpleImages[selectedLumpType]}
                                     complexImages={complexImages && complexImages[selectedLumpType]}
                                     selectLump={selectLump}
                                     selectMidi={selectMidi}
                                     stopMidi={stopMidi}
+                                    playPCM={playPCM}
+                                    stopPCM={stopPCM}
                                     focusOnWad={focusOnWad}
                                     focusOnLump={focusOnLump}
                                     updateSelectedWadFromList={updateSelectedWadFromList}
