@@ -6,6 +6,7 @@ import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 
 import WadLumpDetails from './WadLumpDetails';
 import Midi from '../AudioPlayers/Midi';
+import PCM from '../AudioPlayers/PCM';
 import ErrorMessage from '../Messages/ErrorMessage';
 
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
@@ -42,6 +43,7 @@ export default ({
     lump,
     text,
     midi,
+    pcm,
     simpleImage,
     complexImage,
     wad,
@@ -51,6 +53,9 @@ export default ({
     selectLump,
     selectMidi,
     stopMidi,
+    selectedPCM,
+    playPCM,
+    stopPCM,
     focusOnLump,
 }) => {
     if (!isSelectedLump({ selectedLump, lump })) {
@@ -74,6 +79,17 @@ export default ({
 
                         />
                     )}
+                    {lump.convertsToPCM && (
+                        <PCM
+                            pcm={pcm}
+                            lump={lump}
+                            wad={wad}
+                            selectedPCM={selectedPCM}
+                            playPCM={playPCM}
+                            stopPCM={stopPCM}
+
+                        />
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>
@@ -86,11 +102,15 @@ export default ({
             wad={wad}
             text={text}
             midi={midi}
+            pcm={pcm}
             simpleImage={simpleImage}
             complexImage={complexImage}
             selectedMidi={selectedMidi}
+            selectedPCM={selectedPCM}
             selectMidi={selectMidi}
             stopMidi={stopMidi}
+            playPCM={playPCM}
+            stopPCM={stopPCM}
             selectLump={selectLump}
             focusOnLump={focusOnLump}
         />
