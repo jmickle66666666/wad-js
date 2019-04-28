@@ -1,10 +1,48 @@
 
 function getMapSize({ vertices }) {
-  const mostLeftX = vertices.reduce((mostLeft, vertex) => {
-      if (vertex.x < min) {
+  const minX = vertices.reduce((mX, vertex) => {
+      if (vertex.x < mX) {
         return vertex.x;
       }
       
-      return min;
-  })
+      return mX;
+  }):
+  
+  const maxX = vertices.reduce((mX, vertex) => {
+      if (vertex.x > mX) {
+        return vertex.x;
+      }
+      
+      return mX;
+  });
+  
+  const minY = vertices.reduce((mX, vertex) => {
+      if (vertex.y < mX) {
+        return vertex.y;
+      }
+      
+      return mX;
+  }):
+  
+  const maxY = vertices.reduce((mX, vertex) => {
+      if (vertex.y > mX) {
+        return vertex.y;
+      }
+      
+      return mX;
+  });
+  
+
+  
+  const width = maxX - minX;
+  const height = maxY - maxY;
+  
+  return {
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width,
+      height,
+  };
 }
