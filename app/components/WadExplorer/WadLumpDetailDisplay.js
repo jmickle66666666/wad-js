@@ -13,6 +13,7 @@ import Map from '../Lumps/Map';
 import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
 import Music from '../Lumps/Music';
+import Sound from '../Lumps/Sound';
 
 import PatchNames from '../Lumps/PatchNames';
 import TextureNames from '../Lumps/TextureNames';
@@ -24,11 +25,15 @@ export default ({
     lump,
     text,
     midi,
+    pcm,
     simpleImage,
     complexImage,
     selectedMidi,
+    selectedPCM,
     selectMidi,
     stopMidi,
+    playPCM,
+    stopPCM,
     selectLump,
 }) => {
     switch (lump.type) {
@@ -155,6 +160,18 @@ export default ({
                     selectedMidi={selectedMidi}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}
+                />
+            );
+        }
+        case 'sounds': {
+            return (
+                <Sound
+                    wad={wad}
+                    lump={lump}
+                    pcm={pcm}
+                    selectedPCM={selectedPCM}
+                    playPCM={playPCM}
+                    stopPCM={stopPCM}
                 />
             );
         }
