@@ -56,6 +56,10 @@ export default class Lump {
         return this.originalFormat === 'MUS' || this.originalFormat === 'MIDI';
     }
 
+    get convertsToPCM() {
+        return this.originalFormat === 'DMX';
+    }
+
     get isPNAMES() {
         return this.name === PNAMES;
     }
