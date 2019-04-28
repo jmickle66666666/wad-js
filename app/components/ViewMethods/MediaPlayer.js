@@ -3,13 +3,20 @@ import moment from 'moment';
 
 import mediaSessionSupport from '../../lib/mediaSessionSupport';
 import MidiPlayer from '../../lib/MidiPlayer';
+import PCMPlayer from '../../lib/PCMPlayer';
 import { getCacheItemAsArrayBuffer } from '../../lib/cacheManager';
 
 import {
-    MIDI_ERROR,
+    MIDI_PLAYER_MESSAGE_PREFIX,
     MIDI_STATUS,
+    MIDI_ERROR,
     MIDI_PLAY,
     MIDI_END,
+    PCM_PLAYER_MESSAGE_PREFIX,
+    PCM_STATUS,
+    PCM_ERROR,
+    PCM_PLAY,
+    PCM_END,
 } from '../../lib/constants';
 
 const {
@@ -246,11 +253,8 @@ export default class MediaPlayer extends Component {
         event,
         message,
         time,
-        done,
         ...payload
     }) => {
-        const midiPlayerMessagePrefix = 'Midi player:';
-
         // debug
         if (event !== MIDI_PLAY) {
             console.log({
@@ -264,7 +268,7 @@ export default class MediaPlayer extends Component {
                     this.addGlobalMessage({
                         type: 'info',
                         id: MIDI_STATUS,
-                        text: `${midiPlayerMessagePrefix} ${message}`,
+                        text: `${MIDI_PLAYER_MESSAGE_PREFIX} ${message}`,
                     });
                 }
                 break;
@@ -274,7 +278,7 @@ export default class MediaPlayer extends Component {
                 this.addGlobalMessage({
                     type: 'error',
                     id: event,
-                    text: `${midiPlayerMessagePrefix} ${message}`,
+                    text: `${MIDI_PLAYER_MESSAGE_PREFIX} ${message}`,
                 });
 
                 // reset the midi player
@@ -562,5 +566,71 @@ export default class MediaPlayer extends Component {
                 this.clearMidiPlayer();
             }
         }
+    }
+
+    initPCMPlayer = () => {
+        this.pcmPlayer = new PCMPlayer({
+            eventLogger: this.handlePCMPlayerEvent,
+        });
+    }
+
+    handlePCMPlayerEvent = ({
+        event,
+        message,
+        time,
+        ...payload
+    }) => {
+        switch (event) {
+            default: { break; }
+            case PCM_ERROR: {
+                this.dismissGlobalMessage(PCM_STATUS);
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: event,
+                    text: `${PCM_PLAYER_MESSAGE_PREFIX} ${message}`,
+                });
+
+                break;
+            }
+            case PCM_END: {
+                this.setState(() => ({ selectedPCM: {} }));
+            }
+        }
+    }
+
+    playPCM = async ({
+        data,
+        wadId,
+        lump,
+    }) => {
+        if (!this.pcmPlayer) {
+            this.initPCMPlayer();
+        }
+
+        this.pcmPlayer.play({
+            data,
+            sampleRate: lump.sampleRate,
+        });
+
+        this.setState(() => ({
+            selectedPCM: {
+                data,
+                sampleRate: lump.sampleRate,
+                lumpType: lump.type,
+                lumpName: lump.name,
+                wadId,
+                startedAt: moment().utc().unix(),
+            },
+        }));
+    }
+
+    stopPCM = () => {
+        this.pcmPlayer.stop();
+        this.setState(prevState => ({
+            selectedPCM: {
+                ...prevState.selectedPCM,
+                ended: true,
+            },
+        }));
     }
 }
