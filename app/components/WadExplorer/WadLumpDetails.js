@@ -9,11 +9,15 @@ export default ({
     wad,
     text,
     midi,
+    pcm,
     simpleImage,
     complexImage,
     selectedMidi,
+    selectedPCM,
     selectMidi,
     stopMidi,
+    playPCM,
+    stopPCM,
     focusOnLump,
     selectLump,
 }) => (
@@ -30,12 +34,19 @@ export default ({
             <div className={style.wadLumpDetailsInner}>
                 <div className={style.wadLumpDetailsEntry}>
                         Type:
-                        {' '}
+                    {' '}
                     {lump.type}
                 </div>
+                {lump.originalFormat && (
+                    <div className={style.wadLumpDetailsEntry}>
+                            Format:
+                        {' '}
+                        {lump.originalFormat}
+                    </div>
+                )}
                 <div className={style.wadLumpDetailsEntry}>
                         Size:
-                        {' '}
+                    {' '}
                     {lump.sizeInBytes}
                 </div>
                 <WadLumpDetailDisplay
@@ -43,11 +54,15 @@ export default ({
                     lump={lump}
                     text={text}
                     midi={midi}
+                    pcm={pcm}
                     simpleImage={simpleImage}
                     complexImage={complexImage}
                     selectedMidi={selectedMidi}
+                    selectedPCM={selectedPCM}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}
+                    playPCM={playPCM}
+                    stopPCM={stopPCM}
                     selectLump={selectLump}
                 />
             </div>
