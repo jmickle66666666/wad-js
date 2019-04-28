@@ -123,7 +123,7 @@ export default class App extends AllMethods {
 
         const { result: freedoomPreloaded } = await localStorageManager.get('freedoom-preloaded');
         if (!freedoomPreloaded) {
-            // this.preUploadFreedoom();
+            this.preUploadFreedoom();
         }
 
         const { match } = this.props;
