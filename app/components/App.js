@@ -56,22 +56,6 @@ export default class App extends AllMethods {
         selectedLumpType: '',
         selectedMidi: {},
         preselectedMidi: false,
-        text: {
-            queue: {},
-            converted: {},
-        },
-        midis: {
-            queue: {},
-            converted: {},
-        },
-        simpleImages: {
-            queue: {},
-            converted: {},
-        },
-        complexImages: {
-            queue: {},
-            converted: {},
-        },
         showSettings: false,
         settings: {
             theme: 'dark',
@@ -593,8 +577,10 @@ export default class App extends AllMethods {
             selectedLump,
             selectedLumpType,
             selectedMidi,
+            selectedPCM,
             text,
             midis,
+            pcms,
             simpleImages,
             complexImages,
             globalMessages,
@@ -694,15 +680,19 @@ export default class App extends AllMethods {
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
-                                    text={text.converted[selectedWad.id]}
-                                    midis={midis.converted[selectedWad.id]}
-                                    simpleImages={simpleImages.converted[selectedWad.id]}
-                                    complexImages={complexImages.converted[selectedWad.id]}
+                                    selectedPCM={selectedPCM}
+                                    text={text && text.converted[selectedWad.id]}
+                                    midis={midis && midis.converted[selectedWad.id]}
+                                    pcms={pcms && pcms.converted[selectedWad.id]}
+                                    simpleImages={simpleImages && simpleImages.converted[selectedWad.id]}
+                                    complexImages={complexImages && complexImages.converted[selectedWad.id]}
                                     selectWad={this.selectWad}
                                     selectLump={this.selectLump}
                                     selectLumpType={this.selectLumpType}
                                     selectMidi={this.selectMidi}
                                     stopMidi={this.stopMidi}
+                                    playPCM={this.playPCM}
+                                    stopPCM={this.stopPCM}
                                     deleteWad={this.deleteWad}
                                     updateFilename={this.updateFilename}
                                     updateSelectedWadFromList={this.updateSelectedWadFromList}
