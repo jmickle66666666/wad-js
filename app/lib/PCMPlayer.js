@@ -1,81 +1,85 @@
-const DEFAULT_CONFIGURATION = {
-    encoding: '8bit',
-    channels: 1,
-    sampleRate: 11025,
-};
-
-const MAX_VALUES = {
-    '8bit': 255,
-    '16bit': 65535,
-    '32bit': 4294967295,
-    '32bitFloat': 1,
-};
-
-const TYPED_ARRAYS = {
-    '8bit': Uint8Array,
-    '16bit': Uint16Array,
-    '32bit': Uint32Array,
-    '32bitFloat': Float32Array,
-};
+import {
+    PCM_ERROR,
+    PCM_PLAY,
+    PCM_STOP,
+    PCM_END,
+    DEFAULT_PCM_SAMPLE_RATE,
+    DEFAULT_PCM_CONFIGURATION,
+    PCM_MAX_VALUES,
+    PCM_TYPED_ARRAYS,
+} from './constants';
 
 export default class PCMPlayer {
+    constructor(initConfiguration) {
+        const configuration = {
+            ...DEFAULT_PCM_CONFIGURATION,
+            ...initConfiguration,
+        };
+
+        const {
+            eventLogger,
+            logging,
+            encoding,
+            channels,
+            volume,
+        } = configuration;
+
+        this.eventLogger = eventLogger;
+        this.logging = logging;
+        this.encoding = encoding;
+        this.channels = channels;
+
+        this.samples = new Float32Array();
+
+        this.maxValue = this.getMaxValue();
+        this.typedArray = this.getTypedArray();
+
+        this.volume = volume;
+    }
+
     getMaxValue() {
         return (
-            MAX_VALUES[this.encoding]
-            || MAX_VALUES[DEFAULT_CONFIGURATION.encoding]
+            PCM_MAX_VALUES[this.encoding]
+            || PCM_MAX_VALUES[DEFAULT_PCM_CONFIGURATION.encoding]
         );
     }
 
     getTypedArray() {
         return (
-            TYPED_ARRAYS[this.encoding]
-            || TYPED_ARRAYS[DEFAULT_CONFIGURATION.encoding]
+            PCM_TYPED_ARRAYS[this.encoding]
+            || PCM_TYPED_ARRAYS[DEFAULT_PCM_CONFIGURATION.encoding]
         );
     }
 
     createAudioContext() {
         this.audioCtx = new AudioContext();
         this.gainNode = this.audioCtx.createGain();
-        this.gainNode.gain.value = 1;
         this.gainNode.connect(this.audioCtx.destination);
-        this.startTime = this.audioCtx.currentTime;
+        this.setVolume();
     }
 
-    constructor(initConfiguration) {
-        const configuration = {
-            ...DEFAULT_CONFIGURATION,
-            ...initConfiguration,
-        };
-
-        const {
-            encoding,
-            channels,
-            sampleRate,
-        } = configuration;
-
-        this.encoding = encoding;
-        this.channels = channels;
-        this.sampleRate = sampleRate;
-
-        this.samples = new Float32Array();
-
-        this.maxValue = this.getMaxValue();
-        this.typedArray = this.getTypedArray();
-        this.createAudioContext();
+    emitEvent(payload) {
+        if (this.eventLogger) {
+            this.eventLogger(payload);
+        } else if (this.logging) {
+            console.log(payload);
+        }
     }
 
     isTypedArray(data) {
         const isTypedArray = (
-            data.byteLength
+            data
+            && data.byteLength
             && data.buffer
             && data.buffer.constructor === ArrayBuffer
         );
 
-        if (!isTypedArray) {
-            console.error('Data is not an array buffer.');
-        }
-
         return isTypedArray;
+    }
+
+    isArrayBuffer(data) {
+        const isArrayBuffer = data instanceof ArrayBuffer;
+        return isArrayBuffer;
     }
 
     getFormatedValue(data) {
@@ -85,75 +89,108 @@ export default class PCMPlayer {
             float32[i] = data[i] / this.maxValue;
         }
 
-        console.log({ float32 });
-
         return float32;
     }
 
-    play(input) {
-        if (!this.isTypedArray(input)) {
+    play({ data: input, sampleRate }) {
+        this.createAudioContext();
+
+        const isTypedArray = this.isTypedArray(input);
+        const isArrayBuffer = this.isArrayBuffer(input);
+        if (!isTypedArray && !isArrayBuffer) {
+            const message = 'Data is not an array buffer.';
+            this.emitEvent({
+                event: PCM_ERROR,
+                message,
+            });
+
             return;
         }
 
-        this.samples = new Float32Array();
-
         const { typedArray } = this;
-        const data = new typedArray(input.buffer, input.byteOffset, input.byteLength);
+        const data = isArrayBuffer ? new typedArray(input) : new typedArray(input.buffer, input.byteOffset, input.byteLength);
 
         const normalizedData = this.getFormatedValue(data);
 
         this.samples = normalizedData;
 
-        const bufferSource = this.audioCtx.createBufferSource();
+
+        this.bufferSource = this.audioCtx.createBufferSource();
         const length = this.samples.length / this.channels;
 
-        const audioBuffer = this.audioCtx.createBuffer(
+        this.audioBuffer = this.audioCtx.createBuffer(
             this.channels,
             length,
-            this.sampleRate,
+            sampleRate || DEFAULT_PCM_SAMPLE_RATE,
         );
 
         let audioData;
         let offset;
-        // let decrement;
 
         for (let channel = 0; channel < this.channels; channel++) {
-            audioData = audioBuffer.getChannelData(channel);
+            audioData = this.audioBuffer.getChannelData(channel);
             offset = channel;
-            // decrement = 25;
             for (let i = 0; i < length; i++) {
                 audioData[i] = this.samples[offset];
-                /* fadein */
-                if (i < 25) {
-                    // audioData[i] = (audioData[i] * i) / 25;
-                }
-                /* fadeout */
-                if (i >= (length - 26)) {
-                    // audioData[i] = (audioData[i] * decrement--) / 25;
-                }
                 offset += this.channels;
             }
         }
 
-        if (this.startTime < this.audioCtx.currentTime) {
-            this.startTime = this.audioCtx.currentTime;
-        }
+        // reduce volume to zero
+        this.gainNode.gain.setValueAtTime(0, 0);
 
-        console.log(`currentTime: ${this.audioCtx.currentTime}; duration: ${audioBuffer.duration}`);
+        this.bufferSource.buffer = this.audioBuffer;
+        this.bufferSource.connect(this.gainNode);
+        this.gainNode.connect(this.audioCtx.destination);
 
-        bufferSource.buffer = audioBuffer;
-        bufferSource.connect(this.gainNode);
-        bufferSource.start(this.startTime);
-        this.startTime += audioBuffer.duration;
+        // fade in
+        this.gainNode.gain.linearRampToValueAtTime(this.volume, 0.030);
+
+        this.bufferSource.start(0);
+
+        this.emitEvent({
+            event: PCM_PLAY,
+            time: 0,
+        });
+
+        this.watchPlayback();
     }
 
-    volume(volume) {
-        this.gainNode.gain.value = volume;
+    stop() {
+        this.destroyAudioContext();
+        this.emitEvent({ event: PCM_STOP });
     }
 
-    destroy() {
-        this.samples = null;
+    watchPlayback() {
+        this.playbackWatcher = setInterval(() => {
+            if (this.audioCtx) {
+                const time = this.audioCtx.currentTime;
+                this.emitEvent({
+                    event: PCM_PLAY,
+                    time,
+                });
+
+                if (time + 0.24 >= this.audioBuffer.duration) {
+                    // fade out
+                    this.gainNode.gain.linearRampToValueAtTime(0, this.audioBuffer.duration);
+                }
+
+                if (time >= this.audioBuffer.duration) {
+                    this.emitEvent({ event: PCM_END });
+                    clearInterval(this.playbackWatcher);
+                }
+            }
+        }, 10);
+    }
+
+    setVolume() {
+        this.gainNode.gain.value = this.volume;
+    }
+
+    destroyAudioContext() {
+        this.samples = new Float32Array();
         this.audioCtx.close();
         this.audioCtx = null;
+        clearInterval(this.playbackWatcher);
     }
 }
