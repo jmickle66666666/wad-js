@@ -7,19 +7,28 @@ import WadLumpDetailDisplay from './WadLumpDetailDisplay';
 export default ({
     lump,
     wad,
-    midi,
-    simpleImage,
     text,
+    midi,
+    pcm,
+    simpleImage,
+    complexImage,
     selectedMidi,
+    selectedPCM,
     selectMidi,
     stopMidi,
+    playPCM,
+    stopPCM,
     focusOnLump,
     selectLump,
 }) => (
     <Fragment>
         <span id="lumpDetails" className={style.wadLumpDetailsAnchor} />
         <div className={style.wadLumpDetailsOuter}>
-            <h4 onClick={focusOnLump} className={style.wadLumpDetailsTitle}>
+            <h4
+                className={style.wadLumpDetailsTitle}
+                onClick={focusOnLump}
+                onKeyPress={focusOnLump}
+            >
                 {lump.name}
             </h4>
             <div className={style.wadLumpDetailsInner}>
@@ -28,6 +37,13 @@ export default ({
                     {' '}
                     {lump.type}
                 </div>
+                {lump.originalFormat && (
+                    <div className={style.wadLumpDetailsEntry}>
+                            Format:
+                        {' '}
+                        {lump.originalFormat}
+                    </div>
+                )}
                 <div className={style.wadLumpDetailsEntry}>
                         Size:
                     {' '}
@@ -36,12 +52,17 @@ export default ({
                 <WadLumpDetailDisplay
                     wad={wad}
                     lump={lump}
-                    midi={midi}
-                    simpleImage={simpleImage}
                     text={text}
+                    midi={midi}
+                    pcm={pcm}
+                    simpleImage={simpleImage}
+                    complexImage={complexImage}
                     selectedMidi={selectedMidi}
+                    selectedPCM={selectedPCM}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}
+                    playPCM={playPCM}
+                    stopPCM={stopPCM}
                     selectLump={selectLump}
                 />
             </div>

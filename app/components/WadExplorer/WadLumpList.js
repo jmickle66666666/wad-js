@@ -10,12 +10,17 @@ export default ({
     selectedLump,
     selectedLumpType,
     selectedMidi,
-    midis,
-    simpleImages,
+    selectedPCM,
     text,
+    midis,
+    pcms,
+    simpleImages,
+    complexImages,
     selectLump,
     selectMidi,
     stopMidi,
+    playPCM,
+    stopPCM,
     focusOnWad,
     focusOnLump,
 }) => (
@@ -43,17 +48,22 @@ export default ({
                             && (
                                 <WadLumpItem
                                     key={lumpName}
-                                    midi={midis && midis[lumpName]}
-                                    simpleImage={simpleImages && simpleImages[lumpName]}
                                     text={text && text[lumpName]}
+                                    midi={midis && midis[lumpName]}
+                                    pcm={pcms && pcms[lumpName]}
+                                    simpleImage={simpleImages && simpleImages[lumpName]}
+                                    complexImage={complexImages && complexImages[lumpName]}
                                     lump={lump}
                                     wad={wad}
                                     selectedLump={selectedLump}
                                     selectedLumpType={selectedLumpType}
                                     selectedMidi={selectedMidi}
+                                    selectedPCM={selectedPCM}
                                     selectLump={selectLump}
                                     selectMidi={selectMidi}
                                     stopMidi={stopMidi}
+                                    playPCM={playPCM}
+                                    stopPCM={stopPCM}
                                     focusOnLump={focusOnLump}
                                 />
                             )

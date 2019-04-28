@@ -284,6 +284,8 @@ export const MIDI_AUDIO_S16LSB = 0x8010;
 
 export const MIDI_PATCH_URL = '/public/midi/pat/';
 
+export const MIDI_PLAYER_MESSAGE_PREFIX = 'Midi player:';
+
 export const MIDI_ERROR = 'MIDI_ERROR';
 
 export const MIDI_STATUS = 'MIDI_STATUS';
@@ -303,6 +305,51 @@ export const MIDI_RESUME = 'MIDI_RESUME';
 export const MIDI_STOP = 'MIDI_STOP';
 
 export const MIDI_END = 'MIDI_END';
+
+/* DMX -> PCM conversion */
+
+export const DMX_HEADER_SIZE = 18;
+
+export const DMX_TAIL_PADDING = 2;
+
+/* PCM Player */
+
+export const DEFAULT_PCM_SAMPLE_RATE = 11025;
+
+export const DEFAULT_PCM_CONFIGURATION = {
+    encoding: '8bit',
+    channels: 1,
+    volume: 1,
+    logging: false,
+};
+
+export const PCM_MAX_VALUES = {
+    '8bit': 255,
+    '16bit': 65535,
+    '32bit': 4294967295,
+    '32bitFloat': 1,
+};
+
+export const PCM_TYPED_ARRAYS = {
+    '8bit': Uint8Array,
+    '16bit': Uint16Array,
+    '32bit': Uint32Array,
+    '32bitFloat': Float32Array,
+};
+
+export const PCM_PLAYER_MESSAGE_PREFIX = 'PCM player:';
+
+export const PCM_STATUS = 'PCM_STATUS';
+
+export const PCM_ERROR = 'PCM_ERROR';
+
+export const PCM_PLAY = 'PCM_PLAY';
+
+export const PCM_PAUSE = 'PCM_PAUSE';
+
+export const PCM_STOP = 'PCM_STOP';
+
+export const PCM_END = 'PCM_END';
 
 /* ANSI conversion */
 

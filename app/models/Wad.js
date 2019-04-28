@@ -22,7 +22,6 @@ import {
     LUMP_INDEX_ENTRY_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_SIZE,
     LUMP_INDEX_ENTRY_OFFSET_TO_LUMP_NAME,
-    COLOR_COUNT_PER_PALETTE,
     PALETTE_SIZE,
     COLORMAP_SIZE,
     BYTES_PER_COLOR,
@@ -30,8 +29,6 @@ import {
     BLUE_COLOR_OFFSET,
     FLAT_DIMENSIONS,
     IMAGE_DATA_HEADER_SIZE,
-    IMAGE_DATA_BOUNDARY,
-    TRANSPARENT_PIXEL,
     MUS_HEADER,
     MIDI_HEADER_SIZE,
     MIDI_HEADER,
@@ -373,6 +370,12 @@ export default class Wad {
         return new TextDecoder().decode(data).replace(/\u0000/g, ' ');
     }
 
+    readDMX(data) {
+        const sampleRate = data.getUint16(2, true);
+        const metadata = { sampleRate };
+        return { metadata };
+    }
+
     readSoundInfo(data) {
         try {
             const decodedText = decodeURI(new TextDecoder('utf-8').decode(data).replace(/\u0000/g, ' '));
@@ -623,50 +626,6 @@ export default class Wad {
         };
     }
 
-    convertColorIndexesToDataURL(arrayOfColorIndexes, width, height, name, palette) {
-        if (palette.length !== COLOR_COUNT_PER_PALETTE) {
-            console.error('The palette does not have enough colors to draw images.');
-            return '';
-        }
-
-        try {
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const context = canvas.getContext('2d');
-
-            const imageData = context.createImageData(
-                canvas.width,
-                canvas.height,
-            );
-
-            for (let i = 0; i < arrayOfColorIndexes.length; i++) {
-                if (arrayOfColorIndexes[i] === TRANSPARENT_PIXEL) {
-                    imageData.data[(i * 4) + 3] = 0;
-                } else {
-                    const { red, green, blue } = palette[arrayOfColorIndexes[i]];
-                    imageData.data[(i * 4) + 0] = red;
-                    imageData.data[(i * 4) + 1] = green;
-                    imageData.data[(i * 4) + 2] = blue;
-                    imageData.data[(i * 4) + 3] = 255;
-                }
-            }
-            const newCanvas = document.createElement('CANVAS');
-            newCanvas.width = imageData.width;
-            newCanvas.height = imageData.height;
-            newCanvas.getContext('2d').putImageData(imageData, 0, 0);
-            context.imageSmoothingEnabled = false;
-            context.drawImage(newCanvas, 0, 0);
-
-            const dataURL = canvas.toDataURL();
-
-            return dataURL;
-        } catch (error) {
-            console.error(`An error occurred while converting the color indexes of lump '${name}' to a Data URL`, { error });
-            return '';
-        }
-    }
-
     readFlat(data) {
         // hack for Heretic 65x64 scrolling flats
         const width = data.byteLength === 4160 ? FLAT_DIMENSIONS + 1 : FLAT_DIMENSIONS;
@@ -684,17 +643,11 @@ export default class Wad {
         return { metadata };
     }
 
-    readImageDataHeader(data) {
+    readImageHeader(data) {
         const header = [];
         for (let i = 0; i < IMAGE_DATA_HEADER_SIZE; i += 2) {
             header.push(data.getUint16(i, true));
         }
-
-        return header;
-    }
-
-    readImageData(data, name, palette) {
-        const colorIndexes = [];
 
         const [
             width,
@@ -702,7 +655,7 @@ export default class Wad {
             // the { x,y } offset of patches is usually zero
             xOffset,
             yOffset,
-        ] = this.readImageDataHeader(data);
+        ] = header;
 
         const metadata = {
             width,
@@ -711,48 +664,7 @@ export default class Wad {
             yOffset,
         };
 
-        // assume that the whole image is transparent
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
-                colorIndexes.push(TRANSPARENT_PIXEL);
-            }
-        }
-
-        const columnAddresses = [];
-        for (let i = 0; i < width; i++) {
-            columnAddresses[i] = data.getUint32(8 + (i * 4), true);
-        }
-
-        let position = 0;
-        let pixelCount = 0;
-
-        for (let i = 0; i < width; i++) {
-            position = columnAddresses[i];
-            let rowStart = 0;
-
-            while (rowStart !== IMAGE_DATA_BOUNDARY) {
-                rowStart = data.getUint8(position);
-                position += 1;
-
-                if (rowStart === IMAGE_DATA_BOUNDARY) break;
-
-                pixelCount = data.getUint8(position);
-                position += 2;
-
-                for (let j = 0; j < pixelCount; j++) {
-                    colorIndexes[((rowStart + j) * width) + i] = data.getUint8(position);
-                    position += 1;
-                }
-                position += 1;
-            }
-        }
-
-        const image = this.convertColorIndexesToDataURL(colorIndexes, width, height, name, palette);
-
-        return {
-            metadata,
-            image,
-        };
+        return { metadata };
     }
 
     disambiguateMusicFormat(data) {
@@ -965,21 +877,22 @@ export default class Wad {
                                 break;
                             }
                             case 'patches': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
+                                    originalFormat: 'complexImage',
                                 };
-
                                 break;
                             }
                             case 'sprites': {
-                                const { image, metadata } = this.readImageData(lumpData, name, paletteData);
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
+                                    originalFormat: 'complexImage',
                                 };
 
                                 break;
@@ -1008,16 +921,27 @@ export default class Wad {
                                 originalFormat = format;
 
                                 parsedLumpData = lumpData;
-                                // DS* (DMX) and DP* (speaker)
-                            } else if (/^DS[0-9a-zA-Z_]{1,}$/.test(name) || /^DP[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                // DS* (DMX)
+                            } else if (/^DS[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                const { metadata } = this.readDMX(lumpData);
                                 lumpType = 'sounds';
+                                parsedLumpData = lumpData;
+                                originalFormat = 'DMX';
+                                lumpIndexData = {
+                                    ...lumpIndexData,
+                                    ...metadata,
+                                };
+                                // DP* (speaker sound data)
+                            } else if (/^DP[0-9a-zA-Z_]{1,}$/.test(name)) {
+                                lumpType = 'sounds';
+                                parsedLumpData = lumpData;
+                                originalFormat = 'speakerSound';
                                 // M_*
                             } else if (/^M_[0-9a-zA-Z_]{1,}$/.test(name)) {
                                 lumpType = MENU;
-                                const { image, metadata } = this.readImageData(
-                                    lumpData, name, paletteData,
-                                );
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
+                                originalFormat = 'complexImage';
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
@@ -1029,20 +953,18 @@ export default class Wad {
                                 || END_LUMPS.test(name)
                             ) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = INTERMISSION;
-                                const { image, metadata } = this.readImageData(
-                                    lumpData, name, paletteData,
-                                );
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
+                                originalFormat = 'complexImage';
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
                                 };
                             } else if (STATUS_BAR_LUMPS.test(name) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = STATUS_BAR;
-                                const { image, metadata } = this.readImageData(
-                                    lumpData, name, paletteData,
-                                );
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
+                                originalFormat = 'complexImage';
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
@@ -1053,10 +975,9 @@ export default class Wad {
                                 lumpType = MAP;
                             } else if (MENU_SCREENS.includes(name) && this.name !== 'HERETIC.WAD' && this.name !== 'HEXEN.WAD') {
                                 lumpType = MENU;
-                                const { image, metadata } = this.readImageData(
-                                    lumpData, name, paletteData,
-                                );
-                                parsedLumpData = image;
+                                const { metadata } = this.readImageHeader(lumpData);
+                                parsedLumpData = lumpData;
+                                originalFormat = 'complexImage';
                                 lumpIndexData = {
                                     ...lumpIndexData,
                                     ...metadata,
@@ -1118,6 +1039,10 @@ export default class Wad {
                     if (sound.type === 'music') {
                         const { format } = this.disambiguateMusicFormat(incompleteLump.data);
                         incompleteLump.originalFormat = format;
+                    } else {
+                        incompleteLump.originalFormat = 'DMX';
+                        const { metadata } = this.readDMX(incompleteLump.data);
+                        incompleteLump.sampleRate = metadata.sampleRate;
                     }
 
                     const lump = this.createLumpIndex({

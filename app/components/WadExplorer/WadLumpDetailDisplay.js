@@ -13,6 +13,7 @@ import Map from '../Lumps/Map';
 import ImageLump from '../Lumps/ImageLump';
 import Texture from '../Lumps/Texture';
 import Music from '../Lumps/Music';
+import Sound from '../Lumps/Sound';
 
 import PatchNames from '../Lumps/PatchNames';
 import TextureNames from '../Lumps/TextureNames';
@@ -22,12 +23,17 @@ import SoundInfo from '../Lumps/SoundInfo';
 export default ({
     wad,
     lump,
-    midi,
-    simpleImage,
     text,
+    midi,
+    pcm,
+    simpleImage,
+    complexImage,
     selectedMidi,
+    selectedPCM,
     selectMidi,
     stopMidi,
+    playPCM,
+    stopPCM,
     selectLump,
 }) => {
     switch (lump.type) {
@@ -81,7 +87,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
-                    simpleImage={simpleImage}
+                    image={simpleImage}
                 />
             );
         }
@@ -92,7 +98,11 @@ export default ({
                 );
             }
             return (
-                <ImageLump wad={wad} lump={lump} />
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                    image={simpleImage || complexImage}
+                />
             );
         }
         case 'textures': {
@@ -107,7 +117,11 @@ export default ({
         }
         case 'sprites': {
             return (
-                <ImageLump wad={wad} lump={lump} />
+                <ImageLump
+                    wad={wad}
+                    lump={lump}
+                    image={simpleImage || complexImage}
+                />
             );
         }
         case 'menu': {
@@ -115,6 +129,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }
@@ -123,6 +138,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }
@@ -131,6 +147,7 @@ export default ({
                 <ImageLump
                     wad={wad}
                     lump={lump}
+                    image={simpleImage || complexImage}
                 />
             );
         }
@@ -143,6 +160,18 @@ export default ({
                     selectedMidi={selectedMidi}
                     selectMidi={selectMidi}
                     stopMidi={stopMidi}
+                />
+            );
+        }
+        case 'sounds': {
+            return (
+                <Sound
+                    wad={wad}
+                    lump={lump}
+                    pcm={pcm}
+                    selectedPCM={selectedPCM}
+                    playPCM={playPCM}
+                    stopPCM={stopPCM}
                 />
             );
         }

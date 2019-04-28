@@ -1,4 +1,11 @@
+## v0.3.0: Ramping up for MVP
+
+* wadJS is now able to convert DMX files into PCM and play them seamlessy. Hooray!
+* From now on, images will be converted to PNG after the lump directory has been processed instead of doing it at upload time. This allows to load WADs much faster and also not overwhelm the main thread with heavy computations but comes at the cost of converting images more slowly.
+* Various refactor to abstract away more stuff!
+
 ## v0.2.5: More potent web workers and CSS tweaks
+
 * Thanks to a big refactor behind the logic that run web worker tasks, each converter is now able to handle lumps coming from whatever lump type. This is a huge win, given the fact that the original format of a lump is usually not self-evident. As an example, we'll be able to parse intermission lumps from Heretic and Hexen with very little added code now.
 * A few aesthetical update related to responsive design. Some icons were shrunk extra small on smaller screens. The logo also had extra padding which made the screen bigger than the viewport.
 

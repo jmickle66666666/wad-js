@@ -4,7 +4,7 @@ import {
 onmessage = (message) => {
     const { wadId, lumpId, data } = message.data;
 
-    console.log(`Parsing map '${lumpId}' (WAD: '${wadId}') ...`);
+    // console.log(`Parsing map '${lumpId}' (WAD: '${wadId}') ...`);
 
     const mapData = {};
 

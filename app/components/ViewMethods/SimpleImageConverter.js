@@ -1,11 +1,11 @@
-import MediaPlayer from './MediaPlayer';
+import ComplexImageConverter from './ComplexImageConverter';
 
 import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 import SimpleImageConverter from '../../webWorkers/simpleImageConverter';
 
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
-export default class SimpleImageConverterMethods extends MediaPlayer {
+export default class SimpleImageConverterMethods extends ComplexImageConverter {
     startSimpleImageConverterWorker() {
         this.startWorker({
             workerId: 'simpleImageConverter',

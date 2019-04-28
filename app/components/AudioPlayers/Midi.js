@@ -132,9 +132,7 @@ export default ({
 
     if (midi === false) {
         return (
-            <div>
-                <ErrorMessage message="Could not convert MUS to MIDI." />
-            </div>
+            <ErrorMessage message="Could not convert lump to MIDI." />
         );
     }
 

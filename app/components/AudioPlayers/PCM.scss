@@ -1,0 +1,19 @@
+.player {
+    display: flex;
+    justify-content: center;
+
+    [role=button] {
+        padding: 5px;
+        cursor: pointer;
+
+        &, svg {
+            height: 40px;
+            width: 40px;    
+        }
+    }
+}
+
+.loading {
+    color: rgb(110, 110, 110);
+    font-size: 14px;
+}
