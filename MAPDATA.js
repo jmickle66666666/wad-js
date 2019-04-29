@@ -47,9 +47,22 @@ function getMapSize({ vertices }) {
   };
 }
 
-function createMapPreview({ data }) {
+function createMapPreview({ data, palette }) {
     if (!data || !data.LINEDEFS) {
         return null;
+    }
+  
+    let mapPalette = {};
+    if (!palette || palette.length !== COLOR_COUNT_PER_PALETTE) {
+        console.warn('No valid palette found. Map preview will be drawn with default color scheme.', { palette });
+        mapPalette = DEFAULT_MAP_PALETTE;
+    } else {
+        mapPalette = {
+          background: palette[0],
+          solidWall: palette[176],
+          lowerWall: palette[64],
+          upperWall: palette[231],
+        }
     }
   
     
