@@ -46,3 +46,7 @@ function getMapSize({ vertices }) {
       height,
   };
 }
+
+function createMapPreview({ data }) {
+    
+}
