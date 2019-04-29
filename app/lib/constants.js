@@ -353,6 +353,8 @@ export const PCM_END = 'PCM_END';
 
 /* Map data */
 
+export const MAP_PADDING = 64;
+
 export const MAP_DATA_SCHEMAS = {
     THINGS: {
         size: 10,
@@ -395,13 +397,13 @@ export const MAP_DATA_SCHEMAS = {
     LINEDEFS: {
         size: 14,
         properties: [
-            { name: 'vx1' },
-            { name: 'vx2' },
+            { name: 'vertex1' },
+            { name: 'vertex2' },
             { name: 'flags' },
             { name: 'action' },
             { name: 'tag' },
-            { name: 'right' },
-            { name: 'left' },
+            { name: 'rightSidedef' },
+            { name: 'leftSidedef' },
         ],
     },
     SIDEDEFS: {
@@ -430,8 +432,8 @@ export const MAP_DATA_SCHEMAS = {
     SEGS: {
         size: 12,
         properties: [
-            { name: 'vx1' },
-            { name: 'vx2' },
+            { name: 'vertex1' },
+            { name: 'vertex2' },
             { name: 'angle' },
             { name: 'linedef' },
             { name: 'direction' },
@@ -536,8 +538,8 @@ export const HEXEN_MAP_DATA_SCHEMAS = {
     LINEDEFS: {
         size: 16,
         properties: [
-            { name: 'vx1' },
-            { name: 'vx2' },
+            { name: 'vertex1' },
+            { name: 'vertex2' },
             { name: 'flags' },
             {
                 name: 'action',
@@ -570,9 +572,37 @@ export const HEXEN_MAP_DATA_SCHEMAS = {
                 format: 'Int8',
                 littleEndian: false,
             },
-            { name: 'right' },
-            { name: 'left' },
+            { name: 'rightSidedef' },
+            { name: 'leftSidedef' },
         ],
+    },
+};
+
+export const DEFAULT_MAP_PALETTE = {
+    background: {
+        blue: 0,
+        green: 0,
+        red: 0,
+    },
+    solidWall: {
+        blue: 0,
+        green: 0,
+        red: 255,
+    },
+    lowerWall: {
+        blue: 75,
+        green: 123,
+        red: 191,
+    },
+    upperWall: {
+        blue: 0,
+        green: 255,
+        red: 255,
+    },
+    sameHeight: {
+        blue: 131,
+        green: 131,
+        red: 131,
     },
 };
 
