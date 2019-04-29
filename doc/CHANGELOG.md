@@ -1,3 +1,7 @@
+## v0.3.1: Map preview
+
+* wadJS is now able to create previews of the maps within a WAD.
+
 ## v0.3.0: Ramping up for MVP
 
 * wadJS is now able to convert DMX files into PCM and play them seamlessy. Hooray!
