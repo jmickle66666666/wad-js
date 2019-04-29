@@ -28,6 +28,7 @@ export default ({
     pcm,
     simpleImage,
     complexImage,
+    map,
     selectedMidi,
     selectedPCM,
     selectMidi,
@@ -79,7 +80,11 @@ export default ({
         }
         case 'maps': {
             return (
-                <Map wad={wad} lump={lump} />
+                <Map
+                    wad={wad}
+                    lump={lump}
+                    map={map}
+                />
             );
         }
         case 'flats': {

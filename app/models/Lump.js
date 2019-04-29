@@ -52,6 +52,10 @@ export default class Lump {
         return this.name !== PNAMES && IMAGE_LUMPS.includes(this.type);
     }
 
+    get isMap() {
+        return this.type === 'maps';
+    }
+
     get convertsToMidi() {
         return this.originalFormat === 'MUS' || this.originalFormat === 'MIDI';
     }

@@ -44,6 +44,7 @@ export default class WadDetails extends Component {
             pcms,
             simpleImages,
             complexImages,
+            maps,
             selectWad,
             selectLump,
             selectLumpType,
@@ -125,6 +126,7 @@ export default class WadDetails extends Component {
                                     pcms={pcms && pcms[selectedLumpType]}
                                     simpleImages={simpleImages && simpleImages[selectedLumpType]}
                                     complexImages={complexImages && complexImages[selectedLumpType]}
+                                    maps={maps && maps[selectedLumpType]}
                                     selectLump={selectLump}
                                     selectMidi={selectMidi}
                                     stopMidi={stopMidi}

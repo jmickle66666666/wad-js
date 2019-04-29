@@ -2,26 +2,53 @@ import React, { Fragment } from 'react';
 
 import style from './ImageLump.scss';
 
-export default ({ wad, lump }) => (
-    <Fragment>
-        {lump.data && (
+const getMapDataCount = ({ map, lumpName }) => (map && map[lumpName] && map[lumpName].length) || 0;
+
+const renderMapDataDetails = ({ lump, map }) => {
+    const thingCount = getMapDataCount({ map, lumpName: 'THINGS' });
+    const sectorCount = getMapDataCount({ map, lumpName: 'SECTORS' });
+    const linedefCount = getMapDataCount({ map, lumpName: 'LINEDEFS' });
+    const vertexCount = getMapDataCount({ map, lumpName: 'VERTEXES' });
+    return (
+        <Fragment>
             <div className={style.wadLumpDetailsEntry}>
-                Map lumps:
+                Things:
                 {' '}
-                {Object.keys(lump.data || {}).map(lumpName => lumpName).join(', ')}
+                {thingCount}
             </div>
-        )}
-        <div className={style.wadLumpDetailsEntry}>
-            Things:
-        </div>
-        <div className={style.wadLumpDetailsEntry}>
-            Sectors:
-        </div>
-        <div className={style.wadLumpDetailsEntry}>
-            Linedefs:
-        </div>
-        <div className={style.wadLumpDetailsEntry}>
-            Vertices:
-        </div>
+            <div className={style.wadLumpDetailsEntry}>
+                Sectors:
+                {' '}
+                {sectorCount}
+            </div>
+            <div className={style.wadLumpDetailsEntry}>
+                Linedefs:
+                {' '}
+                {linedefCount}
+            </div>
+            <div className={style.wadLumpDetailsEntry}>
+                Vertices:
+                {' '}
+                {vertexCount}
+            </div>
+            {lump.data && (
+                <div className={style.wadLumpDetailsEntry}>
+                    Map lumps:
+                    {' '}
+                    {Object.keys(lump.data || {}).map(lumpName => lumpName).join(', ')}
+                </div>
+            )}
+        </Fragment>
+    );
+};
+
+export default ({
+    wad,
+    lump,
+    map,
+    previewOnly,
+}) => (
+    <Fragment>
+        {!previewOnly && renderMapDataDetails({ lump, map })}
     </Fragment>
 );
