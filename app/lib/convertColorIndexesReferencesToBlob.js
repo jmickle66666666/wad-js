@@ -1,3 +1,5 @@
+import createOffscreenCanvas from './createOffscreenCanvas';
+
 import {
     TRANSPARENT_PIXEL,
     COLOR_COUNT_PER_PALETTE,
@@ -15,10 +17,7 @@ export default async function convertColorIndexesReferencesToBlob(
     }
 
     try {
-        const canvas = new OffscreenCanvas(height, width);
-        canvas.height = height;
-        canvas.width = width;
-        const context = canvas.getContext('2d');
+        const { canvas, context } = createOffscreenCanvas({ height, width });
 
         const imageData = context.createImageData(
             canvas.width,
@@ -36,10 +35,9 @@ export default async function convertColorIndexesReferencesToBlob(
                 imageData.data[(i * 4) + 3] = 255;
             }
         }
-        const newCanvas = new OffscreenCanvas(height, width);
-        newCanvas.height = imageData.height;
-        newCanvas.width = imageData.width;
-        newCanvas.getContext('2d').putImageData(imageData, 0, 0);
+
+        const { canvas: newCanvas, context: newContext } = createOffscreenCanvas({ height, width });
+        newContext.putImageData(imageData, 0, 0);
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);
 
