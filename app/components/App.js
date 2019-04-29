@@ -583,6 +583,7 @@ export default class App extends AllMethods {
             pcms,
             simpleImages,
             complexImages,
+            maps,
             globalMessages,
             showSettings,
             settings,
@@ -686,6 +687,7 @@ export default class App extends AllMethods {
                                     pcms={pcms && pcms.converted[selectedWad.id]}
                                     simpleImages={simpleImages && simpleImages.converted[selectedWad.id]}
                                     complexImages={complexImages && complexImages.converted[selectedWad.id]}
+                                    maps={maps && maps.converted[selectedWad.id]}
                                     selectWad={this.selectWad}
                                     selectLump={this.selectLump}
                                     selectLumpType={this.selectLumpType}

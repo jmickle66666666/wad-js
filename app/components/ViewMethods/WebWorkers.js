@@ -1,7 +1,7 @@
-import PCMConverter from './PCMConverter';
+import MapParser from './MapParser';
 import { deleteCache } from '../../lib/cacheManager';
 
-export default class WebWorkers extends PCMConverter {
+export default class WebWorkers extends MapParser {
     startWorker({
         workerId,
         workerClass,
@@ -19,6 +19,7 @@ export default class WebWorkers extends PCMConverter {
         wad,
         lumpType,
         formatCheck = () => true,
+        lumpCheck = () => true,
         extractLumpData = lump => lump,
     }) => {
         const lumpIds = Object.keys(wad.lumps[lumpType] || {});
@@ -33,7 +34,8 @@ export default class WebWorkers extends PCMConverter {
                     && items.converted[wad.id][lump.name]
                 );
                 return !alreadyExists
-                    && formatCheck(lump.originalFormat);
+                    && formatCheck(lump.originalFormat)
+                    && lumpCheck(lump);
             });
 
         const lumpObject = {};
@@ -242,6 +244,7 @@ export default class WebWorkers extends PCMConverter {
         workerStarter,
         targetObject,
         formatCheck,
+        lumpCheck,
         handleNextLump,
         queueStarted = () => { },
         wad,
@@ -278,6 +281,7 @@ export default class WebWorkers extends PCMConverter {
                     lumpType,
                     targetObject,
                     formatCheck,
+                    lumpCheck,
                 });
 
                 lumps = {
@@ -403,6 +407,7 @@ export default class WebWorkers extends PCMConverter {
         this.addToPCMConversionQueue({ wad });
         this.addToSimpleImageConversionQueue({ wad });
         this.addToComplexImageConversionQueue({ wad });
+        this.addToMapParserQueue({ wad });
     }
 
     stopConvertingWadItems = ({ wadId }) => {
@@ -411,6 +416,7 @@ export default class WebWorkers extends PCMConverter {
         this.removeWadFromTargetObject({ targetObject: 'pcms', wadId });
         this.removeWadFromTargetObject({ targetObject: 'simpleImages', wadId });
         this.removeWadFromTargetObject({ targetObject: 'complexImages', wadId });
+        this.removeWadFromTargetObject({ targetObject: 'maps', wadId });
     }
 
     stopConvertingAllWads = () => {
@@ -419,5 +425,6 @@ export default class WebWorkers extends PCMConverter {
         this.clearTargetObject({ targetObject: 'pcms' });
         this.clearTargetObject({ targetObject: 'simpleImages' });
         this.clearTargetObject({ targetObject: 'complexImages' });
+        this.clearTargetObject({ targetObject: 'maps' });
     }
 }

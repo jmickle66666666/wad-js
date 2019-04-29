@@ -7,6 +7,7 @@ import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 import WadLumpDetails from './WadLumpDetails';
 import Midi from '../AudioPlayers/Midi';
 import PCM from '../AudioPlayers/PCM';
+import Map from '../Lumps/Map';
 import ErrorMessage from '../Messages/ErrorMessage';
 
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
@@ -46,6 +47,7 @@ export default ({
     pcm,
     simpleImage,
     complexImage,
+    map,
     wad,
     selectedLump,
     selectedLumpType,
@@ -90,6 +92,14 @@ export default ({
 
                         />
                     )}
+                    {lump.isMap && (
+                        <Map
+                            previewOnly
+                            map={map}
+                            lump={lump}
+                            wad={wad}
+                        />
+                    )}
                     <div>{lump.sizeInBytes}</div>
                 </div>
             </a>
@@ -105,6 +115,7 @@ export default ({
             pcm={pcm}
             simpleImage={simpleImage}
             complexImage={complexImage}
+            map={map}
             selectedMidi={selectedMidi}
             selectedPCM={selectedPCM}
             selectMidi={selectMidi}

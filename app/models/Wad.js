@@ -273,7 +273,7 @@ export default class Wad {
         return reader;
     }
 
-    handleMapLumpEntry(map, lumps, lumpIndexData, callback) {
+    handleMapLumpEntry(map, lumps, lumpIndexData, lumpData, callback) {
         const updatedNonMapLumps = 0;
         let updatedMap = { ...map };
         const updatedLumps = { ...lumps };
@@ -320,7 +320,11 @@ export default class Wad {
             };
         }
 
-        updatedMap.dataLumps[lumpIndexData.name] = { ...lumpIndexData };
+        // map data type lump
+        updatedMap.dataLumps[lumpIndexData.name] = {
+            ...lumpIndexData,
+            data: lumpData,
+        };
 
         return {
             updatedNonMapLumps,
@@ -776,6 +780,7 @@ export default class Wad {
                         map,
                         lumps,
                         lumpIndexData,
+                        lumpData,
                         callback,
                     );
 

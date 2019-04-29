@@ -16,6 +16,7 @@ export default ({
     pcms,
     simpleImages,
     complexImages,
+    maps,
     selectLump,
     selectMidi,
     stopMidi,
@@ -53,6 +54,7 @@ export default ({
                                     pcm={pcms && pcms[lumpName]}
                                     simpleImage={simpleImages && simpleImages[lumpName]}
                                     complexImage={complexImages && complexImages[lumpName]}
+                                    map={maps && maps[lumpName]}
                                     lump={lump}
                                     wad={wad}
                                     selectedLump={selectedLump}

@@ -12,6 +12,7 @@ export default ({
     pcm,
     simpleImage,
     complexImage,
+    map,
     selectedMidi,
     selectedPCM,
     selectMidi,
@@ -57,6 +58,7 @@ export default ({
                     pcm={pcm}
                     simpleImage={simpleImage}
                     complexImage={complexImage}
+                    map={map}
                     selectedMidi={selectedMidi}
                     selectedPCM={selectedPCM}
                     selectMidi={selectMidi}

@@ -351,6 +351,261 @@ export const PCM_STOP = 'PCM_STOP';
 
 export const PCM_END = 'PCM_END';
 
+/* Map data */
+
+export const MAP_PADDING = 64;
+
+export const MAP_DATA_SCHEMAS = {
+    THINGS: {
+        size: 10,
+        properties: [
+            {
+                name: 'x',
+                format: 'Int16',
+            },
+            {
+                name: 'y',
+                format: 'Int16',
+            },
+            {
+                name: 'angle',
+                format: 'Int16',
+            },
+            {
+                name: 'type',
+                format: 'Int16',
+            },
+            {
+                name: 'flags',
+                format: 'Int16',
+            },
+        ],
+    },
+    VERTEXES: {
+        size: 4,
+        properties: [
+            {
+                name: 'x',
+                format: 'Int16',
+            },
+            {
+                name: 'y',
+                format: 'Int16',
+            },
+        ],
+    },
+    LINEDEFS: {
+        size: 14,
+        properties: [
+            { name: 'vertex1' },
+            { name: 'vertex2' },
+            { name: 'flags' },
+            { name: 'action' },
+            { name: 'tag' },
+            { name: 'rightSidedef' },
+            { name: 'leftSidedef' },
+        ],
+    },
+    SIDEDEFS: {
+        size: 30,
+        properties: [
+            { name: 'xOffset' },
+            { name: 'yOffset' },
+            { name: 'upper', format: 'name' },
+            { name: 'lower', format: 'name' },
+            { name: 'middle', format: 'name' },
+            { name: 'sector' },
+        ],
+    },
+    SECTORS: {
+        size: 26,
+        properties: [
+            { name: 'zFloor' },
+            { name: 'zCeil' },
+            { name: 'floorFlat', format: 'name' },
+            { name: 'ceilFlat', format: 'name' },
+            { name: 'light' },
+            { name: 'type' },
+            { name: 'tag' },
+        ],
+    },
+    SEGS: {
+        size: 12,
+        properties: [
+            { name: 'vertex1' },
+            { name: 'vertex2' },
+            { name: 'angle' },
+            { name: 'linedef' },
+            { name: 'direction' },
+            { name: 'offset' },
+        ],
+    },
+    SSECTORS: {
+        size: 4,
+        properties: [
+            { name: 'segCount' },
+            { name: 'first' },
+        ],
+    },
+    NODES: {
+        size: 28,
+        properties: [
+            { name: 'partitionX' },
+            { name: 'partitionY' },
+            { name: 'changeX' },
+            { name: 'changeY' },
+            // different form original
+            { name: 'boundsRightTop' },
+            { name: 'boundsRightBottom' },
+            { name: 'boundsRightLeft' },
+            { name: 'boundsRightRight' },
+            // different form original
+            { name: 'boundsLeftTop' },
+            { name: 'boundsLeftBottom' },
+            { name: 'boundsLeftLeft' },
+            { name: 'boundsLeftRight' },
+            { name: 'childRight' },
+            { name: 'childLeft' },
+        ],
+    },
+};
+
+export const HEXEN_MAP_DATA_SCHEMAS = {
+    THINGS: {
+        size: 20,
+        properties: [
+            {
+                name: 'tid',
+                format: 'Int16',
+            },
+            {
+                name: 'x',
+                format: 'Int16',
+            },
+            {
+                name: 'y',
+                format: 'Int16',
+            },
+            {
+                name: 'z',
+                format: 'Int16',
+            },
+            {
+                name: 'angle',
+                format: 'Int16',
+            },
+            {
+                name: 'type',
+                format: 'Int16',
+            },
+            {
+                name: 'flags',
+                format: 'Int16',
+            },
+            {
+                name: 'special',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            // different from original
+            {
+                name: 'arg0',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg1',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg2',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg3',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg4',
+                format: 'Int8',
+                littleEndian: false,
+            },
+        ],
+    },
+    LINEDEFS: {
+        size: 16,
+        properties: [
+            { name: 'vertex1' },
+            { name: 'vertex2' },
+            { name: 'flags' },
+            {
+                name: 'action',
+                format: 'Uint8',
+                littleEndian: false,
+            },
+            // different from original
+            {
+                name: 'arg0',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg1',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg2',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg3',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            {
+                name: 'arg4',
+                format: 'Int8',
+                littleEndian: false,
+            },
+            { name: 'rightSidedef' },
+            { name: 'leftSidedef' },
+        ],
+    },
+};
+
+export const DEFAULT_MAP_PALETTE = {
+    background: {
+        blue: 0,
+        green: 0,
+        red: 0,
+    },
+    solidWall: {
+        blue: 0,
+        green: 0,
+        red: 255,
+    },
+    lowerWall: {
+        blue: 75,
+        green: 123,
+        red: 191,
+    },
+    upperWall: {
+        blue: 0,
+        green: 255,
+        red: 255,
+    },
+    sameHeight: {
+        blue: 131,
+        green: 131,
+        red: 131,
+    },
+};
+
 /* ANSI conversion */
 
 export const ANSI_CODE_PAGE_437_TABLES = [
