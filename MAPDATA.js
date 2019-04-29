@@ -48,5 +48,9 @@ function getMapSize({ vertices }) {
 }
 
 function createMapPreview({ data }) {
+    if (!data || !data.LINEDEFS) {
+        return null;
+    }
+  
     
 }
