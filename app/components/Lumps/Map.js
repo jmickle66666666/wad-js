@@ -1,6 +1,12 @@
 import React, { Fragment } from 'react';
 
-import style from './ImageLump.scss';
+import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
+
+import ErrorMessage from '../Messages/ErrorMessage';
+
+import style from './Map.scss';
+
+const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
 const getMapDataCount = ({ map, lumpName }) => (map && map[lumpName] && map[lumpName].length) || 0;
 
@@ -11,6 +17,15 @@ const renderMapDataDetails = ({ lump, map }) => {
     const vertexCount = getMapDataCount({ map, lumpName: 'VERTEXES' });
     return (
         <Fragment>
+            {map && (
+                <div className={style.wadLumpDetailsEntry}>
+                    Dimensions:
+                    {' '}
+                    {map.width}
+                    &times;
+                    {map.height}
+                </div>
+            )}
             <div className={style.wadLumpDetailsEntry}>
                 Things:
                 {' '}
@@ -42,6 +57,32 @@ const renderMapDataDetails = ({ lump, map }) => {
     );
 };
 
+const renderMapPreview = ({ lump, map }) => {
+    if (!offscreenCanvasSupported || (map && map.preview === null)) {
+        return (
+            <div>
+                <ErrorMessage message="Could not load image." />
+            </div>
+        );
+    }
+
+    if (!map) {
+        return (
+            <div className={style.loading}>Loading...</div>
+        );
+    }
+
+    return (
+        <img
+            title={`${lump.name} (${map.width}×${map.height})`}
+            alt={lump.name}
+            src={URL.createObjectURL(new Blob([map.preview]))}
+            width="100%"
+            height="100%"
+        />
+    );
+};
+
 export default ({
     wad,
     lump,
@@ -50,5 +91,6 @@ export default ({
 }) => (
     <Fragment>
         {!previewOnly && renderMapDataDetails({ lump, map })}
+        {renderMapPreview({ lump, map })}
     </Fragment>
 );
