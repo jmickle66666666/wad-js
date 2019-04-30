@@ -57,61 +57,65 @@ function buildColorIndexReferences(data, width, height) {
 }
 
 onmessage = async (message) => {
-    const {
-        wadId,
-        lump,
-        palette,
-    } = message.data;
-
-    const {
-        name,
-        type,
-        data,
-        width,
-        height,
-    } = lump;
-
-    // console.log(`Converting '${type}/${name}' from complex image to PNG data URL (WAD: '${wadId}') ...`);
-
-    const requestURL = `/complexImages/${wadId}/${name}`;
-    const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
-
-    if (cachedItem) {
-        postMessage({
+    try {
+        const {
             wadId,
-            lumpId: name,
-            lumpType: type,
-            output: cachedItem,
-        });
+            lump,
+            palette,
+        } = message.data;
 
-        return;
-    }
+        const {
+            name,
+            type,
+            data,
+            width,
+            height,
+        } = lump;
 
-    const colorIndexReferences = buildColorIndexReferences(data, width, height);
+        // console.log(`Converting '${type}/${name}' from complex image to PNG data URL (WAD: '${wadId}') ...`);
 
-    const image = await convertColorIndexesReferencesToBlob(
-        colorIndexReferences,
-        width,
-        height,
-        palette,
-    );
+        const requestURL = `/complexImages/${wadId}/${name}`;
+        const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
 
-    if (image && !image.error) {
-        // console.log(`Converted '${type}/${name}' from complex image to blob (WAD: '${wadId}').`);
-        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: image });
-        postMessage({
-            wadId,
-            lumpId: name,
-            lumpType: type,
-            output: image,
-        });
-    } else {
-        console.error(`Could not convert '${name}' from complex image to blob (WAD: '${wadId}').`);
-        postMessage({
-            wadId,
-            lumpId: name,
-            lumpType: type,
-            error: image.error,
-        });
+        if (cachedItem) {
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                output: cachedItem,
+            });
+
+            return;
+        }
+
+        const colorIndexReferences = buildColorIndexReferences(data, width, height);
+
+        const image = await convertColorIndexesReferencesToBlob(
+            colorIndexReferences,
+            width,
+            height,
+            palette,
+        );
+
+        if (image && !image.error) {
+            // console.log(`Converted '${type}/${name}' from complex image to blob (WAD: '${wadId}').`);
+            setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: image });
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                output: image,
+            });
+        } else {
+            console.error(`Could not convert '${name}' from complex image to blob (WAD: '${wadId}').`);
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                error: image.error,
+            });
+        }
+    } catch (error) {
+        console.error('Something bad happened in complexImageConverter.', { error });
     }
 };

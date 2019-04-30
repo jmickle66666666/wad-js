@@ -67,105 +67,109 @@ const firstDecodeTextMethod = input => decodeURI(new TextDecoder('utf-8').decode
 const processNewLines = text => text.split('\n');
 
 onmessage = async (message) => {
-    const {
-        wadId,
-        lumpType,
-        lumpId,
-        input,
-    } = message.data;
+    try {
+        const {
+            wadId,
+            lumpType,
+            lumpId,
+            input,
+        } = message.data;
 
-    // console.log(`Converting '${lumpType}/${lumpId}' to text (WAD: '${wadId}') ...`);
+        // console.log(`Converting '${lumpType}/${lumpId}' to text (WAD: '${wadId}') ...`);
 
-    let output = null;
-    let convertedFormat = 'text';
+        let output = null;
+        let convertedFormat = 'text';
 
-    if (lumpId === SNDINFO) {
+        if (lumpId === SNDINFO) {
+            postMessage({
+                wadId,
+                lumpType,
+                lumpId,
+                ignored: true,
+            });
+
+            return;
+        }
+
+        const requestURL = `/text/${wadId}/${lumpId}`;
+
+        if (ANSI_LUMPS.includes(lumpId)) {
+            // ANSI
+            convertedFormat = 'ANSI';
+
+            const cachedItem = await getCacheItemAsJson({ cacheId: wadId, requestURL });
+
+            if (cachedItem) {
+                postMessage({
+                    wadId,
+                    lumpType,
+                    lumpId,
+                    output: cachedItem,
+                    convertedFormat,
+                });
+
+                return;
+            }
+
+            output = parseAnsiScreen(input);
+
+            setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: JSON.stringify(output) });
+        } else {
+            const cachedItem = await getCacheItemAsText({ cacheId: wadId, requestURL });
+
+            if (cachedItem) {
+                postMessage({
+                    wadId,
+                    lumpType,
+                    lumpId,
+                    output: cachedItem,
+                    convertedFormat,
+                });
+
+                return;
+            }
+
+            // text
+            // rules out certain lumps that are definitively not meant to be rendered as text
+            let splitText = null;
+            try {
+                const decodedText = firstDecodeTextMethod(input);
+                splitText = processNewLines(decodedText);
+            } catch (err) {
+                const errorMessage = `Could not convert '${lumpId}' to text (WAD: '${wadId}').`;
+                const id = INVALID_TEXT;
+                const error = {
+                    id,
+                    message: errorMessage,
+                };
+
+                // console.error(error, { err });
+
+                postMessage({
+                    wadId,
+                    lumpType,
+                    lumpId,
+                    error,
+                });
+
+                return;
+            }
+
+            output = splitText;
+
+            setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
+        }
+
+        // console.log(`Converted '${lumpType}/${lumpId}' to text (WAD: '${wadId}').`);
+
         postMessage({
             wadId,
             lumpType,
             lumpId,
-            ignored: true,
+            output,
+            convertedFormat,
         });
-
-        return;
+    } catch (error) {
+        console.error('Something bad happened in textConverter.', { error });
     }
-
-    const requestURL = `/text/${wadId}/${lumpId}`;
-
-    if (ANSI_LUMPS.includes(lumpId)) {
-        // ANSI
-        convertedFormat = 'ANSI';
-
-        const cachedItem = await getCacheItemAsJson({ cacheId: wadId, requestURL });
-
-        if (cachedItem) {
-            postMessage({
-                wadId,
-                lumpType,
-                lumpId,
-                output: cachedItem,
-                convertedFormat,
-            });
-
-            return;
-        }
-
-        output = parseAnsiScreen(input);
-
-        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: JSON.stringify(output) });
-    } else {
-        const cachedItem = await getCacheItemAsText({ cacheId: wadId, requestURL });
-
-        if (cachedItem) {
-            postMessage({
-                wadId,
-                lumpType,
-                lumpId,
-                output: cachedItem,
-                convertedFormat,
-            });
-
-            return;
-        }
-
-        // text
-        // rules out certain lumps that are definitively not meant to be rendered as text
-        let splitText = null;
-        try {
-            const decodedText = firstDecodeTextMethod(input);
-            splitText = processNewLines(decodedText);
-        } catch (err) {
-            const errorMessage = `Could not convert '${lumpId}' to text (WAD: '${wadId}').`;
-            const id = INVALID_TEXT;
-            const error = {
-                id,
-                message: errorMessage,
-            };
-
-            // console.error(error, { err });
-
-            postMessage({
-                wadId,
-                lumpType,
-                lumpId,
-                error,
-            });
-
-            return;
-        }
-
-        output = splitText;
-
-        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
-    }
-
-    // console.log(`Converted '${lumpType}/${lumpId}' to text (WAD: '${wadId}').`);
-
-    postMessage({
-        wadId,
-        lumpType,
-        lumpId,
-        output,
-        convertedFormat,
-    });
 };

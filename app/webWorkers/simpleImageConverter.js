@@ -16,65 +16,69 @@ function buildColorIndexReferences(data) {
 }
 
 onmessage = async (message) => {
-    const {
-        wadId,
-        lump,
-        palette,
-    } = message.data;
+    try {
+        const {
+            wadId,
+            lump,
+            palette,
+        } = message.data;
 
-    const {
-        name,
-        type,
-        data,
-        width,
-        height,
-    } = lump;
+        const {
+            name,
+            type,
+            data,
+            width,
+            height,
+        } = lump;
 
-    // console.log(`Converting '${type}/${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
+        // console.log(`Converting '${type}/${name}' from simple color index references to PNG data URL (WAD: '${wadId}') ...`);
 
-    const requestURL = `/simpleImages/${wadId}/${name}`;
-    const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
+        const requestURL = `/simpleImages/${wadId}/${name}`;
+        const cachedItem = await getCacheItemAsBlob({ cacheId: wadId, requestURL });
 
-    if (cachedItem) {
+        if (cachedItem) {
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                output: cachedItem,
+            });
+
+            return;
+        }
+
+        const colorIndexReferences = buildColorIndexReferences(data);
+
+        const output = await convertColorIndexesReferencesToBlob(
+            colorIndexReferences,
+            width,
+            height,
+            palette,
+        );
+
+        if (output) {
+            // console.log(`Converted '${type}/${name}' from simple color index references to blob (WAD: '${wadId}').`);
+        } else {
+            console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
+
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+            });
+
+            return;
+        }
+
+        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
+
         postMessage({
             wadId,
             lumpId: name,
             lumpType: type,
-            output: cachedItem,
+            output,
         });
-
-        return;
+    } catch (error) {
+        console.error('Something bad happened in simpleImageConverter.', { error });
     }
-
-    const colorIndexReferences = buildColorIndexReferences(data);
-
-    const output = await convertColorIndexesReferencesToBlob(
-        colorIndexReferences,
-        width,
-        height,
-        palette,
-    );
-
-    if (output) {
-        // console.log(`Converted '${type}/${name}' from simple color index references to blob (WAD: '${wadId}').`);
-    } else {
-        console.error(`Could not convert '${name}' from simple color index references to blob (WAD: '${wadId}').`);
-
-        postMessage({
-            wadId,
-            lumpId: name,
-            lumpType: type,
-        });
-
-        return;
-    }
-
-    setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: output });
-
-    postMessage({
-        wadId,
-        lumpId: name,
-        lumpType: type,
-        output,
-    });
 };

@@ -298,61 +298,65 @@ function parseMapData({ data, mapFormat }) {
 }
 
 onmessage = async (message) => {
-    const {
-        wadId,
-        lump,
-        mapFormat, // not used for now
-        palette,
-    } = message.data;
-
-    const {
-        name,
-        type,
-        data,
-    } = lump;
-
-    console.log(`Parsing map '${type}/${name}' (WAD: '${wadId}') ...`);
-
-    let mapData = {};
     try {
-        mapData = parseMapData({ data, mapFormat });
-        const mapSizeData = getMapSize({ vertices: mapData.VERTEXES });
+        const {
+            wadId,
+            lump,
+            mapFormat, // not used for now
+            palette,
+        } = message.data;
 
-        if (mapSizeData) {
-            const mapPreview = await createMapPreview({
-                mapData,
-                mapFormat,
-                mapSizeData,
-                palette,
+        const {
+            name,
+            type,
+            data,
+        } = lump;
+
+        console.log(`Parsing map '${type}/${name}' (WAD: '${wadId}') ...`);
+
+        let mapData = {};
+        try {
+            mapData = parseMapData({ data, mapFormat });
+            const mapSizeData = getMapSize({ vertices: mapData.VERTEXES });
+
+            if (mapSizeData) {
+                const mapPreview = await createMapPreview({
+                    mapData,
+                    mapFormat,
+                    mapSizeData,
+                    palette,
+                });
+
+                mapData = {
+                    ...mapData,
+                    ...mapSizeData,
+                    preview: mapPreview,
+                };
+            }
+        } catch (error) {
+            console.error(`An error occurred while parsing map '${type}/${name}' (WAD: '${wadId}').`, { error });
+
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                error: error.message,
             });
 
-            mapData = {
-                ...mapData,
-                ...mapSizeData,
-                preview: mapPreview,
-            };
+            return;
         }
-    } catch (error) {
-        console.error(`An error occurred while parsing map '${type}/${name}' (WAD: '${wadId}').`, { error });
+
+        // console.log(`Parsed map '${type}/${name}' (WAD: '${wadId}') ...`);
+
+        console.log({ mapData });
 
         postMessage({
             wadId,
             lumpId: name,
             lumpType: type,
-            error: error.message,
+            output: mapData,
         });
-
-        return;
+    } catch (error) {
+        console.error('Something bad happened in mapParser.', { error });
     }
-
-    // console.log(`Parsed map '${type}/${name}' (WAD: '${wadId}') ...`);
-
-    console.log({ mapData });
-
-    postMessage({
-        wadId,
-        lumpId: name,
-        lumpType: type,
-        output: mapData,
-    });
 };

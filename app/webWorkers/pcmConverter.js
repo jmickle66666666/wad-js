@@ -22,53 +22,57 @@ function getDMXBody({ data }) {
 }
 
 onmessage = async (message) => {
-    const {
-        wadId,
-        lump,
-    } = message.data;
-
-    const {
-        name,
-        type,
-        data,
-    } = lump;
-
-    // console.log(`Converting '${type}/${name}' from DMX to PCM (WAD: '${wadId}') ...`);
-
-    const requestURL = `/pcms/${wadId}/${name}`;
-    const cachedItem = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL });
-
-    if (cachedItem) {
-        postMessage({
-            wadId,
-            lumpId: name,
-            lumpType: type,
-            output: cachedItem,
-        });
-
-        return;
-    }
-
     try {
-        const pcm = getDMXBody({ data });
-
-        console.log(`Converted '${type}/${name}' from DMX to PCM (WAD: '${wadId}').`);
-        setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: pcm });
-
-        postMessage({
+        const {
             wadId,
-            lumpId: name,
-            lumpType: type,
-            output: pcm,
-        });
+            lump,
+        } = message.data;
+
+        const {
+            name,
+            type,
+            data,
+        } = lump;
+
+        // console.log(`Converting '${type}/${name}' from DMX to PCM (WAD: '${wadId}') ...`);
+
+        const requestURL = `/pcms/${wadId}/${name}`;
+        const cachedItem = await getCacheItemAsArrayBuffer({ cacheId: wadId, requestURL });
+
+        if (cachedItem) {
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                output: cachedItem,
+            });
+
+            return;
+        }
+
+        try {
+            const pcm = getDMXBody({ data });
+
+            console.log(`Converted '${type}/${name}' from DMX to PCM (WAD: '${wadId}').`);
+            setCacheItemAsBlob({ cacheId: wadId, requestURL, responseData: pcm });
+
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                output: pcm,
+            });
+        } catch (error) {
+            console.error(`Could not convert '${name}' from DMX to PCM (WAD: '${wadId}').`, { error });
+
+            postMessage({
+                wadId,
+                lumpId: name,
+                lumpType: type,
+                error: error.message,
+            });
+        }
     } catch (error) {
-        console.error(`Could not convert '${name}' from DMX to PCM (WAD: '${wadId}').`, { error });
-
-        postMessage({
-            wadId,
-            lumpId: name,
-            lumpType: type,
-            error: error.message,
-        });
+        console.error('Something bad happened in pcmConverter.', { error });
     }
 };
