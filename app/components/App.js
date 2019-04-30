@@ -1,6 +1,5 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import ReactRouterPropTypes from 'react-router-prop-types';
-import moment from 'moment';
 
 import style from './App.scss';
 
@@ -63,7 +62,6 @@ export default class App extends AllMethods {
             playNextTrack: true,
             offlineMode: true,
         },
-        displayError: {},
     }
 
     async componentDidMount() {
@@ -564,14 +562,8 @@ export default class App extends AllMethods {
         return themeClassRules;
     }
 
-    componentDidCatch(error, info) {
-        document.title = `${prefixWindowtitle} / oops!`;
-        this.setState(() => ({ displayError: { error, info } }));
-    }
-
     render() {
         const {
-            displayError,
             wads,
             selectedWad,
             selectedLump,
@@ -588,63 +580,6 @@ export default class App extends AllMethods {
             showSettings,
             settings,
         } = this.state;
-
-        if (displayError.error) {
-            return (
-                <ThemeContext.Provider value={settings.theme}>
-                    <div className={`${style.app} ${this.getThemeClass()}`}>
-                        <Header />
-                        <div className={style.errorScreenOuter}>
-                            <div className={style.errorScreenInner}>
-                                <div className={style.errorMessage}>
-                                    <h2>An error occurred :(</h2>
-                                    Please
-                                    {' '}
-                                    <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        href={this.getWADsAsObjectURL()}
-                                        download={`wadjs_error_${moment().utc().format('YYYY_MM_DD_HH_mm_ss')}.json`}
-                                    >
-                                        download this file
-                                    </a>
-                                    {' '}
-                                    and use it with the message below to
-                                    {' '}
-                                    <a target="_blank" rel="noopener noreferrer" href={ISSUES}>report the issue</a>
-                                    {' '}
-                                    on GitHub.
-                                </div>
-                                <code>
-                                    Error:
-                                    {' '}
-                                    {displayError.error.message}
-                                    <br />
-                                    <br />
-                                    {displayError.error.stack && displayError.error.stack.split('\n').map((stack, index) => (
-                                        <Fragment key={index}>
-                                            {stack.replace('webpack-internal:///', '').replace('@', ' @ ')}
-                                            <br />
-                                        </Fragment>
-                                    ))}
-                                    {displayError.info.componentStack && displayError.info.componentStack.split('\n').map((stack, index) => (
-                                        <Fragment key={index}>
-                                            {stack}
-                                            <br />
-                                        </Fragment>
-                                    ))}
-                                    <br />
-                                    URL:
-                                    {' '}
-                                    {document.location.href}
-                                </code>
-                                <a className={style.errorBackLink} href="/">Reload the app.</a>
-                            </div>
-                        </div>
-                    </div>
-                </ThemeContext.Provider>
-            );
-        }
 
         return (
             <ThemeContext.Provider value={settings.theme}>
