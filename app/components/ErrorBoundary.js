@@ -38,7 +38,6 @@ export default class ErrorBoundary extends Component {
     }
 
     componentDidCatch(error, info) {
-        console.log('caught');
         document.title = `${prefixWindowtitle} / oops!`;
         this.setState(() => ({ displayError: { error, info } }));
     }
