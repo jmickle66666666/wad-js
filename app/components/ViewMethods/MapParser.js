@@ -32,10 +32,12 @@ export default class MapParser extends PCMConverter {
     }
 
     saveParsedMap = (payload) => {
-        this.saveConvertedLump({
-            targetObject: 'maps',
-            handleNextLump: this.sendNextMapLump,
-            payload,
+        this.catchErrors(() => {
+            this.saveConvertedLump({
+                targetObject: 'maps',
+                handleNextLump: this.sendNextMapLump,
+                payload,
+            });
         });
     }
 }

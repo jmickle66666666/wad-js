@@ -31,10 +31,12 @@ export default class TextConverterMethods extends SimpleImageConverter {
     }
 
     saveConvertedText = (payload) => {
-        this.saveConvertedLump({
-            targetObject: 'text',
-            handleNextLump: this.sendNextTextLump,
-            payload,
+        this.catchErrors(() => {
+            this.saveConvertedLump({
+                targetObject: 'text',
+                handleNextLump: this.sendNextTextLump,
+                payload,
+            });
         });
     }
 }

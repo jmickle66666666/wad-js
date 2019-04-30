@@ -39,10 +39,12 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
     }
 
     saveConvertedComplexImage = (payload) => {
-        this.saveConvertedLump({
-            targetObject: 'complexImages',
-            handleNextLump: this.sendNextComplexImageLump,
-            payload,
+        this.catchErrors(() => {
+            this.saveConvertedLump({
+                targetObject: 'complexImages',
+                handleNextLump: this.sendNextComplexImageLump,
+                payload,
+            });
         });
     }
 }

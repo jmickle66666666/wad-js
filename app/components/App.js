@@ -562,6 +562,19 @@ export default class App extends AllMethods {
         return themeClassRules;
     }
 
+    catchErrors = (wrappedFunction) => {
+        try {
+            wrappedFunction();
+        } catch (error) {
+            console.error('An error was caught.', { error });
+            this.addGlobalMessage({
+                type: 'error',
+                id: 'caughtError',
+                text: `An error occurred: ${error.message}.`,
+            });
+        }
+    }
+
     render() {
         const {
             wads,

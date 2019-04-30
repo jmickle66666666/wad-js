@@ -17,7 +17,7 @@ export default ({ wad, selectedLumpType, selectLumpType }) => (
                     layoutClass="helpCenterLayout"
                     iconClass={theme === DARK_THEME ? 'helpIconInverted' : null}
                 >
-                    <h2 className={style.wadLumpTypeTitle}>Lumps Types</h2>
+                    <h2 className={style.wadLumpTypeTitle}>Lumps</h2>
                 </Help>
                 <div className={style.wadListInner}>
                     <div className={style.wadLumpTypes}>

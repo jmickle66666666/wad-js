@@ -22,17 +22,21 @@ export default class PCMConverterMethods extends MidiConverter {
     }
 
     sendNextPCMLump = ({ nextLump, nextWadId }) => {
-        this.pcmConverter.postMessage({
-            wadId: nextWadId,
-            lump: nextLump,
+        this.catchErrors(() => {
+            this.pcmConverter.postMessage({
+                wadId: nextWadId,
+                lump: nextLump,
+            });
         });
     }
 
     saveConvertedPCM = (payload) => {
-        this.saveConvertedLump({
-            targetObject: 'pcms',
-            handleNextLump: this.sendNextPCMLump,
-            payload,
+        this.catchErrors(() => {
+            this.saveConvertedLump({
+                targetObject: 'pcms',
+                handleNextLump: this.sendNextPCMLump,
+                payload,
+            });
         });
     }
 }

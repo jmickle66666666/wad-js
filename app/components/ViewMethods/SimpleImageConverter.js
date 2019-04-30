@@ -39,10 +39,12 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
     }
 
     saveConvertedSimpleImage = (payload) => {
-        this.saveConvertedLump({
-            targetObject: 'simpleImages',
-            handleNextLump: this.sendNextSimpleImageLump,
-            payload,
+        this.catchErrors(() => {
+            this.saveConvertedLump({
+                targetObject: 'simpleImages',
+                handleNextLump: this.sendNextSimpleImageLump,
+                payload,
+            });
         });
     }
 }

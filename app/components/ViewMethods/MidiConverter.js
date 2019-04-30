@@ -36,9 +36,11 @@ export default class MidiConverterMethods extends TextConverter {
     }
 
     sendNextMidiLump = ({ nextLump, nextWadId }) => {
-        this.midiConverter.postMessage({
-            wadId: nextWadId,
-            lump: nextLump,
+        this.catchErrors(() => {
+            this.midiConverter.postMessage({
+                wadId: nextWadId,
+                lump: nextLump,
+            });
         });
     }
 
