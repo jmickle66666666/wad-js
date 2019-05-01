@@ -22,21 +22,21 @@ export default class TextConverterMethods extends SimpleImageConverter {
     }
 
     sendNextTextLump = ({ nextLump, nextWadId }) => {
-        this.textConverter.postMessage({
-            wadId: nextWadId,
-            lumpId: nextLump.name,
-            lumpType: nextLump.type,
-            input: nextLump.data,
+        this.catchErrors(() => {
+            this.textConverter.postMessage({
+                wadId: nextWadId,
+                lumpId: nextLump.name,
+                lumpType: nextLump.type,
+                input: nextLump.data,
+            });
         });
     }
 
     saveConvertedText = (payload) => {
-        this.catchErrors(() => {
-            this.saveConvertedLump({
-                targetObject: 'text',
-                handleNextLump: this.sendNextTextLump,
-                payload,
-            });
+        this.saveConvertedLump({
+            targetObject: 'text',
+            handleNextLump: this.sendNextTextLump,
+            payload,
         });
     }
 }

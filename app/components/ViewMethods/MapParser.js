@@ -22,22 +22,22 @@ export default class MapParser extends PCMConverter {
     }
 
     sendNextMapLump = ({ nextLump, nextWadId }) => {
-        const { wads } = this.state;
-        const nextWad = wads[nextWadId];
-        this.mapParser.postMessage({
-            wadId: nextWadId,
-            lump: nextLump,
-            palette: nextWad && nextWad.palette,
+        this.catchErrors(() => {
+            const { wads } = this.state;
+            const nextWad = wads[nextWadId];
+            this.mapParser.postMessage({
+                wadId: nextWadId,
+                lump: nextLump,
+                palette: nextWad && nextWad.palette,
+            });
         });
     }
 
     saveParsedMap = (payload) => {
-        this.catchErrors(() => {
-            this.saveConvertedLump({
-                targetObject: 'maps',
-                handleNextLump: this.sendNextMapLump,
-                payload,
-            });
+        this.saveConvertedLump({
+            targetObject: 'maps',
+            handleNextLump: this.sendNextMapLump,
+            payload,
         });
     }
 }

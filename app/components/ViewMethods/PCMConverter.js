@@ -31,12 +31,10 @@ export default class PCMConverterMethods extends MidiConverter {
     }
 
     saveConvertedPCM = (payload) => {
-        this.catchErrors(() => {
-            this.saveConvertedLump({
-                targetObject: 'pcms',
-                handleNextLump: this.sendNextPCMLump,
-                payload,
-            });
+        this.saveConvertedLump({
+            targetObject: 'pcms',
+            handleNextLump: this.sendNextPCMLump,
+            payload,
         });
     }
 }

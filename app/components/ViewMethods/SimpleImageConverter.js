@@ -29,22 +29,22 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
     }
 
     sendNextSimpleImageLump = ({ nextLump, nextWadId }) => {
-        const { wads } = this.state;
-        const nextWad = wads[nextWadId];
-        this.simpleImageConverter.postMessage({
-            wadId: nextWadId,
-            lump: nextLump,
-            palette: nextWad && nextWad.palette,
+        this.catchErrors(() => {
+            const { wads } = this.state;
+            const nextWad = wads[nextWadId];
+            this.simpleImageConverter.postMessage({
+                wadId: nextWadId,
+                lump: nextLump,
+                palette: nextWad && nextWad.palette,
+            });
         });
     }
 
     saveConvertedSimpleImage = (payload) => {
-        this.catchErrors(() => {
-            this.saveConvertedLump({
-                targetObject: 'simpleImages',
-                handleNextLump: this.sendNextSimpleImageLump,
-                payload,
-            });
+        this.saveConvertedLump({
+            targetObject: 'simpleImages',
+            handleNextLump: this.sendNextSimpleImageLump,
+            payload,
         });
     }
 }

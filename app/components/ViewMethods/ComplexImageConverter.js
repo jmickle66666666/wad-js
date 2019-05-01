@@ -29,22 +29,22 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
     }
 
     sendNextComplexImageLump = ({ nextLump, nextWadId }) => {
-        const { wads } = this.state;
-        const nextWad = wads[nextWadId];
-        this.complexImageConverter.postMessage({
-            wadId: nextWadId,
-            lump: nextLump,
-            palette: nextWad && nextWad.palette,
+        this.catchErrors(() => {
+            const { wads } = this.state;
+            const nextWad = wads[nextWadId];
+            this.complexImageConverter.postMessage({
+                wadId: nextWadId,
+                lump: nextLump,
+                palette: nextWad && nextWad.palette,
+            });
         });
     }
 
     saveConvertedComplexImage = (payload) => {
-        this.catchErrors(() => {
-            this.saveConvertedLump({
-                targetObject: 'complexImages',
-                handleNextLump: this.sendNextComplexImageLump,
-                payload,
-            });
+        this.saveConvertedLump({
+            targetObject: 'complexImages',
+            handleNextLump: this.sendNextComplexImageLump,
+            payload,
         });
     }
 }
