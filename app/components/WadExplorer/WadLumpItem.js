@@ -34,7 +34,7 @@ const renderImage = ({ lump, image }) => {
             <img
                 title={`${lump.name} (${lump.width}×${lump.height})`}
                 alt={lump.name}
-                src={image ? URL.createObjectURL(new Blob([image])) : lump.data}
+                src={image}
             />
         </div>
     );

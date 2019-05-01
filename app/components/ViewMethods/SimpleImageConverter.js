@@ -42,10 +42,27 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
     }
 
     saveConvertedSimpleImage = (payload) => {
+        const { output } = payload.data;
+
+        let payloadWithBlobUrl = {};
+        let blobUrl = null;
+
+        if (output) {
+            blobUrl = URL.createObjectURL(new Blob([output]));
+
+            payloadWithBlobUrl = {
+                ...payload,
+                data: {
+                    ...payload.data,
+                    output: blobUrl,
+                },
+            };
+        }
+
         this.saveConvertedLump({
             targetObject: 'simpleImages',
             handleNextLump: this.sendNextSimpleImageLump,
-            payload,
+            payload: payloadWithBlobUrl,
         });
     }
 }

@@ -42,10 +42,27 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
     }
 
     saveConvertedComplexImage = (payload) => {
+        const { output } = payload.data;
+
+        let payloadWithBlobUrl = {};
+        let blobUrl = null;
+
+        if (output) {
+            blobUrl = URL.createObjectURL(new Blob([output]));
+
+            payloadWithBlobUrl = {
+                ...payload,
+                data: {
+                    ...payload.data,
+                    output: blobUrl,
+                },
+            };
+        }
+
         this.saveConvertedLump({
             targetObject: 'complexImages',
             handleNextLump: this.sendNextComplexImageLump,
-            payload,
+            payload: payloadWithBlobUrl,
         });
     }
 }

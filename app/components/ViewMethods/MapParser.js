@@ -63,10 +63,30 @@ export default class MapParser extends PCMConverter {
     }
 
     saveParsedMap = (payload) => {
+        const { output } = payload.data;
+
+        let payloadWithBlobUrl = {};
+        let blobUrl = null;
+
+        if (output) {
+            blobUrl = URL.createObjectURL(new Blob([output.preview]));
+
+            payloadWithBlobUrl = {
+                ...payload,
+                data: {
+                    ...payload.data,
+                    output: {
+                        ...payload.data.output,
+                        preview: blobUrl,
+                    },
+                },
+            };
+        }
+
         this.saveConvertedLump({
             targetObject: 'maps',
             handleNextLump: this.sendNextMapLump,
-            payload,
+            payload: payloadWithBlobUrl,
         });
     }
 }

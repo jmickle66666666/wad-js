@@ -76,7 +76,7 @@ const renderMapPreview = ({ lump, map }) => {
         <img
             title={`${lump.name} (${map.width}×${map.height})`}
             alt={lump.name}
-            src={URL.createObjectURL(new Blob([map.preview]))}
+            src={map.preview}
             width="100%"
             height="100%"
         />
