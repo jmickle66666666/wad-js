@@ -356,6 +356,9 @@ onmessage = async (message) => {
             lumpType: type,
             output: mapData,
         });
+
+        // garbage collection
+        mapData = undefined;
     } catch (error) {
         console.error('Something bad happened in mapParser.', { error });
     }
