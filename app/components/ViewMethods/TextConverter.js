@@ -13,6 +13,7 @@ export default class TextConverterMethods extends SimpleImageConverter {
 
     addToTextConversionQueue({ wad }) {
         this.createAndStartQueue({
+            workerId: 'textConverter',
             workerStarter: () => this.startTextConverterWorker(),
             targetObject: 'text',
             formatCheck: lumpFormat => lumpFormat === 'text' || lumpFormat === 'ANSI',

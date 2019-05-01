@@ -20,6 +20,7 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
         }
 
         this.createAndStartQueue({
+            workerId: 'complexImageConverter',
             workerStarter: () => this.startComplexImageConverterWorker(),
             targetObject: 'complexImages',
             formatCheck: lumpFormat => lumpFormat === 'complexImage',

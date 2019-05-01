@@ -13,6 +13,7 @@ export default class MapParser extends PCMConverter {
 
     addToMapParserQueue({ wad }) {
         this.createAndStartQueue({
+            workerId: 'mapParser',
             workerStarter: () => this.startMapParserWorker(),
             targetObject: 'maps',
             lumpCheck: lump => lump.type === 'maps',

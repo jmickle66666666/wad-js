@@ -20,6 +20,7 @@ export default class MidiConverterMethods extends TextConverter {
 
     addToMidiConversionQueue({ wad }) {
         this.createAndStartQueue({
+            workerId: 'midiConverter',
             workerStarter: () => this.startMidiConverterWorker(),
             targetObject: 'midis',
             formatCheck: lumpFormat => lumpFormat === 'MUS' || lumpFormat === 'MIDI',

@@ -13,6 +13,7 @@ export default class PCMConverterMethods extends MidiConverter {
 
     addToPCMConversionQueue({ wad }) {
         this.createAndStartQueue({
+            workerId: 'pcmConverter',
             workerStarter: () => this.startPCMConverterWorker(),
             targetObject: 'pcms',
             formatCheck: lumpFormat => lumpFormat === 'DMX',

@@ -241,6 +241,7 @@ export default class WebWorkers extends MapParser {
     }
 
     createAndStartQueue = ({
+        workerId,
         workerStarter,
         targetObject,
         formatCheck,
@@ -294,7 +295,10 @@ export default class WebWorkers extends MapParser {
                 totalLumpCount += lumpCountInType;
 
                 if (firstLumpInType) {
-                    workerStarter();
+                    if (!this[workerId]) {
+                        workerStarter();
+                    }
+
                     handleNextLump({
                         nextLump: firstLumpInType,
                         nextWadId: wad.id,

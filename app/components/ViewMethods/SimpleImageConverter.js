@@ -20,6 +20,7 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
         }
 
         this.createAndStartQueue({
+            workerId: 'simpleImageConverter',
             workerStarter: () => this.startSimpleImageConverterWorker(),
             targetObject: 'simpleImages',
             formatCheck: lumpFormat => lumpFormat === 'simpleImage',
