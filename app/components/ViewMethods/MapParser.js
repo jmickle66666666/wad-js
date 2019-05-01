@@ -26,9 +26,37 @@ export default class MapParser extends PCMConverter {
         this.catchErrors(() => {
             const { wads } = this.state;
             const nextWad = wads[nextWadId];
+
+
+            const {
+                name,
+                type,
+                data,
+            } = nextLump;
+
+            const {
+                SECTORS,
+                LINEDEFS,
+                SIDEDEFS,
+                VERTEXES,
+                THINGS,
+            } = data;
+
+            const trimmedLump = {
+                name,
+                type,
+                data: {
+                    SECTORS,
+                    LINEDEFS,
+                    SIDEDEFS,
+                    VERTEXES,
+                    THINGS,
+                },
+            };
+
             this.mapParser.postMessage({
                 wadId: nextWadId,
-                lump: nextLump,
+                lump: trimmedLump,
                 palette: nextWad && nextWad.palette,
             });
         });
