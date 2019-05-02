@@ -1,3 +1,16 @@
+## v0.3.4: Web Worker safety net
+
+* After noticing that web workers can fail on devices with less memory, I implemented logic to retry spawning them.
+
+## v0.3.3
+
+* ObjectURL are now created when a Web Worker provides a converted lump instead of being created in the render method of the view.
+* wadJS is now capable of catching errors that occur when sending messages to Web Workers instead of making the whole app fail.
+
+## v0.3.2: Error boundaries
+
+* The app now does a better job at catching errors and displaying them to the user.
+
 ## v0.3.1: Map preview
 
 * wadJS is now able to create previews of the maps within a WAD.
