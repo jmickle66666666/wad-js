@@ -3,7 +3,7 @@ import MidiConverter from './MidiConverter';
 import PCMConverter from '../../webWorkers/pcmConverter';
 
 export default class PCMConverterMethods extends MidiConverter {
-    startPCMConverterWorker() {
+    startPCMConverterWorker = () => {
         this.startWorker({
             workerId: 'pcmConverter',
             workerClass: PCMConverter,
@@ -24,11 +24,22 @@ export default class PCMConverterMethods extends MidiConverter {
 
     sendNextPCMLump = ({ nextLump, nextWadId }) => {
         this.catchErrors(() => {
+            let nextLumpInQueue = {};
+            if (!nextLump && nextWadId) {
+                const result = this.getNextItemInQueue({
+                    targetObject: 'pcmConverter',
+                    wadId: nextWadId,
+                });
+
+                nextLumpInQueue = result.nextLump;
+            }
+
             this.pcmConverter.postMessage({
                 wadId: nextWadId,
-                lump: nextLump,
+                lump: nextLump || nextLumpInQueue,
             });
-        });
+        }, () => this.restartPCMConverterWorker({ nextLump, nextWadId }),
+        { displayErrorMessage: this.pcmConverterRetries === 3 });
     }
 
     saveConvertedPCM = (payload) => {
@@ -36,6 +47,20 @@ export default class PCMConverterMethods extends MidiConverter {
             targetObject: 'pcms',
             handleNextLump: this.sendNextPCMLump,
             payload,
+        });
+    }
+
+    restartPCMConverterWorker = (nextPayload) => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'pc',
+            text: 'Restarting pcmConverter...',
+        });
+
+        this.restartWebWorker({
+            workerId: 'pcmConverter',
+            workerStarter: this.startPCMConverterWorker,
+            sendNextLump: () => this.sendNextPCMLump(nextPayload),
         });
     }
 }

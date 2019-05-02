@@ -3,7 +3,7 @@ import PCMConverter from './PCMConverter';
 import mapParser from '../../webWorkers/mapParser';
 
 export default class MapParser extends PCMConverter {
-    startMapParserWorker() {
+    startMapParserWorker = () => {
         this.startWorker({
             workerId: 'mapParser',
             workerClass: mapParser,
@@ -27,12 +27,21 @@ export default class MapParser extends PCMConverter {
             const { wads } = this.state;
             const nextWad = wads[nextWadId];
 
+            let nextLumpInQueue = {};
+            if (!nextLump && nextWadId) {
+                const result = this.getNextItemInQueue({
+                    targetObject: 'mapParser',
+                    wadId: nextWadId,
+                });
+
+                nextLumpInQueue = result.nextLump;
+            }
 
             const {
                 name,
                 type,
                 data,
-            } = nextLump;
+            } = nextLump || nextLumpInQueue;
 
             const {
                 SECTORS,
@@ -53,13 +62,13 @@ export default class MapParser extends PCMConverter {
                     THINGS,
                 },
             };
-
             this.mapParser.postMessage({
                 wadId: nextWadId,
                 lump: trimmedLump,
                 palette: nextWad && nextWad.palette,
             });
-        });
+        }, () => this.restartMapParserWorker({ nextLump, nextWadId }),
+        { displayErrorMessage: this.mapParserRetries === 3 });
     }
 
     saveParsedMap = (payload) => {
@@ -87,6 +96,20 @@ export default class MapParser extends PCMConverter {
             targetObject: 'maps',
             handleNextLump: this.sendNextMapLump,
             payload: payloadWithBlobUrl,
+        });
+    }
+
+    restartMapParserWorker = (nextPayload) => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'mp',
+            text: 'Restarting mapParser...',
+        });
+
+        this.restartWebWorker({
+            workerId: 'mapParser',
+            workerStarter: this.startMapParserWorker,
+            sendNextLump: () => this.sendNextMapLump(nextPayload),
         });
     }
 }

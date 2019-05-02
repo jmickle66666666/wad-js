@@ -10,7 +10,7 @@ const {
 } = mediaSessionSupport();
 
 export default class MidiConverterMethods extends TextConverter {
-    startMidiConverterWorker() {
+    startMidiConverterWorker = () => {
         this.startWorker({
             workerId: 'midiConverter',
             workerClass: MidiConverter,
@@ -38,11 +38,22 @@ export default class MidiConverterMethods extends TextConverter {
 
     sendNextMidiLump = ({ nextLump, nextWadId }) => {
         this.catchErrors(() => {
+            let nextLumpInQueue = {};
+            if (!nextLump && nextWadId) {
+                const result = this.getNextItemInQueue({
+                    targetObject: 'midiConverter',
+                    wadId: nextWadId,
+                });
+
+                nextLumpInQueue = result.nextLump;
+            }
+
             this.midiConverter.postMessage({
                 wadId: nextWadId,
-                lump: nextLump,
+                lump: nextLump || nextLumpInQueue,
             });
-        });
+        }, () => this.restartMidiConverterWorker({ nextLump, nextWadId }),
+        { displayErrorMessage: this.midiConverterRetries === 3 });
     }
 
     saveConvertedMidi = (payload) => {
@@ -57,6 +68,20 @@ export default class MidiConverterMethods extends TextConverter {
                 }
             },
             payload,
+        });
+    }
+
+    restartMidiConverterWorker = (nextPayload) => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'mc',
+            text: 'Restarting midiConverter...',
+        });
+
+        this.restartWebWorker({
+            workerId: 'midiConverter',
+            workerStarter: this.startMidiConverterWorker,
+            sendNextLump: () => this.sendNextMidiLump(nextPayload),
         });
     }
 

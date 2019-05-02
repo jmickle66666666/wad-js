@@ -6,7 +6,7 @@ import ComplexImageConverter from '../../webWorkers/complexImageConverter';
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
 export default class ComplexImageConverterMethods extends MediaPlayer {
-    startComplexImageConverterWorker() {
+    startComplexImageConverterWorker = () => {
         this.startWorker({
             workerId: 'complexImageConverter',
             workerClass: ComplexImageConverter,
@@ -33,12 +33,24 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
         this.catchErrors(() => {
             const { wads } = this.state;
             const nextWad = wads[nextWadId];
+
+            let nextLumpInQueue = {};
+            if (!nextLump && nextWadId) {
+                const result = this.getNextItemInQueue({
+                    targetObject: 'complexImageConverter',
+                    wadId: nextWadId,
+                });
+
+                nextLumpInQueue = result.nextLump;
+            }
+
             this.complexImageConverter.postMessage({
                 wadId: nextWadId,
-                lump: nextLump,
+                lump: nextLump || nextLumpInQueue,
                 palette: nextWad && nextWad.palette,
             });
-        });
+        }, () => this.restartComplexImageConverterWorker({ nextLump, nextWadId }),
+        { displayErrorMessage: this.complexImageConverterRetries === 3 });
     }
 
     saveConvertedComplexImage = (payload) => {
@@ -63,6 +75,20 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
             targetObject: 'complexImages',
             handleNextLump: this.sendNextComplexImageLump,
             payload: payloadWithBlobUrl,
+        });
+    }
+
+    restartComplexImageConverterWorker = (nextPayload) => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'cic',
+            text: 'Restarting complexImageConverter...',
+        });
+
+        this.restartWebWorker({
+            workerId: 'complexImageConverter',
+            workerStarter: this.startComplexImageConverterWorker,
+            sendNextLump: () => this.sendNextComplexImageLump(nextPayload),
         });
     }
 }

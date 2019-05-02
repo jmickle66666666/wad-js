@@ -6,7 +6,7 @@ import SimpleImageConverter from '../../webWorkers/simpleImageConverter';
 const { supported: offscreenCanvasSupported } = offscreenCanvasSupport();
 
 export default class SimpleImageConverterMethods extends ComplexImageConverter {
-    startSimpleImageConverterWorker() {
+    startSimpleImageConverterWorker = () => {
         this.startWorker({
             workerId: 'simpleImageConverter',
             workerClass: SimpleImageConverter,
@@ -31,14 +31,26 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
 
     sendNextSimpleImageLump = ({ nextLump, nextWadId }) => {
         this.catchErrors(() => {
+            let nextLumpInQueue = {};
+            if (!nextLump && nextWadId) {
+                const result = this.getNextItemInQueue({
+                    targetObject: 'pcmConverter',
+                    wadId: nextWadId,
+                });
+
+                nextLumpInQueue = result.nextLump;
+            }
+
             const { wads } = this.state;
             const nextWad = wads[nextWadId];
+
             this.simpleImageConverter.postMessage({
                 wadId: nextWadId,
-                lump: nextLump,
+                lump: nextLump || nextLumpInQueue,
                 palette: nextWad && nextWad.palette,
             });
-        });
+        }, () => this.restartSimpleImageConverterWorker({ nextLump, nextWadId }),
+        { displayErrorMessage: this.simpleImageConverterRetries === 3 });
     }
 
     saveConvertedSimpleImage = (payload) => {
@@ -63,6 +75,20 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
             targetObject: 'simpleImages',
             handleNextLump: this.sendNextSimpleImageLump,
             payload: payloadWithBlobUrl,
+        });
+    }
+
+    restartSimpleImageConverterWorker = (nextPayload) => {
+        this.addGlobalMessage({
+            type: 'info',
+            id: 'sic',
+            text: 'Restarting simpleImageConverter...',
+        });
+
+        this.restartWebWorker({
+            workerId: 'simpleImageConverter',
+            workerStarter: this.startSimpleImageConverterWorker,
+            sendNextLump: () => this.sendNextSimpleImageLump(nextPayload),
         });
     }
 }
