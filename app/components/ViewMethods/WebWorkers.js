@@ -201,16 +201,19 @@ export default class WebWorkers extends MapParser {
         let nextLump = {};
 
         const currentWadQueue = queue[wadId];
-        const currentWadQueueLumpNames = Object.keys(queue[wadId][lumpType] || {});
-        if (currentWadQueueLumpNames.length > 0) {
-            const nextLumpName = currentWadQueueLumpNames[0];
-            nextLump = queue[wadId][lumpType][nextLumpName];
 
-            return {
-                nextLump,
-                nextLumpType: lumpType,
-                nextWadId: wadId,
-            };
+        if (lumpType) {
+            const currentWadQueueLumpNames = Object.keys(queue[wadId][lumpType] || {});
+            if (currentWadQueueLumpNames.length > 0) {
+                const nextLumpName = currentWadQueueLumpNames[0];
+                nextLump = queue[wadId][lumpType][nextLumpName];
+
+                return {
+                    nextLump,
+                    nextLumpType: lumpType,
+                    nextWadId: wadId,
+                };
+            }
         }
 
         const currentWadQueueLumpTypes = Object.keys(currentWadQueue || {});
@@ -403,6 +406,23 @@ export default class WebWorkers extends MapParser {
         });
     }
 
+    restartWebWorker = ({
+        workerId,
+        workerStarter,
+        sendNextLump,
+    }) => {
+        const retryCountVariable = `${workerId}Retries`;
+        const retryCount = this[retryCountVariable] || 0;
+        if (retryCount < 3) {
+            this[retryCountVariable] = retryCount + 1;
+            console.error(`Attempt #${retryCount + 1} to restart ${workerId}...`);
+            workerStarter();
+            sendNextLump();
+        } else {
+            console.error(`${workerId} has failed too many times.`);
+        }
+    }
+
     // Web worker instances control
 
     convertLumps = ({ wad }) => {
@@ -414,7 +434,7 @@ export default class WebWorkers extends MapParser {
         this.addToMapParserQueue({ wad });
     }
 
-    stopConvertingWadItems = ({ wadId }) => {
+    stopConvertingWad = ({ wadId }) => {
         this.removeWadFromTargetObject({ targetObject: 'text', wadId });
         this.removeWadFromTargetObject({ targetObject: 'midis', wadId }, this.updateMidiSelection);
         this.removeWadFromTargetObject({ targetObject: 'pcms', wadId });
@@ -430,5 +450,21 @@ export default class WebWorkers extends MapParser {
         this.clearTargetObject({ targetObject: 'simpleImages' });
         this.clearTargetObject({ targetObject: 'complexImages' });
         this.clearTargetObject({ targetObject: 'maps' });
+    }
+
+    // not used yet; should be triggered when webworkers postMessage are failing
+    restartConvertingWads = () => {
+        const { wads } = this.state;
+        const wadIds = Object.keys(wads || {});
+
+        for (let i = 0; i < wadIds.length; i++) {
+            const nextWadId = wadIds[i];
+            this.restartTextConverterWorker({ nextWadId });
+            this.restartMidiConverterWorker({ nextWadId });
+            this.restartPCMConverterWorker({ nextWadId });
+            this.restartSimpleImageConverterWorker({ nextWadId });
+            this.restartComplexImageConverterWorker({ nextWadId });
+            this.restartMapParserWorker({ nextWadId });
+        }
     }
 }
