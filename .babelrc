@@ -1,0 +1,16 @@
+{
+    "presets": [
+        "@babel/env",
+        "@babel/react"
+    ],
+    "plugins": [
+        [
+            "@babel/plugin-transform-runtime",
+            {
+                "regenerator": true
+            }
+        ],
+        "@babel/plugin-transform-arrow-functions",
+        "@babel/plugin-proposal-class-properties"
+    ]
+}

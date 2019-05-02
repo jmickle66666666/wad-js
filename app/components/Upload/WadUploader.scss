@@ -1,0 +1,81 @@
+.uploaderOuter {
+    background: rgb(210, 210, 210);
+    max-width: 500px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgb(150, 150, 150);
+    flex: 1;
+    margin: 25px;
+    margin-top: 70px;
+    align-self: flex-start;
+}
+
+.uploaderInner {
+    padding-top: 10px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 40px;
+    background: rgb(240, 240, 240);
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 0 0 10px 10px;
+}
+
+.uploaderTitle {
+    text-align: left;
+}
+
+.uploaderLabel {
+    margin-right: 5px;
+    width: 95px;
+}
+
+.uploaderInput {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.iWadInputInner {
+    flex: 1;
+}
+
+.remoteInputOuter {
+    flex: 1;
+}
+
+.remoteInputInner {
+    display: flex;
+    flex-direction: column;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.loaded {
+    margin-top: 10px;
+}
+
+.rocketContainer {
+    margin-top: -20px;
+    text-align: left;
+    overflow: hidden;
+}
+
+.loadingRocket {
+    height: 20px;
+}
+
+.processed {
+    margin-top: 6px;
+}
+
+.uploaderFeedback {
+    border: 1px solid black;
+    padding: 5px;
+    margin: 5px;
+}

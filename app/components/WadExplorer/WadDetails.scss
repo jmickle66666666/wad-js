@@ -1,0 +1,41 @@
+.wadDetailsTitling {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 35px;
+}
+
+.wadDetailsTitle {
+    color: rgb(240, 240, 240);
+    text-align: center;
+    cursor: pointer;
+}
+
+.light-theme {
+    .wadDetailsTitle {
+        color: rgb(45, 45, 45)
+    }
+}
+
+.wadDetailsAnchor {
+    margin-top: -62px;
+    position: absolute;
+}
+
+.deleteWad {
+    flex-shrink: 0;
+    height: 20px;
+    width: 18px;
+    margin-left: 7px;
+    margin-right: 7px;
+    cursor: pointer; 
+}
+
+.exportWad {
+    flex-shrink: 0;
+    height: 20px;
+    width: 16px;
+    margin-left: 7px;
+    margin-right: 7px;
+    cursor: pointer; 
+}

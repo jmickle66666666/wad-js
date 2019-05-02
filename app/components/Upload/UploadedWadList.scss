@@ -1,0 +1,41 @@
+.wadListOuter {
+    margin: 30px;
+    margin-left: 0;
+    flex: 1;
+}
+
+.wadListTitle {
+    flex-shrink: 0;
+    color: rgb(240, 240, 240);
+    text-align: center;
+}
+
+.wadListSubtitle {
+    color: rgb(240, 240, 240);
+    text-align: center;
+    margin-left: 50px;
+}
+
+.light-theme {
+    .wadListTitle, .wadListSubtitle {
+        color: rgb(45, 45, 45);
+    }
+}
+
+.deleteWads {
+    flex-shrink: 0;
+    margin-left: 7px;
+    margin-right: 7px;
+    height: 20px;
+    width: 18px;
+    cursor: pointer; 
+}
+
+.exportWads {
+    flex-shrink: 0;
+    height: 20px;
+    width: 16px;
+    margin-left: 7px;
+    margin-right: 7px;
+    cursor: pointer; 
+}

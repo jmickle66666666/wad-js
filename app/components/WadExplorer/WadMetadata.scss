@@ -1,0 +1,75 @@
+.wadMetadataOuter {
+    background: rgb(210, 210, 210);
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgb(150, 150, 150);
+    flex: 1;
+    margin: 25px;
+    align-self: flex-start;
+}
+
+.wadMetadataTitle {
+    text-align: left;
+    cursor: pointer;
+}
+
+.wadMetadataInner {
+    padding-top: 10px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 40px;
+    background: rgb(240, 240, 240);
+    box-sizing: border-box;
+    border-radius: 0 0 10px 10px;
+}
+
+.wadMetadataSubtitle {
+    margin-left: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgb(45, 45, 45);
+}
+
+.wadMetadataContent {
+    a {
+        color: rgb(140, 140, 140);
+
+        &:hover {
+            color: rgb(100, 100, 100);
+            text-decoration: none;
+        }
+    }
+}
+
+.wadMetadataTable {
+    display: flex;
+    flex-wrap: wrap;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.wadMetadataEntry {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 7px;
+    min-width: 50%;
+    justify-content: center;
+}
+
+.wadMetadataLabel {
+    width: 125px;
+    margin-right: 5px;
+}
+
+.wadMetadataValue {
+    width: 125px;
+}
+
+.wadMetadataCentered {
+    text-align: center;
+    width: 100%;
+}
+
+input.wadMetadataValue {
+    width: 125px;
+    box-sizing: border-box;
+}

@@ -1,0 +1,30 @@
+.wadLumpOuter {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    min-height: 150px;
+    margin: 10px;
+    border: 1px solid rgb(45, 45, 45);
+    box-shadow: 1px 1px 2px 0;
+    background: rgb(210, 210, 210);
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+.wadLumpSummary {
+    text-align: center;
+}
+
+.wadLumpImage {
+    display: flex;
+    justify-content: center;
+}
+
+.loading {
+    color: rgb(110, 110, 110);
+    font-size: 14px;
+}

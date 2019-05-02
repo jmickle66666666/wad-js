@@ -1,0 +1,16 @@
+.ansiOuter {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-family: 'IBM VGA8';
+    line-height: 100%;
+}
+
+.ansiLine {
+    display: flex;
+    max-width: 100%;
+
+    & span {
+        overflow: hidden;
+    }
+}

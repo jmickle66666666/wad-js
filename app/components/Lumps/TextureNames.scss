@@ -1,0 +1,14 @@
+.textureCount {
+    margin-bottom: 10px;
+}
+
+.textureNames {
+    display: flex;
+    flex-wrap: wrap;
+    cursor: pointer;
+
+    & > div {
+        margin-right: 15px;
+        width: 85px;
+    }
+}
