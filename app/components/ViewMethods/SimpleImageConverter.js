@@ -1,5 +1,6 @@
 import ComplexImageConverter from './ComplexImageConverter';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 import SimpleImageConverter from '../../webWorkers/simpleImageConverter';
 
@@ -49,8 +50,8 @@ export default class SimpleImageConverterMethods extends ComplexImageConverter {
                 lump: nextLump || nextLumpInQueue,
                 palette: nextWad && nextWad.palette,
             });
-        }, () => this.restartSimpleImageConverterWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.simpleImageConverterRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+        { displayErrorMessage: this.simpleImageConverterRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveConvertedSimpleImage = (payload) => {

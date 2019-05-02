@@ -1,5 +1,6 @@
 import PCMConverter from './PCMConverter';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import mapParser from '../../webWorkers/mapParser';
 
 export default class MapParser extends PCMConverter {
@@ -67,8 +68,8 @@ export default class MapParser extends PCMConverter {
                 lump: trimmedLump,
                 palette: nextWad && nextWad.palette,
             });
-        }, () => this.restartMapParserWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.mapParserRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+        { displayErrorMessage: this.mapParserRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveParsedMap = (payload) => {

@@ -1,5 +1,6 @@
 import MidiConverter from './MidiConverter';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import PCMConverter from '../../webWorkers/pcmConverter';
 
 export default class PCMConverterMethods extends MidiConverter {
@@ -38,8 +39,8 @@ export default class PCMConverterMethods extends MidiConverter {
                 wadId: nextWadId,
                 lump: nextLump || nextLumpInQueue,
             });
-        }, () => this.restartPCMConverterWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.pcmConverterRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+        { displayErrorMessage: this.pcmConverterRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveConvertedPCM = (payload) => {

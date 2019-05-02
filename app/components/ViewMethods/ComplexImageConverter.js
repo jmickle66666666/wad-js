@@ -1,5 +1,6 @@
 import MediaPlayer from './MediaPlayer';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import offscreenCanvasSupport from '../../lib/offscreenCanvasSupport';
 import ComplexImageConverter from '../../webWorkers/complexImageConverter';
 
@@ -49,8 +50,8 @@ export default class ComplexImageConverterMethods extends MediaPlayer {
                 lump: nextLump || nextLumpInQueue,
                 palette: nextWad && nextWad.palette,
             });
-        }, () => this.restartComplexImageConverterWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.complexImageConverterRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+        { displayErrorMessage: this.complexImageConverterRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveConvertedComplexImage = (payload) => {

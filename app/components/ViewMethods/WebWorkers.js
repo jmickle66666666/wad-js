@@ -1,4 +1,6 @@
 import MapParser from './MapParser';
+
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import { deleteCache } from '../../lib/cacheManager';
 
 export default class WebWorkers extends MapParser {
@@ -413,7 +415,7 @@ export default class WebWorkers extends MapParser {
     }) => {
         const retryCountVariable = `${workerId}Retries`;
         const retryCount = this[retryCountVariable] || 0;
-        if (retryCount < 3) {
+        if (retryCount < WEB_WORKER_MAX_RETRIES) {
             this[retryCountVariable] = retryCount + 1;
             console.error(`Attempt #${retryCount + 1} to restart ${workerId}...`);
             workerStarter();

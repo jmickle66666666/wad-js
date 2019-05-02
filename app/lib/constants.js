@@ -35,6 +35,8 @@ export const NO_BRAND_ENV = 'development-no-brand';
 
 export const SERVICE_WORKER_CORE = 'service-worker-core.js';
 
+export const WEB_WORKER_MAX_RETRIES = 10;
+
 /* Web worker internal errors */
 
 export const INVALID_TEXT = 'INVALID_TEXT';

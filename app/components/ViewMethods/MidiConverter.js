@@ -2,6 +2,7 @@ import TextConverter from './TextConverter';
 
 import MidiConverter from '../../webWorkers/midiConverter';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import mediaSessionSupport from '../../lib/mediaSessionSupport';
 
 const {
@@ -52,8 +53,8 @@ export default class MidiConverterMethods extends TextConverter {
                 wadId: nextWadId,
                 lump: nextLump || nextLumpInQueue,
             });
-        }, () => this.restartMidiConverterWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.midiConverterRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+        { displayErrorMessage: this.midiConverterRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveConvertedMidi = (payload) => {

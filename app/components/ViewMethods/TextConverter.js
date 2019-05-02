@@ -1,5 +1,6 @@
 import SimpleImageConverter from './SimpleImageConverter';
 
+import { WEB_WORKER_MAX_RETRIES } from '../../lib/constants';
 import TextConverter from '../../webWorkers/textConverter';
 
 export default class TextConverterMethods extends SimpleImageConverter {
@@ -38,8 +39,8 @@ export default class TextConverterMethods extends SimpleImageConverter {
                 wadId: nextWadId,
                 lump: nextLump || nextLumpInQueue,
             });
-        }, () => this.restartTextConverterWorker({ nextLump, nextWadId }),
-        { displayErrorMessage: this.textConverterRetries === 3 });
+        }, () => this.restartConvertingWads({ nextLump, nextWadId }),
+            { displayErrorMessage: this.textConverterRetries === WEB_WORKER_MAX_RETRIES });
     }
 
     saveConvertedText = (payload) => {
