@@ -277,7 +277,7 @@ export default class App extends AllMethods {
 
             return ({ wads: updatedWads });
         }, () => {
-            this.stopConvertingWadItems({ wadId });
+            this.stopConvertingWad({ wadId });
             deleteCache({ cacheId: wadId });
         });
     }
@@ -562,16 +562,22 @@ export default class App extends AllMethods {
         return themeClassRules;
     }
 
-    catchErrors = (wrappedFunction) => {
+    catchErrors = (wrappedFunction, errorCallback, { displayErrorMessage = false } = {}) => {
         try {
             wrappedFunction();
         } catch (error) {
             console.error('An error was caught.', { error });
-            this.addGlobalMessage({
-                type: 'error',
-                id: 'caughtError',
-                text: `An error occurred: ${error.message}.`,
-            });
+            if (displayErrorMessage) {
+                this.addGlobalMessage({
+                    type: 'error',
+                    id: 'caughtError',
+                    text: `An error occurred: ${error.message}.`,
+                });
+            }
+
+            if (errorCallback) {
+                errorCallback({ error });
+            }
         }
     }
 
