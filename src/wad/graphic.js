@@ -1,4 +1,4 @@
-var Graphic = {
+export const Graphic = {
     
     data : null,
     width : null,

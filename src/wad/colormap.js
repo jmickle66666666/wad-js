@@ -1,4 +1,4 @@
-var Colormap = {
+export const Colormap = {
     
     colormaps : null,
     

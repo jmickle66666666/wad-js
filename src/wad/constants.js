@@ -1,33 +1,33 @@
 //constants 
-var TEXT = "text";
-var MAP = "map";
-var MAPDATA = "mapdata";
-var MUSIC = "music";
-var MIDI = "midi";
-var MP3 = "mp3";
-var PNG = "png";
-var MUS = "mus";
-var GRAPHIC = "graphic";
-var FLAT = "flat";
-var MARKER = "marker";
-var PLAYPAL = "PLAYPAL";
-var COLORMAP = "COLORMAP";
-var ENDOOM = "ENDOOM";
-var PNAMES = "PNAMES";
-var TEXTUREx = ["TEXTURE1","TEXTURE2"];
-var GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_","SS_"];
-var FLAT_MARKERS = ["F_","FF_","F1_","F2_","F3_"];
-var MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS","TEXTMAP",
+export const TEXT = "text";
+export const MAP = "map";
+export const MAPDATA = "mapdata";
+export const MUSIC = "music";
+export const MIDI = "midi";
+export const MP3 = "mp3";
+export const PNG = "png";
+export const MUS = "mus";
+export const GRAPHIC = "graphic";
+export const FLAT = "flat";
+export const MARKER = "marker";
+export const PLAYPAL = "PLAYPAL";
+export const COLORMAP = "COLORMAP";
+export const ENDOOM = "ENDOOM";
+export const PNAMES = "PNAMES";
+export const TEXTUREx = ["TEXTURE1","TEXTURE2"];
+export const GRAPHIC_MARKERS = ["P_","PP_","P1_","P2_","P3_","S_","S2_","S3_","SS_"];
+export const FLAT_MARKERS = ["F_","FF_","F1_","F2_","F3_"];
+export const MAPLUMPS = ["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS","TEXTMAP",
                 "SSECTORS","NODES","SECTORS","REJECT","BLOCKMAP","BEHAVIOR","ZNODES"];
-var TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
+export const TEXTLUMPS = [ "DEHACKED", "MAPINFO", "ZMAPINFO", "EMAPINFO", 
                   "DMXGUS", "DMXGUSC", "WADINFO", "EMENUS", "MUSINFO",
                   "SNDINFO", "GLDEFS", "KEYCONF", "SCRIPTS", "LANGUAGE",
                   "DECORATE", "SBARINFO", "MENUDEF" ];
-var DATA_LUMPS = [ "PLAYPAL", "COLORMAP", "TEXTURE1", "TEXTURE2", "PNAMES",
+export const DATA_LUMPS = [ "PLAYPAL", "COLORMAP", "TEXTURE1", "TEXTURE2", "PNAMES",
                     "ENDOOM"];
 
-var DEFAULT_EXTENSION = "lmp";
-var EXTENSIONS = {
+export const DEFAULT_EXTENSION = "lmp";
+export const EXTENSIONS = {
     "text" : "txt",
     "mp3" : "mp3",
     "mus" : "mus",

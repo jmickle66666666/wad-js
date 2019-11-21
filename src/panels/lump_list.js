@@ -1,3 +1,17 @@
+import { Colormap } from '../wad/colormap';
+import { Endoom } from '../wad/endoom';
+import { Flat } from '../wad/flat';
+import { Graphic } from '../wad/graphic';
+import { MapData } from '../wad/mapdata';
+import { mus2midi } from '../wad/mus2midi';
+import { Playpal } from '../wad/playpal';
+
+import { getIcon } from '../ui';
+import { createAudioPreview } from './audio';
+import { createImagePreview } from './image';
+import { createMIDIPreview } from './midi';
+import { createTextPreview } from './text';
+
 function makeUL(array) {
 	// Create the list element:
 	var list = document.createElement('ol');
@@ -24,13 +38,13 @@ function makeUL(array) {
 	return list;
 }
 
-function createLumpList(wad) {
+export function createLumpList(wad, lumpnames) {
 	for (var i = 0; i < wad.lumps.length; i++) {
-		self.lumpnames.push([wad.detectLumpType(i),wad.lumps[i].name]);
+		lumpnames.push([wad.detectLumpType(i),wad.lumps[i].name]);
 	}
 
 	$('#lumpTable').show();
-	$('#lumpList').html(makeUL(self.lumpnames));
+	$('#lumpList').html(makeUL(lumpnames));
 
 	$('#lumpUL').delegate('li', 'click', function (e) {
 		$('#preview').html('');

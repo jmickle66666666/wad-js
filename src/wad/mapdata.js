@@ -1,4 +1,4 @@
-var MapData = {
+export const MapData = {
     
     // internal data
 

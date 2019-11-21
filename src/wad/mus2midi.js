@@ -3,7 +3,7 @@
 // Read a MUS file from a lump data (musinput) and output a MIDI blob
 //
 // Returns ArrayBuffer if successful, false otherwise
-function mus2midi(musinput) {
+export function mus2midi(musinput) {
     // MUS event codes
     var mus_releasekey          = 0x00;
     var mus_presskey            = 0x10;

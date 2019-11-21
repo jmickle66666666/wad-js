@@ -6,7 +6,9 @@ Utility for detecting what type a lump is.
 
 */
 
-Wad.detectLumpType = function (index) {
+import * as CONST from './constants';
+
+export const detectLumpType = function (index) {
     //TODO: get patches from pnames
 
     function headerCheck(dataView, header) {
@@ -20,31 +22,31 @@ Wad.detectLumpType = function (index) {
     //data-based detection
     if (this.lumps[index].size != 0) {
         var dv = new DataView(this.data, this.lumps[index].pos);
-        if (headerCheck(dv, 'MThd')) return MIDI;
-        if (headerCheck(dv, 'ID3')) return MP3;
-        if (headerCheck(dv, 'MUS')) return MUS;
-        if (headerCheck(dv, String.fromCharCode(137)+'PNG')) return PNG;
+        if (headerCheck(dv, 'MThd')) return CONST.MIDI;
+        if (headerCheck(dv, 'ID3')) return CONST.MP3;
+        if (headerCheck(dv, 'MUS')) return CONST.MUS;
+        if (headerCheck(dv, String.fromCharCode(137)+'PNG')) return CONST.PNG;
     }
 
     //name-based detection
     var name = this.lumps[index].name;
-    if (TEXTLUMPS.indexOf(name) >= 0) return TEXT;
-    if (MAPLUMPS.indexOf(name) >= 0) return MAPDATA;
-    if (DATA_LUMPS.indexOf(name) >= 0) return name;
-    if (/^MAP\d\d/.test(name)) return MAP;
-    if (/^E\dM\d/.test(name)) return MAP;
-    if (/_START$/.test(name)) return MARKER;
-    if (/_END$/.test(name)) return MARKER;
+    if (CONST.TEXTLUMPS.indexOf(name) >= 0) return CONST.TEXT;
+    if (CONST.MAPLUMPS.indexOf(name) >= 0) return CONST.MAPDATA;
+    if (CONST.DATA_LUMPS.indexOf(name) >= 0) return name;
+    if (/^MAP\d\d/.test(name)) return CONST.MAP;
+    if (/^E\dM\d/.test(name)) return CONST.MAP;
+    if (/_START$/.test(name)) return CONST.MARKER;
+    if (/_END$/.test(name)) return CONST.MARKER;
 
-    if (this.lumps[index].size == 0) return MARKER;
+    if (this.lumps[index].size == 0) return CONST.MARKER;
 
     //between markers
     for (var i = index; i>=0; i--) {
         if (/_END$/.test(this.lumps[i].name)) break;
         if (/_START$/.test(this.lumps[i].name)) {
-            pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_")+1);
-            if (GRAPHIC_MARKERS.indexOf(pre)>= 0) return GRAPHIC;
-            if (FLAT_MARKERS.indexOf(pre)>= 0) return FLAT;
+            let pre = this.lumps[i].name.substr(0,this.lumps[i].name.indexOf("_")+1);
+            if (CONST.GRAPHIC_MARKERS.indexOf(pre)>= 0) return CONST.GRAPHIC;
+            if (CONST.FLAT_MARKERS.indexOf(pre)>= 0) return CONST.FLAT;
         }
     }
     
@@ -78,7 +80,7 @@ Wad.detectLumpType = function (index) {
         return true;
     }
 
-    if (isDoomGFX(dv,this.lumps[index])) return GRAPHIC;
+    if (isDoomGFX(dv,this.lumps[index])) return CONST.GRAPHIC;
     
     return "...";
 }

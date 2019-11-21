@@ -1,4 +1,4 @@
-var Flat = {
+export const Flat = {
     
     data : null,
     

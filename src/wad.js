@@ -1,4 +1,9 @@
-var Wad = { 
+import { Playpal } from './wad/playpal';
+import { detectLumpType } from './wad/detectlump';
+
+let chunkReaderBlock = null;
+
+export const Wad = { 
 
     onProgress : null,
     onLoad : null,
@@ -9,6 +14,8 @@ var Wad = {
     lumps : [],
     playpal : null,
     errormsg: null,
+
+    detectLumpType : detectLumpType,
 
     error : function (msg) {
 	    self.errormsg = msg;
@@ -69,13 +76,13 @@ var Wad = {
     		   var lumpPos = dataReader.getInt32(p, true);
     		   var lumpSize = dataReader.getInt32(p + 4, true);
     		   var lumpName = "";
-    		   for (j = p + 8; j < p + 16; j++) {
+    		   for (let j = p + 8; j < p + 16; j++) {
     		       if (dataReader.getUint8(j) != 0) {
     			   lumpName += String.fromCharCode(dataReader.getUint8(j));
     		       }
     		   }
 
-    		   lumpEntry = { 
+    		   const lumpEntry = { 
     		       pos : lumpPos,
     		       size : lumpSize,
     		       name : lumpName

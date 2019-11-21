@@ -4,6 +4,10 @@
   "repository": "https://github.com/jmickle66666666/wad-js",
   "author": "jmickle66666666",
   "README": "Readme.md",
+  "scripts": {
+    "build": "webpack",
+    "build-dev": "webpack --mode=development"
+  },
   "devDependencies": {
     "browserify": "^13.3.0",
     "grunt": "^1.0.1",
@@ -11,6 +15,8 @@
     "grunt-contrib-uglify": "^0.5.1",
     "grunt-extract-sourcemap": "^0.1.19",
     "strscan": "^1.0.1",
-    "tree-model": "^1.0.6"
+    "tree-model": "^1.0.6",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }

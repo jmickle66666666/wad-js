@@ -1,4 +1,9 @@
+import { createLumpList } from './panels/lump_list';
+import { Wad } from './wad';
+import * as CONST from './wad/constants';
+
 var self = this;
+var errormsg = null;
 var lumpnames = ["a","b","c"];
 var fileInput = document.getElementById('fileInput');
 var fileDisplayArea = document.getElementById('test');
@@ -15,15 +20,15 @@ var progress = 0;
 var wad = Object.create(Wad);
 
 function initWad() {
-	self.errormsg = null;
+	errormsg = null;
 	$(errors).html("");
 	$('#preview').hide();
 	$('#lumpTable').hide();
 	$('#loading').show();
 	progress = 0;
 
-	if (self.lumpList) self.lumpList.destructor();
-	self.lumpnames = [];
+	if (lumpList) lumpList.destructor();
+	lumpnames = [];
 
 	wad = Object.create(Wad);
 	wad.onProgress = updateLoading;
@@ -52,23 +57,23 @@ var updateLoading = function(e) {
 	document.getElementById('loading').innerHTML = loadingbar + ']';
 };
 
-function getIcon(lumpType) {
-	if (lumpType == MAP) return '<img src="icons/map.png">';
-	if (lumpType == MAPDATA) return '<img src="icons/mapdata.png">';
-	if (lumpType == TEXT) return '<img src="icons/text.png">';
-	if (lumpType == PLAYPAL) return '<img src="icons/playpal.png">';
-	if (lumpType == ENDOOM) return '<img src="icons/endoom.png">';
-	if (lumpType == COLORMAP) return '<img src="icons/colormap.png">';
-	if (lumpType == MUSIC) return '<img src="icons/music.png">';
-	if (lumpType == MIDI) return '<img src="icons/midi.png">';
-	if (lumpType == MP3) return '<img src="icons/mp3.png">';
-	if (lumpType == GRAPHIC) return '<img src="icons/graphic.png">';
-	if (lumpType == FLAT) return '<img src="icons/flat.png">';
-	if (lumpType == PNG) return '<img src="icons/png.png">';
-	if (lumpType == MUS) return '<img src="icons/mus.png">';
-	if (lumpType == MARKER) return '<img src="icons/marker.png">';
-	if (lumpType == PNAMES) return '<img src="icons/pnames.png">';
-	if (TEXTUREx.indexOf(lumpType) >= 0) return '<img src="icons/texturex.png">';
+export function getIcon(lumpType) {
+	if (lumpType == CONST.MAP) return '<img src="icons/map.png">';
+	if (lumpType == CONST.MAPDATA) return '<img src="icons/mapdata.png">';
+	if (lumpType == CONST.TEXT) return '<img src="icons/text.png">';
+	if (lumpType == CONST.PLAYPAL) return '<img src="icons/playpal.png">';
+	if (lumpType == CONST.ENDOOM) return '<img src="icons/endoom.png">';
+	if (lumpType == CONST.COLORMAP) return '<img src="icons/colormap.png">';
+	if (lumpType == CONST.MUSIC) return '<img src="icons/music.png">';
+	if (lumpType == CONST.MIDI) return '<img src="icons/midi.png">';
+	if (lumpType == CONST.MP3) return '<img src="icons/mp3.png">';
+	if (lumpType == CONST.GRAPHIC) return '<img src="icons/graphic.png">';
+	if (lumpType == CONST.FLAT) return '<img src="icons/flat.png">';
+	if (lumpType == CONST.PNG) return '<img src="icons/png.png">';
+	if (lumpType == CONST.MUS) return '<img src="icons/mus.png">';
+	if (lumpType == CONST.MARKER) return '<img src="icons/marker.png">';
+	if (lumpType == CONST.PNAMES) return '<img src="icons/pnames.png">';
+	if (CONST.TEXTUREx.indexOf(lumpType) >= 0) return '<img src="icons/texturex.png">';
 	else return '<img src="icons/unknown.png">';
 }
 
@@ -76,10 +81,10 @@ function wadOnLoad(e) {
 
 	$('#loading').hide();
 
-	if (self.errormsg != null) {
-		$(errors).html(self.errormsg);
+	if (errormsg != null) {
+		$(errors).html(errormsg);
 	} else {
 
-		createLumpList(wad);
+		createLumpList(wad, lumpnames);
 	}
 }

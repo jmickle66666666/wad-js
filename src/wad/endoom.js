@@ -5,7 +5,7 @@ var EndoomChar = {
     blinking : false
 };
 
-var Endoom = {
+export const Endoom = {
     ansiColDark : [ [0, 0, 0], 
                     [0, 0, 170], 
                     [0, 170, 0],

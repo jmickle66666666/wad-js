@@ -1,7 +1,7 @@
 // Data: Raw data to create preview from
 // return: HTML element containing preview
 
-function createMIDIPreview(data) {
+export function createMIDIPreview(data) {
     // Create parent element
     var element = document.createElement('div');
 
