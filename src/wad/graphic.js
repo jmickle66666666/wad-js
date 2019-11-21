@@ -1,3 +1,5 @@
+import { hexToRgb } from './util';
+
 export const Graphic = {
     
     data : null,
@@ -77,7 +79,7 @@ export const Graphic = {
         var size = this.width * this.height;
         for (var i = 0; i < size; i++) {
             if (this.data[i] != -1) {
-                col = hexToRgb(wad.playpal.palettes[0][this.data[i]]);
+                const col = hexToRgb(wad.playpal.palettes[0][this.data[i]]);
                 imageData.data[(i*4)+0] = col.r;
                 imageData.data[(i*4)+1] = col.g;
                 imageData.data[(i*4)+2] = col.b;

@@ -1,3 +1,5 @@
+import { hexToRgb } from './util';
+
 export const Colormap = {
     
     colormaps : null,
@@ -24,7 +26,7 @@ export const Colormap = {
         var imageData = context.createImageData(256,34);
         for (var j = 0; j < 34; j++) {
             for (var i = 0; i < 256; i++) {
-                col = hexToRgb(wad.playpal.palettes[0][this.colormaps[j][i]]);
+                const col = hexToRgb(wad.playpal.palettes[0][this.colormaps[j][i]]);
                 imageData.data[(((j*256)+i)*4)+0] = col.r;
                 imageData.data[(((j*256)+i)*4)+1] = col.g;
                 imageData.data[(((j*256)+i)*4)+2] = col.b;

@@ -1,3 +1,5 @@
+import { hexToRgb } from './util';
+
 export const Playpal = {
     
     rgbToHex : function (r, g, b) {

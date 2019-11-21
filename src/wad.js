@@ -182,7 +182,7 @@ export const Wad = {
     },
     
     getLump: function (index) {
-        l = this.lumps[index];
+        const l = this.lumps[index];
         return this.data.slice(l.pos,l.pos+l.size);
     },
 

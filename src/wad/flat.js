@@ -1,3 +1,5 @@
+import { hexToRgb } from './util';
+
 export const Flat = {
     
     data : null,

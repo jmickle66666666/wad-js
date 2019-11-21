@@ -1,3 +1,6 @@
+import * as CONST from './constants';
+import { readName } from './util';
+
 export const MapData = {
     
     // internal data
@@ -38,15 +41,16 @@ export const MapData = {
         this.reject = null;
         this.blockmap = null;
         this.nodesExist;
+        let getMapLump = null;
 
         // Detect the format of the map first
         if (wad.lumps[mapLumpIndex + 1].name == "TEXTMAP") this.format = "UDMF";
         else {
             // Get a list of the map lumps associated with this map
             var pos = 1;
-            mapdatalumps = [];
-            nextLump = wad.lumps[mapLumpIndex + pos].name;
-            while (MAPLUMPS.indexOf(nextLump) > -1) {
+            const mapdatalumps = [];
+            let nextLump = wad.lumps[mapLumpIndex + pos].name;
+            while (CONST.MAPLUMPS.indexOf(nextLump) > -1) {
                 mapdatalumps.push(nextLump);
                 pos += 1;
                 if (wad.lumps.length == pos + mapLumpIndex) break;
@@ -56,7 +60,7 @@ export const MapData = {
             if (mapdatalumps.indexOf("BEHAVIOR") > -1) this.format = "Hexen";
             else this.format = "Doom";
 
-            function getMapLump(lumpName) {
+            getMapLump = function(lumpName) {
                 return wad.getLump(mapLumpIndex + mapdatalumps.indexOf(lumpName) + 1);
             }
         }
@@ -117,7 +121,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Thing);
+            const r = Object.create(Thing);
             r.x = dv.getInt16((i * entryLen) + 0, true);
             r.y = dv.getInt16((i * entryLen) + 2, true);
             r.angle = dv.getInt16((i * entryLen) + 4, true);
@@ -133,7 +137,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Vertex);
+            const r = Object.create(Vertex);
             r.x = dv.getInt16((i * entryLen) + 0,true);
             r.y = dv.getInt16((i * entryLen) + 2,true);
             this.vertexes.push(r);
@@ -146,7 +150,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Linedef);
+            const r = Object.create(Linedef);
             r.vx1 = dv.getUint16((i * entryLen) + 0,true);
             r.vx2 = dv.getUint16((i * entryLen) + 2,true);
             r.flags = dv.getUint16((i * entryLen) + 4,true);
@@ -164,7 +168,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Sidedef);
+            const r = Object.create(Sidedef);
             r.xOffset = dv.getUint16((i * entryLen) + 0,true);
             r.yOffset = dv.getUint16((i * entryLen) + 2,true);
             r.upper = readName(dv,(i * entryLen) + 4);
@@ -181,7 +185,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Sector);
+            const r = Object.create(Sector);
             r.zFloor = dv.getUint16((i * entryLen) + 0,true);
             r.zCeil = dv.getUint16((i * entryLen) + 2,true);
             r.floorFlat = readName(dv,(i*entryLen)+4);
@@ -199,7 +203,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Seg);
+            const r = Object.create(Seg);
             r.vx1 = dv.getUint16((i * entryLen) + 0,true);
             r.vx2 = dv.getUint16((i * entryLen) + 2,true);
             r.angle = dv.getUint16((i * entryLen) + 4,true);
@@ -216,7 +220,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Subsector);
+            const r = Object.create(Subsector);
             r.segCount = dv.getUint16((i * entryLen) + 0,true);
             r.first = dv.getUint16((i * entryLen) + 2,true);
             this.ssectors.push(r);
@@ -229,7 +233,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(Node);
+            const r = Object.create(Node);
             r.partitionX = dv.getUint16((i * entryLen) + 0,true);
             r.partitionY = dv.getUint16((i * entryLen) + 2,true);
             r.changeX = dv.getUint16((i * entryLen) + 4,true);
@@ -258,7 +262,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(HexenThing);
+            const r = Object.create(HexenThing);
             r.tid = dv.getInt16((i * entryLen) + 0, true);
             r.x = dv.getInt16((i * entryLen) + 2, true);
             r.y = dv.getInt16((i * entryLen) + 4, true);
@@ -280,7 +284,7 @@ export const MapData = {
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            r = Object.create(HexenLinedef);
+            const r = Object.create(HexenLinedef);
             r.vx1 = dv.getUint16((i * entryLen) + 0,true);
             r.vx2 = dv.getUint16((i * entryLen) + 2,true);
             r.flags = dv.getUint16((i * entryLen) + 4,true);
@@ -325,7 +329,7 @@ export const MapData = {
         context.imageSmoothingEnabled = false;
         for (var i = 0; i < this.linedefs.length; i++) {
             //draw every linedef
-            l = this.linedefs[i];
+            const l = this.linedefs[i];
             
             var x1 = l.getVx1(this).x;
             var y1 = l.getVx1(this).y;
