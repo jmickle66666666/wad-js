@@ -1,4 +1,5 @@
 # Web Tool <https://jmickle66666666.github.io/wad-js/>
+
 ### Front-end tool for editing wads on the web.
 Load a wad from your device, or by URL and view many different types of lumps.
 
@@ -25,10 +26,21 @@ Current features include:
 * Render Maps to Canvas
 
 ## Development
- 
-Follow the instructions [here](http://gruntjs.com/getting-started) on how to install and use Grunt.
 
-Install Browserify using npm with `npm install -g browserify`
+Simply clone this repository and run:
+
+```
+$ npm install
+$ npm run build-dev
+```
+
+You can also generate a minified version of the library using:
+
+```
+$ npm run build
+```
+
+If you would like to run the test application locally, download [Caddy](https://caddyserver.com/), extract the Caddy executable to the root of your working copy, and run it.  The test app will be accessible at `http://localhost:8080`.
 
 ## Why?
 
