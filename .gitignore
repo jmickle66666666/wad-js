@@ -50,3 +50,7 @@ node_modules/
 dist/
 dist/*.bundle.js
 dist/*.map
+
+# Caddy is useful as a test server
+/caddy
+/caddy.exe
