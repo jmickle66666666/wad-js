@@ -138,7 +138,7 @@ export function mus2midi(musinput) {
     // Write the end of track marker
     function writeEndTrack()
     {
-        endtrack = [0xFF, 0x2F, 0x00];
+        const endtrack = [0xFF, 0x2F, 0x00];
 
         writeTime(queuedtime);
 
