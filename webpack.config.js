@@ -39,11 +39,11 @@ const ui = {
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public/dist'),
     },
     resolve: {
         extensions: ['.js', '.ts']
     }
 };
 
-module.exports = [ wad, ui ];
+module.exports = [wad, ui];
