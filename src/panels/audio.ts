@@ -2,11 +2,11 @@
 // return: HTML element containing preview
 export function createAudioPreview(data) {
     // Create parent element
-    var element = document.createElement('div');
+    var element = document.createElement("div");
 
     // Create information panel
-    var textEl = document.createElement('div');
-    textnode = document.createTextNode('Artist - Title');
+    var textEl = document.createElement("div");
+    textnode = document.createTextNode("Artist - Title");
     textEl.appendChild(textnode);
 
     // Create audio player
@@ -16,17 +16,19 @@ export function createAudioPreview(data) {
     console.log(audioEl);
 
     // Create loop button
-    var loopCheckbox = document.createElement('input');
-    loopCheckbox.type = 'checkbox';
-    var label = document.createElement('span');
-    label.innerHTML = 'loop';
+    var loopCheckbox = document.createElement("input");
+    loopCheckbox.type = "checkbox";
+    var label = document.createElement("span");
+    label.innerHTML = "loop";
     label.for = loopCheckbox;
-    loopCheckbox.onclick = function () { audioEl.loop = loopCheckbox.checked; }
+    loopCheckbox.onclick = function() {
+        audioEl.loop = loopCheckbox.checked;
+    };
 
     // Add data to preview
     element.append(textEl);
     element.append(audioEl);
-    element.append(document.createElement('br'));
+    element.append(document.createElement("br"));
     element.append(loopCheckbox);
     element.append(label);
 

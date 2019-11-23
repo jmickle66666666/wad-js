@@ -1,2 +1,2 @@
-var TreeModel = require('tree-model');
-var StrScan = require('strscan').StringScanner;
+var TreeModel = require("tree-model");
+var StrScan = require("strscan").StringScanner;

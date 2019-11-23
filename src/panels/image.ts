@@ -2,7 +2,7 @@
 // return: HTML element containing preview
 export function createImagePreview(data) {
     // Create parent element
-    var element = document.createElement('div');
+    var element = document.createElement("div");
 
     // Create Image preview
     var blob = new Blob([data]);

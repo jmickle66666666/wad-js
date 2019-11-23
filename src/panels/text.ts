@@ -2,7 +2,7 @@
 // return: HTML element containing preview
 
 function createTextPreview(text) {
-    var textEl = document.createElement('div');
+    var textEl = document.createElement("div");
     textEl.id = "textPreview";
     textnode = document.createTextNode(text);
     textEl.appendChild(textnode);

@@ -6,10 +6,12 @@
   "README": "Readme.md",
   "scripts": {
     "build": "webpack",
-    "build-dev": "webpack --mode=development"
+    "build-dev": "webpack --mode=development",
+    "prettier": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
     "@types/jquery": "^3.3.31",
+    "prettier": "1.19.1",
     "strscan": "^1.0.1",
     "tree-model": "^1.0.6",
     "ts-loader": "^6.2.1",
