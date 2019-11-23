@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "sourceMap": true,
+        "target": "es5"
+    }
+}
