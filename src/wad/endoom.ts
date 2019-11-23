@@ -110,7 +110,7 @@ export const Endoom = {
             }
         }
 
-        charImage = document.createElement("img");
+        const charImage = document.createElement("img");
         charImage.src = "dos.png";
         charImage.onerror = function() {
             console.log("Image failed!");
@@ -139,7 +139,7 @@ export const Endoom = {
     onLoad: null,
 
     toCanvasBlinked: function() {
-        endoomDat = this.data;
+        const endoomDat = this.data;
 
         var canv = document.createElement("canvas");
         canv.width = 8 * 80;
@@ -158,7 +158,7 @@ export const Endoom = {
     },
 
     toCanvas: function() {
-        endoomDat = this.data;
+        const endoomDat = this.data;
 
         var canv = document.createElement("canvas");
         canv.width = 8 * 80;

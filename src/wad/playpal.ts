@@ -273,7 +273,7 @@ export const Playpal = {
         // 14 palettes to parse
         this.palettes = [];
         for (var i = 0; i < 14; i++) {
-            palette = [];
+            const palette = [];
             for (var j = 0; j < 256; j++) {
                 var red = dv.getUint8(i * 768 + j * 3 + 0);
                 var grn = dv.getUint8(i * 768 + j * 3 + 1);
@@ -298,19 +298,17 @@ export const Playpal = {
         //palettes are 256 colours, so the canvas is going
         //to be 16x16.
         for (var i = 0; i < 1024; i += 4) {
-            col = hexToRgb(this.palettes[0][i / 4]);
+            const col = hexToRgb(this.palettes[0][i / 4]);
             imageData.data[i] = col.r;
             imageData.data[i + 1] = col.g;
             imageData.data[i + 2] = col.b;
             imageData.data[i + 3] = 255;
         }
-        var newCanvas = document.createElement("CANVAS");
+        var newCanvas = document.createElement("canvas");
         newCanvas.width = imageData.width;
         newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
-        context.mozImageSmoothingEnabled = false;
-        context.msImageSmoothingEnabled = false;
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);
         return canvas;

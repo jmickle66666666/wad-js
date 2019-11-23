@@ -6,7 +6,7 @@ export function createImagePreview(data) {
 
     // Create Image preview
     var blob = new Blob([data]);
-    imageEl = new Image();
+    const imageEl = new Image();
     imageEl.src = URL.createObjectURL(blob);
 
     // Add data to preview

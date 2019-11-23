@@ -17,7 +17,7 @@ export const Wad = {
     detectLumpType: detectLumpType,
 
     error: function(msg) {
-        self.errormsg = msg;
+        this.errormsg = msg;
     },
 
     loadURL: function(url) {
@@ -95,7 +95,7 @@ export const Wad = {
                 self.onLoad();
                 self.playpal = Object.create(Playpal);
                 if (self.lumpExists("PLAYPAL")) {
-                    self.playpal.load(wad.getLumpByName("PLAYPAL"));
+                    self.playpal.load(self.getLumpByName("PLAYPAL"));
                 }
                 return;
             }
@@ -154,7 +154,7 @@ export const Wad = {
     getLumpByName: function(name) {
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
-                l = this.lumps[i];
+                const l = this.lumps[i];
                 return this.data.slice(l.pos, l.pos + l.size);
             }
         }
@@ -176,9 +176,9 @@ export const Wad = {
     },
 
     lumpDataToText: function(data) {
-        output = "";
+        let output = "";
         var dv = new DataView(data);
-        for (i = 0; i < data.byteLength; i++)
+        for (let i = 0; i < data.byteLength; i++)
             output += String.fromCharCode(dv.getUint8(i));
         return output;
     },

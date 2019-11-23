@@ -54,7 +54,7 @@ export const detectLumpType = function(index) {
     }
 
     //shitty name-based detection
-    if (/^D_/.test(name)) return MUSIC;
+    if (/^D_/.test(name)) return CONST.MUSIC;
 
     // Doom GFX check
     function isDoomGFX(dv, lump) {

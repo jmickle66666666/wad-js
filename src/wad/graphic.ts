@@ -90,13 +90,11 @@ export const Graphic = {
                 imageData.data[i * 4 + 3] = 0;
             }
         }
-        var newCanvas = document.createElement("CANVAS");
+        var newCanvas = document.createElement("canvas");
         newCanvas.width = imageData.width;
         newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
-        context.mozImageSmoothingEnabled = false;
-        context.msImageSmoothingEnabled = false;
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);
         return canvas;

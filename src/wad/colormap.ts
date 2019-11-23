@@ -7,7 +7,7 @@ export const Colormap = {
         var dv = new DataView(lumpData);
         this.colormaps = [];
         for (var i = 0; i < 34; i++) {
-            cm = [];
+            const cm = [];
             for (var j = 0; j < 256; j++) {
                 cm.push(dv.getUint8(i * 256 + j));
             }
@@ -33,13 +33,11 @@ export const Colormap = {
                 imageData.data[(j * 256 + i) * 4 + 3] = 255;
             }
         }
-        var newCanvas = document.createElement("CANVAS");
+        var newCanvas = document.createElement("canvas");
         newCanvas.width = imageData.width;
         newCanvas.height = imageData.height;
         newCanvas.getContext("2d").putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
-        context.mozImageSmoothingEnabled = false;
-        context.msImageSmoothingEnabled = false;
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);
         return canvas;
