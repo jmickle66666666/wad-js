@@ -216,7 +216,7 @@ export function createLumpList(wad, lumpnames) {
                 var but = document.createElement("button");
                 but.onclick = function viewAsText() {
                     $("#preview").html("");
-                    createTextPreview(self.wad.getLumpAsText(i));
+                    createTextPreview(wad.getLumpAsText(i));
                 };
                 but.innerHTML = "View as text";
                 $("#preview").append(but);
