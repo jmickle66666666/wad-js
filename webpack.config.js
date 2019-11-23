@@ -2,10 +2,10 @@ const path = require('path');
 
 const wad = {
     name: 'wad',
-    entry: {
-        wad: './src/wad.js',
-    },
     devtool: 'source-map',
+    entry: {
+        wad: './src/wad.ts',
+    },
     mode: "production",
     module: {
         rules: [{
@@ -17,15 +17,18 @@ const wad = {
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
+    },
+    resolve: {
+        extensions: ['.js', '.ts']
     }
 };
 
 const ui = {
     name: 'ui',
-    entry: {
-        ui: './src/ui.js',
-    },
     devtool: 'source-map',
+    entry: {
+        ui: './src/ui.ts',
+    },
     mode: "production",
     module: {
         rules: [{
@@ -37,6 +40,9 @@ const ui = {
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
+    },
+    resolve: {
+        extensions: ['.js', '.ts']
     }
 };
 
