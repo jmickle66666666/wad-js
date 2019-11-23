@@ -9,6 +9,7 @@
     "build-dev": "webpack --mode=development"
   },
   "devDependencies": {
+    "@types/jquery": "^3.3.31",
     "strscan": "^1.0.1",
     "tree-model": "^1.0.6",
     "ts-loader": "^6.2.1",
