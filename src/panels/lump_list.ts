@@ -7,11 +7,11 @@ import { MapData } from "../wad/mapdata";
 import { mus2midi } from "../wad/mus2midi";
 import { Playpal } from "../wad/playpal";
 
-import { getIcon } from "../ui";
 import { createAudioPreview } from "./audio";
 import { createImagePreview } from "./image";
 import { createMIDIPreview } from "./midi";
 import { createTextPreview } from "./text";
+import { getIcon } from "../ui";
 
 function makeUL(array) {
     // Create the list element:
@@ -103,7 +103,7 @@ export function createLumpList(wad, lumpnames) {
                     .appendChild(colormap.toCanvas(wad));
                 break;
             case CONST.FLAT:
-                const flat = Object.create(Flat);
+                const flat = new Flat();
                 flat.load(wad.getLump(i));
                 $("#preview").html("");
                 document
@@ -111,7 +111,7 @@ export function createLumpList(wad, lumpnames) {
                     .appendChild(flat.toCanvas(wad));
                 break;
             case CONST.GRAPHIC:
-                const graphic = Object.create(Graphic);
+                const graphic = new Graphic();
                 graphic.load(wad.getLump(i));
                 $("#preview").html("");
                 document

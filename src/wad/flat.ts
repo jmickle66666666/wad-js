@@ -1,17 +1,17 @@
 import { hexToRgb } from "./util";
 
-export const Flat = {
-    data: null,
+export class Flat {
+    data: number[];
 
-    load: function(lumpData) {
+    load(lumpData) {
         var dv = new DataView(lumpData);
         this.data = [];
         for (var j = 0; j < 4096; j++) {
             this.data.push(dv.getUint8(j));
         }
-    },
+    }
 
-    toCanvas: function(wad) {
+    toCanvas(wad) {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = 64 * scaleSize;
@@ -34,4 +34,4 @@ export const Flat = {
         context.drawImage(newCanvas, 0, 0);
         return canvas;
     }
-};
+}

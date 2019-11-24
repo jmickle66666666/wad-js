@@ -125,7 +125,7 @@ Doom uses a custom image format for most of the graphics in the game. These can 
 Example:
 
 ```
-graphic = Object.create(Graphic); // We create Graphic objects just like Wad object files
+const graphic = new Graphic(); // We create Graphic objects just like Wad object files
 graphic.load(wad.getLumpByName('PLAYA1'); // Load the player sprite from DOOM2.WAD
 canvas = graphic.toCanvas(); // Export the image to a HTML5 canvas
 document.body.appendChild(canvas); // Place the image on the page
@@ -135,7 +135,7 @@ document.body.appendChild(canvas); // Place the image on the page
 
 Flats are another image format used in Doom games, for sector floors and ceilings. The API matches the graphic format API.
 
-`flat = Object.create(Flat);`
+`const flat = new Flat();`
 Create a new Flat object
 `flat.load(data);`
 Load lump data into flat object

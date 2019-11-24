@@ -1,13 +1,13 @@
 import { hexToRgb } from "./util";
 
-export const Graphic = {
-    data: null,
-    width: null,
-    height: null,
-    xOffset: null,
-    yOffset: null,
+export class Graphic {
+    data: number[];
+    width: number;
+    height: number;
+    xOffset: number;
+    yOffset: number;
 
-    load: function(lumpData) {
+    load(lumpData) {
         var i;
         var j;
         var dv = new DataView(lumpData);
@@ -66,9 +66,9 @@ export const Graphic = {
                 position += 1;
             }
         }
-    },
+    }
 
-    toCanvas: function(wad) {
+    toCanvas(wad) {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = this.width * scaleSize;
@@ -99,4 +99,4 @@ export const Graphic = {
         context.drawImage(newCanvas, 0, 0);
         return canvas;
     }
-};
+}
