@@ -48,6 +48,9 @@ export const Wad = {
 
         reader.onload = function(e) {
             self.data = e.target.result;
+            if (typeof e.target.result === "string") {
+                throw new Error("Improper data type");
+            }
 
             // header reading
             var headerReader = new DataView(e.target.result);
@@ -118,7 +121,7 @@ export const Wad = {
             var toDownload = new Blob([this.data], { type: "octet/stream" });
             var a = document.createElement("a");
             document.body.appendChild(a);
-            a.style = "display:none;";
+            a.style.display = "none";
             var url = window.URL.createObjectURL(toDownload);
             a.href = url;
             a.download = name;
@@ -134,7 +137,7 @@ export const Wad = {
         });
         var a = document.createElement("a");
         document.body.appendChild(a);
-        a.style = "display:none;";
+        a.style.display = "none";
         var url = window.URL.createObjectURL(toDownload);
         a.href = url;
         a.download = name;

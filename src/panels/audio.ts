@@ -20,7 +20,7 @@ export function createAudioPreview(data) {
     loopCheckbox.type = "checkbox";
     var label = document.createElement("span");
     label.innerHTML = "loop";
-    label.for = loopCheckbox;
+    //label.for = loopCheckbox;
     loopCheckbox.onclick = function() {
         audioEl.loop = loopCheckbox.checked;
     };

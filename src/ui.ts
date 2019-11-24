@@ -5,7 +5,7 @@ import * as CONST from "./wad/constants";
 var self = this;
 var errormsg = null;
 var lumpnames = ["a", "b", "c"];
-var fileInput = document.getElementById("fileInput");
+var fileInput = document.getElementById("fileInput") as HTMLInputElement;
 var fileDisplayArea = document.getElementById("test");
 var lumpList = null;
 var loadingInterval;
@@ -38,7 +38,8 @@ function initWad() {
 
 function loadURL() {
     initWad();
-    wad.loadURL(document.getElementById("urlInput").value);
+    const urlInput = document.getElementById("urlInput") as HTMLInputElement;
+    wad.loadURL(urlInput.value);
 }
 
 fileInput.addEventListener("change", function(e) {
