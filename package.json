@@ -12,8 +12,6 @@
   "devDependencies": {
     "@types/jquery": "^3.3.31",
     "prettier": "1.19.1",
-    "strscan": "^1.0.1",
-    "tree-model": "^1.0.6",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.2",
     "webpack": "^4.41.2",
