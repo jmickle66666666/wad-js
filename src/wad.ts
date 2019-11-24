@@ -96,7 +96,7 @@ export const Wad = {
             if (offset >= blob.size) {
                 self.onProgress();
                 self.onLoad();
-                self.playpal = Object.create(Playpal);
+                self.playpal = new Playpal();
                 if (self.lumpExists("PLAYPAL")) {
                     self.playpal.load(self.getLumpByName("PLAYPAL"));
                 }

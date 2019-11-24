@@ -1,9 +1,9 @@
 import { hexToRgb } from "./util";
 
-export const Colormap = {
-    colormaps: null,
+export class Colormap {
+    colormaps: number[][];
 
-    load: function(lumpData) {
+    load(lumpData) {
         var dv = new DataView(lumpData);
         this.colormaps = [];
         for (var i = 0; i < 34; i++) {
@@ -13,9 +13,9 @@ export const Colormap = {
             }
             this.colormaps.push(cm);
         }
-    },
+    }
 
-    toCanvas: function(wad) {
+    toCanvas(wad) {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = 256 * scaleSize;
@@ -42,4 +42,4 @@ export const Colormap = {
         context.drawImage(newCanvas, 0, 0);
         return canvas;
     }
-};
+}

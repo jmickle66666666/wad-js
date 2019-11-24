@@ -1,14 +1,10 @@
 import { hexToRgb } from "./util";
 
-export const Playpal = {
-    rgbToHex: function(r, g, b) {
-        return (
-            "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
-        );
-    },
+export class Playpal {
+    palettes: string[][];
 
-    palettes: [
-        [
+    constructor() {
+        const originalPalette = [
             "#000000",
             "#1f170b",
             "#170f07",
@@ -265,10 +261,18 @@ export const Playpal = {
             "#9f009b",
             "#6f006b",
             "#a76b6b"
-        ]
-    ],
+        ];
+        this.palettes = [];
+        this.palettes.push(originalPalette);
+    }
 
-    load: function(lumpData) {
+    rgbToHex(r, g, b) {
+        return (
+            "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+        );
+    }
+
+    load(lumpData) {
         var dv = new DataView(lumpData);
         // 14 palettes to parse
         this.palettes = [];
@@ -282,9 +286,9 @@ export const Playpal = {
             }
             this.palettes.push(palette);
         }
-    },
+    }
 
-    toCanvas: function() {
+    toCanvas() {
         var scaleSize = 16;
         //then lets make a canvas to put this image onto
         var canvas = document.createElement("canvas");
@@ -313,4 +317,4 @@ export const Playpal = {
         context.drawImage(newCanvas, 0, 0);
         return canvas;
     }
-};
+}

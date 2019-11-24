@@ -87,7 +87,7 @@ export function createLumpList(wad, lumpnames) {
                 $("#preview").append(createTextPreview(wad.getLumpAsText(i)));
                 break;
             case CONST.PLAYPAL:
-                const playpal = Object.create(Playpal);
+                const playpal = new Playpal();
                 playpal.load(wad.getLump(i));
                 $("#preview").html("");
                 document
@@ -95,7 +95,7 @@ export function createLumpList(wad, lumpnames) {
                     .appendChild(playpal.toCanvas());
                 break;
             case CONST.COLORMAP:
-                const colormap = Object.create(Colormap);
+                const colormap = new Colormap();
                 colormap.load(wad.getLump(i));
                 $("#preview").html("");
                 document
