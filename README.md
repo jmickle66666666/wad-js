@@ -146,7 +146,7 @@ Return new canvas object with the flat's data rendered to it
 
 The PLAYPAL lump is the palette used in the Doom wad, present in the IWAD files. If no PLAYPAL is present, a copy of the DOOM/2.WAD palette is used internally for graphics rendering.
 
-`playpal = Object.Create(Playpal);`
+`const playpal = new Playpal();`
 Create a new Playpal object
 `playpal.load(data);`
 Load lump data into playpal object
@@ -157,7 +157,7 @@ Render playpal to a canvas object and return it
 
 The COLORMAP lump is used in Doom for lighting effects. It is an indexed list for each color in the palette with a ramp to darkness.
 
-`colormap = Object.Create(Colormap);`
+`const colormap = new Colormap();`
 Create a new Colormap object
 `colormap.load(data);`
 Load lump data into colormap object
