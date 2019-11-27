@@ -17,7 +17,7 @@ $("#loading").hide();
 
 var progress = 0;
 
-var wad = Object.create(Wad);
+var wad = new Wad();
 
 function initWad() {
     errormsg = null;
@@ -30,7 +30,7 @@ function initWad() {
     if (lumpList) lumpList.destructor();
     lumpnames = [];
 
-    wad = Object.create(Wad);
+    wad = new Wad();
     wad.onProgress = updateLoading;
 
     wad.onLoad = wadOnLoad;
@@ -49,7 +49,7 @@ fileInput.addEventListener("change", function(e) {
     wad.load(file);
 });
 
-var updateLoading = function(e) {
+var updateLoading = function() {
     progress++;
     var bar = (36 * progress) / ((wad.numlumps * 16) / 128);
     var loadingbar = "[";
@@ -79,7 +79,7 @@ export function getIcon(lumpType) {
     else return '<img src="icons/unknown.png">';
 }
 
-function wadOnLoad(e) {
+function wadOnLoad() {
     $("#loading").hide();
 
     if (errormsg != null) {

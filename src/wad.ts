@@ -3,24 +3,35 @@ import { detectLumpType } from "./wad/detectlump";
 
 let chunkReaderBlock = null;
 
-export const Wad = {
-    onProgress: null,
-    onLoad: null,
-    ident: "",
-    numlumps: -1,
-    dictpos: -1,
-    data: null,
-    lumps: [],
-    playpal: null,
-    errormsg: null,
+interface LumpEntry {
+    pos: number;
+    size: number;
+    name: string;
+};
 
-    detectLumpType: detectLumpType,
+export class Wad {
+    onProgress: () => void;
+    onLoad: () => void;
+    ident: string;
+    numlumps: number;
+    dictpos: number;
+    data: string | ArrayBuffer;
+    lumps: LumpEntry[];
+    playpal: Playpal;
+    errormsg: string;
 
-    error: function(msg) {
+    detectLumpType: typeof detectLumpType;
+
+    constructor() {
+        this.ident = "";
+        this.detectLumpType = detectLumpType;
+    }
+
+    error(msg) {
         this.errormsg = msg;
-    },
+    }
 
-    loadURL: function(url) {
+    loadURL(url) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.responseType = "blob";
@@ -32,9 +43,9 @@ export const Wad = {
             }
         };
         xhr.send();
-    },
+    }
 
-    load: function(blob) {
+    load(blob) {
         var self = this;
 
         self.lumps = [];
@@ -113,9 +124,9 @@ export const Wad = {
             r.onprogress = self.onProgress;
             r.readAsArrayBuffer(b);
         };
-    },
+    }
 
-    save: function() {
+    save() {
         var name = prompt("Save as...", "output.wad");
         if (this.data != null) {
             var toDownload = new Blob([this.data], { type: "octet/stream" });
@@ -128,9 +139,9 @@ export const Wad = {
             a.click();
             window.URL.revokeObjectURL(url);
         }
-    },
+    }
 
-    saveLump: function(index) {
+    saveLump(index) {
         var name = this.lumps[index].name + ".lmp";
         var toDownload = new Blob([this.getLump(index)], {
             type: "octet/stream"
@@ -143,18 +154,18 @@ export const Wad = {
         a.download = name;
         a.click();
         window.URL.revokeObjectURL(url);
-    },
+    }
 
-    lumpExists: function(name) {
+    lumpExists(name) {
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 return true;
             }
         }
         return false;
-    },
+    }
 
-    getLumpByName: function(name) {
+    getLumpByName(name) {
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 const l = this.lumps[i];
@@ -162,31 +173,31 @@ export const Wad = {
             }
         }
         return null;
-    },
+    }
 
-    getLumpIndexByName: function(name) {
+    getLumpIndexByName(name) {
         for (var i = this.numlumps - 1; i >= 0; i--) {
             if (this.lumps[i].name == name) {
                 return i;
             }
         }
         return null;
-    },
+    }
 
-    getLumpAsText: function(index) {
+    getLumpAsText(index) {
         var dat = this.getLump(index);
         return this.lumpDataToText(dat);
-    },
+    }
 
-    lumpDataToText: function(data) {
+    lumpDataToText(data) {
         let output = "";
         var dv = new DataView(data);
         for (let i = 0; i < data.byteLength; i++)
             output += String.fromCharCode(dv.getUint8(i));
         return output;
-    },
+    }
 
-    getLump: function(index) {
+    getLump(index) {
         const l = this.lumps[index];
         return this.data.slice(l.pos, l.pos + l.size);
     }
