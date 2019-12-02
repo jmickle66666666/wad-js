@@ -131,7 +131,7 @@ export function createLumpList(wad, lumpnames) {
 
                 break;
             case CONST.MAP:
-                const map = Object.create(MapData);
+                const map = new MapData();
                 map.load(wad, wad.lumps[i].name);
                 $("#preview").html("");
                 var width =
@@ -152,7 +152,7 @@ export function createLumpList(wad, lumpnames) {
                     );
                 break;
             case CONST.MAPDATA:
-                const mapdata = Object.create(MapData);
+                const mapdata = new MapData();
                 switch (wad.lumps[i].name) {
                     case "VERTEXES":
                         mapdata.parseVertexes(wad.getLump(i));

@@ -1,45 +1,48 @@
+import { Wad } from "../wad";
+
 import * as CONST from "./constants";
 import { readName } from "./util";
 
-export const MapData = {
+type ThingTable = { [key: number]: number };
+
+export class MapData {
     // internal data
 
-    things: null,
-    vertexes: null,
-    linedefs: null,
-    sidedefs: null,
-    segs: null,
-    ssectors: null,
-    nodes: null,
-    sectors: null,
-    reject: null,
-    blockmap: null,
-    wad: null,
+    things: (Thing | HexenThing)[];
+    vertexes: Vertex[];
+    linedefs: (Linedef | HexenLinedef)[];
+    sidedefs: Sidedef[];
+    segs: Seg[];
+    ssectors: Subsector[];
+    nodes: Node[];
+    sectors: Sector[];
+    reject: null;
+    blockmap: null;
+    wad: Wad;
 
-    thingTable: null,
+    thingTable: ThingTable;
 
     // map information
 
-    name: null,
-    music: null,
-    format: null,
+    name: string;
+    music: string;
+    format: "Doom" | "Hexen" | "UDMF";
 
     //boundaries
 
-    top: null,
-    left: null,
-    bottom: null,
-    right: null,
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
 
     //functions
 
-    load: function(wad, mapname) {
+    load(wad: Wad, mapname: string) {
         var mapLumpIndex = wad.getLumpIndexByName(mapname);
 
         this.wad = wad;
         this.reject = null;
         this.blockmap = null;
-        this.nodesExist;
         let getMapLump = null;
 
         // Detect the format of the map first
@@ -102,9 +105,9 @@ export const MapData = {
         }
         if (Doom2DefaultMusic[mapname] != null)
             this.music = Doom2DefaultMusic[mapname];
-    },
+    }
 
-    calculateBoundaries: function() {
+    calculateBoundaries() {
         this.top = this.vertexes[0].y;
         this.left = this.vertexes[0].x;
         this.bottom = this.vertexes[0].y;
@@ -117,15 +120,15 @@ export const MapData = {
             if (this.vertexes[i].y > this.bottom)
                 this.bottom = this.vertexes[i].y;
         }
-    },
+    }
 
-    parseThings: function(lump) {
+    parseThings(lump) {
         this.things = [];
         var entryLen = 10;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Thing);
+            const r = new Thing();
             r.x = dv.getInt16(i * entryLen + 0, true);
             r.y = dv.getInt16(i * entryLen + 2, true);
             r.angle = dv.getInt16(i * entryLen + 4, true);
@@ -133,28 +136,28 @@ export const MapData = {
             r.flags = dv.getInt16(i * entryLen + 8, true);
             this.things.push(r);
         }
-    },
+    }
 
-    parseVertexes: function(lump) {
+    parseVertexes(lump) {
         this.vertexes = [];
         var entryLen = 4;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Vertex);
+            const r = new Vertex();
             r.x = dv.getInt16(i * entryLen + 0, true);
             r.y = dv.getInt16(i * entryLen + 2, true);
             this.vertexes.push(r);
         }
-    },
+    }
 
-    parseLinedefs: function(lump) {
+    parseLinedefs(lump) {
         this.linedefs = [];
         var entryLen = 14;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Linedef);
+            const r = new Linedef();
             r.vx1 = dv.getUint16(i * entryLen + 0, true);
             r.vx2 = dv.getUint16(i * entryLen + 2, true);
             r.flags = dv.getUint16(i * entryLen + 4, true);
@@ -164,15 +167,15 @@ export const MapData = {
             r.left = dv.getUint16(i * entryLen + 12, true);
             this.linedefs.push(r);
         }
-    },
+    }
 
-    parseSidedefs: function(lump) {
+    parseSidedefs(lump) {
         this.sidedefs = [];
         var entryLen = 30;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Sidedef);
+            const r = new Sidedef();
             r.xOffset = dv.getUint16(i * entryLen + 0, true);
             r.yOffset = dv.getUint16(i * entryLen + 2, true);
             r.upper = readName(dv, i * entryLen + 4);
@@ -181,15 +184,15 @@ export const MapData = {
             r.sector = dv.getUint16(i * entryLen + 28, true);
             this.sidedefs.push(r);
         }
-    },
+    }
 
-    parseSectors: function(lump) {
+    parseSectors(lump) {
         this.sectors = [];
         var entryLen = 26;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Sector);
+            const r = new Sector();
             r.zFloor = dv.getUint16(i * entryLen + 0, true);
             r.zCeil = dv.getUint16(i * entryLen + 2, true);
             r.floorFlat = readName(dv, i * entryLen + 4);
@@ -199,15 +202,15 @@ export const MapData = {
             r.tag = dv.getUint16(i * entryLen + 24, true);
             this.sectors.push(r);
         }
-    },
+    }
 
-    parseSegs: function(lump) {
+    parseSegs(lump) {
         this.segs = [];
         var entryLen = 12;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Seg);
+            const r = new Seg();
             r.vx1 = dv.getUint16(i * entryLen + 0, true);
             r.vx2 = dv.getUint16(i * entryLen + 2, true);
             r.angle = dv.getUint16(i * entryLen + 4, true);
@@ -216,28 +219,28 @@ export const MapData = {
             r.offset = dv.getUint16(i * entryLen + 10, true);
             this.segs.push(r);
         }
-    },
+    }
 
-    parseSsectors: function(lump) {
+    parseSsectors(lump) {
         this.ssectors = [];
         var entryLen = 4;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Subsector);
+            const r = new Subsector();
             r.segCount = dv.getUint16(i * entryLen + 0, true);
             r.first = dv.getUint16(i * entryLen + 2, true);
             this.ssectors.push(r);
         }
-    },
+    }
 
-    parseNodes: function(lump) {
+    parseNodes(lump) {
         this.nodes = [];
         var entryLen = 28;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(Node);
+            const r = new Node();
             r.partitionX = dv.getUint16(i * entryLen + 0, true);
             r.partitionY = dv.getUint16(i * entryLen + 2, true);
             r.changeX = dv.getUint16(i * entryLen + 4, true);
@@ -258,15 +261,15 @@ export const MapData = {
             r.childLeft = dv.getUint16(i * entryLen + 26, true);
             this.nodes.push(r);
         }
-    },
+    }
 
-    parseHexenThings: function(lump) {
+    parseHexenThings(lump) {
         this.things = [];
         var entryLen = 20;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(HexenThing);
+            const r = new HexenThing();
             r.tid = dv.getInt16(i * entryLen + 0, true);
             r.x = dv.getInt16(i * entryLen + 2, true);
             r.y = dv.getInt16(i * entryLen + 4, true);
@@ -280,15 +283,15 @@ export const MapData = {
             }
             this.things.push(r);
         }
-    },
+    }
 
-    parseHexenLinedefs: function(lump) {
+    parseHexenLinedefs(lump) {
         this.linedefs = [];
         var entryLen = 16;
         var dv = new DataView(lump);
         var len = dv.byteLength / entryLen;
         for (var i = 0; i < len; i++) {
-            const r = Object.create(HexenLinedef);
+            const r = new HexenLinedef();
             r.vx1 = dv.getUint16(i * entryLen + 0, true);
             r.vx2 = dv.getUint16(i * entryLen + 2, true);
             r.flags = dv.getUint16(i * entryLen + 4, true);
@@ -300,9 +303,9 @@ export const MapData = {
             r.left = dv.getUint16(i * entryLen + 14, true);
             this.linedefs.push(r);
         }
-    },
+    }
 
-    toCanvas: function(width, height) {
+    toCanvas(width, height) {
         // Early-out if it is not a Doom format map.
         if (this.format == "UDMF") {
             var output = document.createElement("div");
@@ -388,9 +391,9 @@ export const MapData = {
         }
 
         return canvas;
-    },
+    }
 
-    getDoomThingName: function(id) {
+    getDoomThingName(id) {
         for (var prop in DoomThingTable) {
             if (DoomThingTable.hasOwnProperty(prop)) {
                 if (DoomThingTable[prop] === id) {
@@ -398,9 +401,9 @@ export const MapData = {
                 }
             }
         }
-    },
+    }
 
-    getThingTable: function() {
+    getThingTable() {
         this.thingTable = [];
         for (var i = 0; i < this.things.length; i++) {
             if (this.thingTable[this.things[i].type] == undefined) {
@@ -410,127 +413,134 @@ export const MapData = {
             }
         }
         return this.thingTable;
-    },
+    }
 
-    getThingCount: function(type) {
+    getThingCount(type) {
         var output = 0;
         for (var i = 0; i < this.things.length; i++) {
             if (this.things[i].type == type) output += 1;
         }
         return output;
     }
-};
+}
 
-var Thing = {
-    x: null,
-    y: null,
-    angle: null,
-    type: null,
-    flags: null
-};
+class Thing {
+    x: number;
+    y: number;
+    angle: number;
+    type: number;
+    flags: number;
+}
 
-var Vertex = {
-    x: null,
-    y: null
-};
+class Vertex {
+    x: number;
+    y: number;
+}
 
-var Linedef = {
-    vx1: null,
-    vx2: null,
-    flags: null,
-    action: null,
-    tag: null,
-    right: null,
-    left: null,
+class Linedef {
+    vx1: number;
+    vx2: number;
+    flags: number;
+    action: number;
+    tag: number;
+    right: number;
+    left: number;
 
-    getVx1: function(mapdata) {
+    getVx1(mapdata: MapData) {
         return mapdata.vertexes[this.vx1];
-    },
+    }
 
-    getVx2: function(mapdata) {
+    getVx2(mapdata: MapData) {
         return mapdata.vertexes[this.vx2];
     }
-};
+}
 
-var Sidedef = {
-    xOffset: null,
-    yOffset: null,
-    upper: null,
-    lower: null,
-    middle: null,
-    sector: null
-};
+class Sidedef {
+    xOffset: number;
+    yOffset: number;
+    upper: string;
+    lower: string;
+    middle: string;
+    sector: number;
+}
 
-var Seg = {
-    vx1: null,
-    vx2: null,
-    angle: null,
-    linedef: null,
-    direction: null,
-    offset: null
-};
+class Seg {
+    vx1: number;
+    vx2: number;
+    angle: number;
+    linedef: number;
+    direction: number;
+    offset: number;
+}
 
-var Subsector = {
-    segCount: null,
-    first: null
-};
+class Subsector {
+    segCount: number;
+    first: number;
+}
 
-var Node = {
-    partitionX: null,
-    partitionY: null,
-    changeX: null,
-    changeY: null,
-    boundsRight: null,
-    boundsLeft: null,
-    childRight: null,
-    childLeft: null
-};
+interface NodeBounds {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+}
 
-var Sector = {
-    zFloor: null,
-    zCeil: null,
-    floorFlat: null,
-    ceilFlat: null,
-    light: null,
-    type: null,
-    tag: null
-};
+class Node {
+    partitionX: number;
+    partitionY: number;
+    changeX: number;
+    changeY: number;
+    boundsRight: NodeBounds;
+    boundsLeft: NodeBounds;
+    childRight: number;
+    childLeft: number;
+}
 
-var Reject = {};
+class Sector {
+    zFloor: number;
+    zCeil: number;
+    floorFlat: string;
+    ceilFlat: string;
+    light: number;
+    type: number;
+    tag: number;
+}
 
-var Blockmap = {};
+class Reject {}
 
-var HexenThing = {
-    tid: null,
-    x: null,
-    y: null,
-    z: null,
-    angle: null,
-    type: null,
-    flags: null,
-    special: null,
-    args: []
-};
+class Blockmap {}
 
-var HexenLinedef = {
-    vx1: null,
-    vx2: null,
-    flags: null,
-    action: null,
-    args: [],
-    right: null,
-    left: null,
+class HexenThing {
+    tid: number;
+    x: number;
+    y: number;
+    z: number;
+    angle: number;
+    type: number;
+    flags: number;
+    special: number;
+    args: number[];
+}
 
-    getVx1: function(mapdata) {
+class HexenLinedef {
+    vx1: number;
+    vx2: number;
+    flags: number;
+    action: number;
+    args: number[];
+    right: number;
+    left: number;
+
+    getVx1(mapdata: MapData) {
         return mapdata.vertexes[this.vx1];
-    },
+    }
 
-    getVx2: function(mapdata) {
+    getVx2(mapdata: MapData) {
         return mapdata.vertexes[this.vx2];
     }
-};
+}
 
-var DoomThingGroups = {
+const DoomThingGroups = {
     Monsters: [
         68,
         64,
@@ -572,7 +582,7 @@ var DoomThingGroups = {
     Keys: [5, 40, 13, 38, 6, 39]
 };
 
-var DoomThingTable = {
+const DoomThingTable = {
     zombie: 3004,
     sergeant: 9,
     commando: 65,
@@ -686,7 +696,7 @@ var DoomThingTable = {
     barrel: 2035
 };
 
-var Doom2DefaultMusic = {
+const Doom2DefaultMusic = {
     MAP01: "D_RUNNIN",
     MAP02: "D_STALKS",
     MAP03: "D_COUNTD",
