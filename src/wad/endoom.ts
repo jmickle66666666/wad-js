@@ -1,45 +1,61 @@
-var EndoomChar = {
-    charIndex: 0,
-    backColor: 0,
-    foreColor: 0,
-    blinking: false
-};
+class EndoomChar {
+    charIndex: number;
+    backColor: number;
+    foreColor: number;
+    blinking: boolean;
 
-export const Endoom = {
-    ansiColDark: [
-        [0, 0, 0],
-        [0, 0, 170],
-        [0, 170, 0],
-        [0, 170, 170],
-        [170, 0, 0],
-        [170, 0, 170],
-        [170, 85, 0],
-        [170, 170, 170]
-    ],
+    constructor() {
+        this.charIndex = 0;
+        this.backColor = 0;
+        this.foreColor = 0;
+        this.blinking = false;
+    }
+}
 
-    ansiColLight: [
-        [85, 85, 85],
-        [85, 85, 255],
-        [85, 255, 85],
-        [85, 255, 255],
-        [255, 85, 85],
-        [255, 85, 255],
-        [255, 255, 85],
-        [255, 255, 255]
-    ],
+export class Endoom {
+    ansiColDark: number[][];
+    ansiColLight: number[][];
+    charCanvas: HTMLCanvasElement[];
+    charContext: CanvasRenderingContext2D[];
+    data: EndoomChar[];
+    onLoad: () => void | null;
 
-    charCanvas: [],
-    charContext: [],
+    constructor() {
+        this.ansiColDark = [
+            [0, 0, 0],
+            [0, 0, 170],
+            [0, 170, 0],
+            [0, 170, 170],
+            [170, 0, 0],
+            [170, 0, 170],
+            [170, 85, 0],
+            [170, 170, 170]
+        ];
+        this.ansiColLight = [
+            [85, 85, 85],
+            [85, 85, 255],
+            [85, 255, 85],
+            [85, 255, 255],
+            [255, 85, 85],
+            [255, 85, 255],
+            [255, 255, 85],
+            [255, 255, 255]
+        ];
+        this.charCanvas = [];
+        this.charContext = [];
+        this.data = [];
+        this.onLoad = null;
+    }
 
-    setTile: function(_ctx, x, y, i, c1, c2) {
+    setTile(_ctx, x, y, i, c1, c2) {
         var _i = (x % 80) + Math.floor(y / 80);
         this.data[_i].charIndex = i;
         this.data[_i].backColor = c1;
         this.data[_i].foreColor = c2;
         _ctx.drawImage(this.getChar(i, c1, c2), x * 8, y * 16);
-    },
+    }
 
-    getChar: function(i, c1, c2) {
+    getChar(i, c1, c2) {
         var _can = document.createElement("canvas");
         var _ctx = _can.getContext("2d");
         _ctx.drawImage(this.charCanvas[i], 0, 0);
@@ -52,9 +68,9 @@ export const Endoom = {
 
         this.swapcolor(_ctx, [255, 255, 255], _fc);
         return _can;
-    },
+    }
 
-    swapcolor: function(ctex, oc, nc) {
+    swapcolor(ctex, oc, nc) {
         // pull the entire image into an array of pixel data
         var imageData = ctex.getImageData(0, 0, 8, 16);
 
@@ -75,11 +91,9 @@ export const Endoom = {
         }
         // put the altered data back on the canvas
         ctex.putImageData(imageData, 0, 0);
-    },
+    }
 
-    data: [],
-
-    load: function(lumpData) {
+    load(lumpData) {
         this.data = [];
 
         if (lumpData != null) {
@@ -96,7 +110,7 @@ export const Endoom = {
                     _b -= 8;
                 }
 
-                var _nec = Object.create(EndoomChar);
+                var _nec = new EndoomChar();
                 _nec.charIndex = _c;
                 _nec.backColor = _b;
                 _nec.foreColor = _f;
@@ -105,7 +119,7 @@ export const Endoom = {
             }
         } else {
             for (var i = 0; i < 2000; i++) {
-                var _nec = Object.create(EndoomChar);
+                var _nec = new EndoomChar();
                 this.data.push(_nec);
             }
         }
@@ -130,15 +144,13 @@ export const Endoom = {
                 self.charCanvas.push(newcan);
                 self.charContext.push(newctx);
             }
-            if (self.onLoad != null) {
+            if (self.onLoad !== null) {
                 self.onLoad();
             }
         };
-    },
+    }
 
-    onLoad: null,
-
-    toCanvasBlinked: function() {
+    toCanvasBlinked() {
         const endoomDat = this.data;
 
         var canv = document.createElement("canvas");
@@ -155,9 +167,9 @@ export const Endoom = {
         }
 
         return canv;
-    },
+    }
 
-    toCanvas: function() {
+    toCanvas() {
         const endoomDat = this.data;
 
         var canv = document.createElement("canvas");
@@ -174,4 +186,4 @@ export const Endoom = {
 
         return canv;
     }
-};
+}

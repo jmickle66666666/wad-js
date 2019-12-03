@@ -119,7 +119,7 @@ export function createLumpList(wad, lumpnames) {
                     .appendChild(graphic.toCanvas(wad));
                 break;
             case CONST.ENDOOM:
-                const endoom = Object.create(Endoom);
+                const endoom = new Endoom();
                 endoom.onLoad = function() {
                     $("#preview").html("");
                     document
