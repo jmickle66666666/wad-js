@@ -7,7 +7,7 @@ interface LumpEntry {
     pos: number;
     size: number;
     name: string;
-};
+}
 
 export class Wad {
     onProgress: () => void;
@@ -15,7 +15,7 @@ export class Wad {
     ident: string;
     numlumps: number;
     dictpos: number;
-    data: string | ArrayBuffer;
+    data: ArrayBuffer;
     lumps: LumpEntry[];
     playpal: Playpal;
     errormsg: string;
@@ -27,11 +27,11 @@ export class Wad {
         this.detectLumpType = detectLumpType;
     }
 
-    error(msg) {
+    error(msg: string): void {
         this.errormsg = msg;
     }
 
-    loadURL(url) {
+    loadURL(url: string): void {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.responseType = "blob";
@@ -45,7 +45,7 @@ export class Wad {
         xhr.send();
     }
 
-    load(blob) {
+    load(blob: File): void {
         var self = this;
 
         self.lumps = [];
@@ -58,10 +58,10 @@ export class Wad {
         reader.onprogress = self.onProgress;
 
         reader.onload = function(e) {
-            self.data = e.target.result;
             if (typeof e.target.result === "string") {
                 throw new Error("Improper data type");
             }
+            self.data = e.target.result;
 
             // header reading
             var headerReader = new DataView(e.target.result);
@@ -126,7 +126,7 @@ export class Wad {
         };
     }
 
-    save() {
+    save(): void {
         var name = prompt("Save as...", "output.wad");
         if (this.data != null) {
             var toDownload = new Blob([this.data], { type: "octet/stream" });
@@ -141,7 +141,7 @@ export class Wad {
         }
     }
 
-    saveLump(index) {
+    saveLump(index: number): void {
         var name = this.lumps[index].name + ".lmp";
         var toDownload = new Blob([this.getLump(index)], {
             type: "octet/stream"
@@ -156,7 +156,7 @@ export class Wad {
         window.URL.revokeObjectURL(url);
     }
 
-    lumpExists(name) {
+    lumpExists(name: string): boolean {
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 return true;
@@ -165,7 +165,7 @@ export class Wad {
         return false;
     }
 
-    getLumpByName(name) {
+    getLumpByName(name: string): ArrayBuffer | null {
         for (var i = 0; i < this.numlumps; i++) {
             if (this.lumps[i].name == name) {
                 const l = this.lumps[i];
@@ -175,7 +175,7 @@ export class Wad {
         return null;
     }
 
-    getLumpIndexByName(name) {
+    getLumpIndexByName(name: string) {
         for (var i = this.numlumps - 1; i >= 0; i--) {
             if (this.lumps[i].name == name) {
                 return i;
@@ -184,12 +184,12 @@ export class Wad {
         return null;
     }
 
-    getLumpAsText(index) {
+    getLumpAsText(index: number): string {
         var dat = this.getLump(index);
-        return this.lumpDataToText(dat);
+        return Wad.lumpDataToText(dat);
     }
 
-    lumpDataToText(data) {
+    static lumpDataToText(data: ArrayBuffer): string {
         let output = "";
         var dv = new DataView(data);
         for (let i = 0; i < data.byteLength; i++)
@@ -197,8 +197,8 @@ export class Wad {
         return output;
     }
 
-    getLump(index) {
+    getLump(index: number): ArrayBuffer {
         const l = this.lumps[index];
         return this.data.slice(l.pos, l.pos + l.size);
     }
-};
+}

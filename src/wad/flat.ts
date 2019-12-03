@@ -1,9 +1,10 @@
 import { hexToRgb } from "./util";
+import { Wad } from "../wad";
 
 export class Flat {
     data: number[];
 
-    load(lumpData) {
+    load(lumpData: ArrayBuffer): void {
         var dv = new DataView(lumpData);
         this.data = [];
         for (var j = 0; j < 4096; j++) {
@@ -11,7 +12,7 @@ export class Flat {
         }
     }
 
-    toCanvas(wad) {
+    toCanvas(wad: Wad): HTMLCanvasElement {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = 64 * scaleSize;

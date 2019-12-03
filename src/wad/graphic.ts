@@ -1,4 +1,5 @@
 import { hexToRgb } from "./util";
+import { Wad } from "../wad";
 
 export class Graphic {
     data: number[];
@@ -7,7 +8,7 @@ export class Graphic {
     xOffset: number;
     yOffset: number;
 
-    load(lumpData) {
+    load(lumpData: ArrayBuffer): void {
         var i;
         var j;
         var dv = new DataView(lumpData);
@@ -68,7 +69,7 @@ export class Graphic {
         }
     }
 
-    toCanvas(wad) {
+    toCanvas(wad: Wad): HTMLCanvasElement {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = this.width * scaleSize;

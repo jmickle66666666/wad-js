@@ -37,13 +37,13 @@ export class MapData {
 
     //functions
 
-    load(wad: Wad, mapname: string) {
+    load(wad: Wad, mapname: string): void {
         var mapLumpIndex = wad.getLumpIndexByName(mapname);
 
         this.wad = wad;
         this.reject = null;
         this.blockmap = null;
-        let getMapLump = null;
+        let getMapLump: (lumpName: string) => ArrayBuffer | null = null;
 
         // Detect the format of the map first
         if (wad.lumps[mapLumpIndex + 1].name == "TEXTMAP") this.format = "UDMF";
@@ -62,7 +62,7 @@ export class MapData {
             if (mapdatalumps.indexOf("BEHAVIOR") > -1) this.format = "Hexen";
             else this.format = "Doom";
 
-            getMapLump = function(lumpName) {
+            getMapLump = (lumpName: string): ArrayBuffer => {
                 return wad.getLump(
                     mapLumpIndex + mapdatalumps.indexOf(lumpName) + 1
                 );
@@ -107,7 +107,7 @@ export class MapData {
             this.music = Doom2DefaultMusic[mapname];
     }
 
-    calculateBoundaries() {
+    calculateBoundaries(): void {
         this.top = this.vertexes[0].y;
         this.left = this.vertexes[0].x;
         this.bottom = this.vertexes[0].y;
@@ -122,7 +122,7 @@ export class MapData {
         }
     }
 
-    parseThings(lump) {
+    parseThings(lump: ArrayBuffer): void {
         this.things = [];
         var entryLen = 10;
         var dv = new DataView(lump);
@@ -138,7 +138,7 @@ export class MapData {
         }
     }
 
-    parseVertexes(lump) {
+    parseVertexes(lump: ArrayBuffer): void {
         this.vertexes = [];
         var entryLen = 4;
         var dv = new DataView(lump);
@@ -151,7 +151,7 @@ export class MapData {
         }
     }
 
-    parseLinedefs(lump) {
+    parseLinedefs(lump: ArrayBuffer): void {
         this.linedefs = [];
         var entryLen = 14;
         var dv = new DataView(lump);
@@ -169,7 +169,7 @@ export class MapData {
         }
     }
 
-    parseSidedefs(lump) {
+    parseSidedefs(lump: ArrayBuffer): void {
         this.sidedefs = [];
         var entryLen = 30;
         var dv = new DataView(lump);
@@ -186,7 +186,7 @@ export class MapData {
         }
     }
 
-    parseSectors(lump) {
+    parseSectors(lump: ArrayBuffer): void {
         this.sectors = [];
         var entryLen = 26;
         var dv = new DataView(lump);
@@ -204,7 +204,7 @@ export class MapData {
         }
     }
 
-    parseSegs(lump) {
+    parseSegs(lump: ArrayBuffer): void {
         this.segs = [];
         var entryLen = 12;
         var dv = new DataView(lump);
@@ -221,7 +221,7 @@ export class MapData {
         }
     }
 
-    parseSsectors(lump) {
+    parseSsectors(lump: ArrayBuffer): void {
         this.ssectors = [];
         var entryLen = 4;
         var dv = new DataView(lump);
@@ -234,7 +234,7 @@ export class MapData {
         }
     }
 
-    parseNodes(lump) {
+    parseNodes(lump: ArrayBuffer): void {
         this.nodes = [];
         var entryLen = 28;
         var dv = new DataView(lump);
@@ -263,7 +263,7 @@ export class MapData {
         }
     }
 
-    parseHexenThings(lump) {
+    parseHexenThings(lump: ArrayBuffer): void {
         this.things = [];
         var entryLen = 20;
         var dv = new DataView(lump);
@@ -285,7 +285,7 @@ export class MapData {
         }
     }
 
-    parseHexenLinedefs(lump) {
+    parseHexenLinedefs(lump: ArrayBuffer): void {
         this.linedefs = [];
         var entryLen = 16;
         var dv = new DataView(lump);
@@ -305,7 +305,10 @@ export class MapData {
         }
     }
 
-    toCanvas(width, height) {
+    toCanvas(
+        width: number,
+        height: number
+    ): HTMLCanvasElement | HTMLDivElement {
         // Early-out if it is not a Doom format map.
         if (this.format == "UDMF") {
             var output = document.createElement("div");
@@ -393,7 +396,7 @@ export class MapData {
         return canvas;
     }
 
-    getDoomThingName(id) {
+    getDoomThingName(id: number): string | undefined {
         for (var prop in DoomThingTable) {
             if (DoomThingTable.hasOwnProperty(prop)) {
                 if (DoomThingTable[prop] === id) {
@@ -403,7 +406,7 @@ export class MapData {
         }
     }
 
-    getThingTable() {
+    getThingTable(): ThingTable {
         this.thingTable = [];
         for (var i = 0; i < this.things.length; i++) {
             if (this.thingTable[this.things[i].type] == undefined) {
@@ -415,7 +418,7 @@ export class MapData {
         return this.thingTable;
     }
 
-    getThingCount(type) {
+    getThingCount(type: number): number {
         var output = 0;
         for (var i = 0; i < this.things.length; i++) {
             if (this.things[i].type == type) output += 1;
@@ -446,11 +449,11 @@ class Linedef {
     right: number;
     left: number;
 
-    getVx1(mapdata: MapData) {
+    getVx1(mapdata: MapData): Vertex {
         return mapdata.vertexes[this.vx1];
     }
 
-    getVx2(mapdata: MapData) {
+    getVx2(mapdata: MapData): Vertex {
         return mapdata.vertexes[this.vx2];
     }
 }
@@ -520,6 +523,10 @@ class HexenThing {
     flags: number;
     special: number;
     args: number[];
+
+    constructor() {
+        this.args = [];
+    }
 }
 
 class HexenLinedef {
@@ -531,11 +538,15 @@ class HexenLinedef {
     right: number;
     left: number;
 
-    getVx1(mapdata: MapData) {
+    constructor() {
+        this.args = [];
+    }
+
+    getVx1(mapdata: MapData): Vertex {
         return mapdata.vertexes[this.vx1];
     }
 
-    getVx2(mapdata: MapData) {
+    getVx2(mapdata: MapData): Vertex {
         return mapdata.vertexes[this.vx2];
     }
 }

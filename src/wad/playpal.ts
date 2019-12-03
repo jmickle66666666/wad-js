@@ -266,13 +266,13 @@ export class Playpal {
         this.palettes.push(originalPalette);
     }
 
-    rgbToHex(r, g, b) {
+    rgbToHex(r: number, g: number, b: number): string {
         return (
             "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
         );
     }
 
-    load(lumpData) {
+    load(lumpData: ArrayBuffer): void {
         var dv = new DataView(lumpData);
         // 14 palettes to parse
         this.palettes = [];
@@ -288,7 +288,7 @@ export class Playpal {
         }
     }
 
-    toCanvas() {
+    toCanvas(): HTMLCanvasElement {
         var scaleSize = 16;
         //then lets make a canvas to put this image onto
         var canvas = document.createElement("canvas");

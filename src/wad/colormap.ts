@@ -1,9 +1,10 @@
 import { hexToRgb } from "./util";
+import { Wad } from "../wad";
 
 export class Colormap {
     colormaps: number[][];
 
-    load(lumpData) {
+    load(lumpData: ArrayBuffer): void {
         var dv = new DataView(lumpData);
         this.colormaps = [];
         for (var i = 0; i < 34; i++) {
@@ -15,7 +16,7 @@ export class Colormap {
         }
     }
 
-    toCanvas(wad) {
+    toCanvas(wad: Wad): HTMLCanvasElement {
         var scaleSize = 3;
         var canvas = document.createElement("canvas");
         canvas.width = 256 * scaleSize;
