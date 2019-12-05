@@ -38,19 +38,22 @@ export class MapData {
     //functions
 
     load(wad: Wad, mapname: string): void {
-        var mapLumpIndex = wad.getLumpIndexByName(mapname);
+        const mapLumpIndex = wad.getLumpIndexByName(mapname);
+        if (mapLumpIndex === null) {
+            throw new Error("Could not find map marker");
+        }
 
         this.wad = wad;
         this.reject = null;
         this.blockmap = null;
-        let getMapLump: (lumpName: string) => ArrayBuffer | null = null;
+        let getMapLump: ((lumpName: string) => ArrayBuffer) | null = null;
 
         // Detect the format of the map first
         if (wad.lumps[mapLumpIndex + 1].name == "TEXTMAP") this.format = "UDMF";
         else {
             // Get a list of the map lumps associated with this map
             var pos = 1;
-            const mapdatalumps = [];
+            const mapdatalumps: string[] = [];
             let nextLump = wad.lumps[mapLumpIndex + pos].name;
             while (CONST.MAPLUMPS.indexOf(nextLump) > -1) {
                 mapdatalumps.push(nextLump);
@@ -69,28 +72,96 @@ export class MapData {
             };
         }
 
+        if (getMapLump === null) {
+            throw new Error("getMapLump not set");
+        }
+
         if (this.format == "Doom") {
-            this.parseThings(getMapLump("THINGS"));
-            this.parseLinedefs(getMapLump("LINEDEFS"));
-            this.parseSidedefs(getMapLump("SIDEDEFS"));
-            this.parseVertexes(getMapLump("VERTEXES"));
-            this.parseSegs(getMapLump("SEGS"));
-            this.parseSsectors(getMapLump("SSECTORS"));
-            this.parseNodes(getMapLump("NODES"));
-            this.parseSectors(getMapLump("SECTORS"));
+            const THINGS = getMapLump("THINGS");
+            if (THINGS === null) {
+                throw new Error("Could not find THINGS lump");
+            }
+            this.parseThings(THINGS);
+            const LINEDEFS = getMapLump("LINEDEFS");
+            if (LINEDEFS === null) {
+                throw new Error("Could not find LINEDEFS lump");
+            }
+            this.parseLinedefs(LINEDEFS);
+            const SIDEDEFS = getMapLump("SIDEDEFS");
+            if (SIDEDEFS === null) {
+                throw new Error("Could not find SIDEDEFS lump");
+            }
+            this.parseSidedefs(SIDEDEFS);
+            const VERTEXES = getMapLump("VERTEXES");
+            if (VERTEXES === null) {
+                throw new Error("Could not find VERTEXES lump");
+            }
+            this.parseVertexes(VERTEXES);
+            const SEGS = getMapLump("SEGS");
+            if (SEGS === null) {
+                throw new Error("Could not find SEGS lump");
+            }
+            this.parseSegs(SEGS);
+            const SSECTORS = getMapLump("SSECTORS");
+            if (SSECTORS === null) {
+                throw new Error("Could not find SSECTORS lump");
+            }
+            this.parseSsectors(SSECTORS);
+            const NODES = getMapLump("NODES");
+            if (NODES === null) {
+                throw new Error("Could not find NODES lump");
+            }
+            this.parseNodes(NODES);
+            const SECTORS = getMapLump("SECTORS");
+            if (SECTORS === null) {
+                throw new Error("Could not find SECTORS lump");
+            }
+            this.parseSectors(SECTORS);
             //this.parseReject(wad.getLump(mapLumpIndex + 9));
             //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
             this.calculateBoundaries();
         }
         if (this.format == "Hexen") {
-            this.parseHexenThings(getMapLump("THINGS"));
-            this.parseHexenLinedefs(getMapLump("LINEDEFS"));
-            this.parseSidedefs(getMapLump("SIDEDEFS"));
-            this.parseVertexes(getMapLump("VERTEXES"));
-            this.parseSegs(getMapLump("SEGS"));
-            this.parseSsectors(getMapLump("SSECTORS"));
-            this.parseNodes(getMapLump("NODES"));
-            this.parseSectors(getMapLump("SECTORS"));
+            const THINGS = getMapLump("THINGS");
+            if (THINGS === null) {
+                throw new Error("Could not find THINGS lump");
+            }
+            this.parseHexenThings(THINGS);
+            const LINEDEFS = getMapLump("LINEDEFS");
+            if (LINEDEFS === null) {
+                throw new Error("Could not find LINEDEFS lump");
+            }
+            this.parseHexenLinedefs(LINEDEFS);
+            const SIDEDEFS = getMapLump("SIDEDEFS");
+            if (SIDEDEFS === null) {
+                throw new Error("Could not find SIDEDEFS lump");
+            }
+            this.parseSidedefs(SIDEDEFS);
+            const VERTEXES = getMapLump("VERTEXES");
+            if (VERTEXES === null) {
+                throw new Error("Could not find VERTEXES lump");
+            }
+            this.parseVertexes(VERTEXES);
+            const SEGS = getMapLump("SEGS");
+            if (SEGS === null) {
+                throw new Error("Could not find SEGS lump");
+            }
+            this.parseSegs(SEGS);
+            const SSECTORS = getMapLump("SSECTORS");
+            if (SSECTORS === null) {
+                throw new Error("Could not find SSECTORS lump");
+            }
+            this.parseSsectors(SSECTORS);
+            const NODES = getMapLump("NODES");
+            if (NODES === null) {
+                throw new Error("Could not find NODES lump");
+            }
+            this.parseNodes(NODES);
+            const SECTORS = getMapLump("SECTORS");
+            if (SECTORS === null) {
+                throw new Error("Could not find SECTORS lump");
+            }
+            this.parseSectors(SECTORS);
             //this.parseReject(wad.getLump(mapLumpIndex + 9));
             //this.parseBlockmap(wad.getLump(mapLumpIndex + 10));
             this.calculateBoundaries();
@@ -334,6 +405,9 @@ export class MapData {
         }
 
         var context = canvas.getContext("2d");
+        if (context === null) {
+            throw new Error("Cannot get 2d context");
+        }
         context.fillStyle = this.wad.playpal.palettes[0][0];
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.imageSmoothingEnabled = false;

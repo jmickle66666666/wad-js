@@ -3,7 +3,7 @@ import { Wad } from "./wad";
 import * as CONST from "./wad/constants";
 
 var self = this;
-var errormsg = null;
+var errormsg: string | null = null;
 var lumpnames = ["a", "b", "c"];
 var fileInput = document.getElementById("fileInput") as HTMLInputElement;
 var fileDisplayArea = document.getElementById("test");
@@ -20,6 +20,10 @@ var progress = 0;
 var wad = new Wad();
 
 function initWad() {
+    if (errors === null) {
+        throw new Error("Error element is missing");
+    }
+
     errormsg = null;
     $(errors).html("");
     $("#preview").hide();
@@ -27,7 +31,8 @@ function initWad() {
     $("#loading").show();
     progress = 0;
 
-    if (lumpList) lumpList.destructor();
+    // [AM] What is this?
+    //if (lumpList) lumpList.destructor();
     lumpnames = [];
 
     wad = new Wad();
@@ -44,6 +49,9 @@ function loadURL() {
 
 fileInput.addEventListener("change", function(e) {
     initWad();
+    if (fileInput.files === null) {
+        throw new Error("File list is missing files array");
+    }
     var file = fileInput.files[0];
     console.log(file);
     wad.load(file);
@@ -55,7 +63,11 @@ var updateLoading = function() {
     var loadingbar = "[";
     for (var i = 0; i < bar; i++) loadingbar += ".";
     for (i = bar; i < 36; i++) loadingbar += "&nbsp;";
-    document.getElementById("loading").innerHTML = loadingbar + "]";
+    const loading = document.getElementById("loading");
+    if (loading === null) {
+        throw new Error("Loading element is missing");
+    }
+    loading.innerHTML = loadingbar + "]";
 };
 
 export function getIcon(lumpType) {
@@ -82,6 +94,9 @@ export function getIcon(lumpType) {
 function wadOnLoad() {
     $("#loading").hide();
 
+    if (errors === null) {
+        throw new Error("Error element is missing");
+    }
     if (errormsg != null) {
         $(errors).html(errormsg);
     } else {

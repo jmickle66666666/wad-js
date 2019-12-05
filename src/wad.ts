@@ -1,8 +1,6 @@
 import { Playpal } from "./wad/playpal";
 import { detectLumpType } from "./wad/detectlump";
 
-let chunkReaderBlock = null;
-
 interface LumpEntry {
     pos: number;
     size: number;
@@ -21,6 +19,7 @@ export class Wad {
     errormsg: string;
 
     detectLumpType: typeof detectLumpType;
+    chunkReaderBlock: ((x: number, y: number, z: File) => void) | null;
 
     constructor() {
         this.ident = "";
@@ -58,8 +57,12 @@ export class Wad {
         reader.onprogress = self.onProgress;
 
         reader.onload = function(e) {
-            if (typeof e.target.result === "string") {
-                throw new Error("Improper data type");
+            if (e.target === null) {
+                throw new Error("Missing target");
+            } else if (e.target.result === null) {
+                throw new Error("Target result is null");
+            } else if (typeof e.target.result === "string") {
+                throw new Error("Target result is string");
             }
             self.data = e.target.result;
 
@@ -76,7 +79,10 @@ export class Wad {
                 offset = self.dictpos;
                 chunkSize = 128;
 
-                chunkReaderBlock(self.dictpos, chunkSize, blob);
+                if (self.chunkReaderBlock === null) {
+                    throw new Error("chunkReaderBlock is missing");
+                }
+                self.chunkReaderBlock(self.dictpos, chunkSize, blob);
             }
         };
 
@@ -108,16 +114,20 @@ export class Wad {
                 self.onProgress();
                 self.onLoad();
                 self.playpal = new Playpal();
-                if (self.lumpExists("PLAYPAL")) {
-                    self.playpal.load(self.getLumpByName("PLAYPAL"));
+                const playpal = self.getLumpByName("PLAYPAL");
+                if (playpal !== null) {
+                    self.playpal.load(playpal);
                 }
                 return;
             }
 
-            chunkReaderBlock(offset, chunkSize, blob);
+            if (self.chunkReaderBlock === null) {
+                throw new Error("chunkReaderBlock is missing");
+            }
+            self.chunkReaderBlock(offset, chunkSize, blob);
         };
 
-        chunkReaderBlock = function(_offset, chunkSize, data) {
+        self.chunkReaderBlock = function(_offset, chunkSize, data) {
             var r = new FileReader();
             var b = data.slice(_offset, _offset + chunkSize);
             r.onload = nextChunk;
@@ -128,7 +138,7 @@ export class Wad {
 
     save(): void {
         var name = prompt("Save as...", "output.wad");
-        if (this.data != null) {
+        if (name !== null && this.data != null) {
             var toDownload = new Blob([this.data], { type: "octet/stream" });
             var a = document.createElement("a");
             document.body.appendChild(a);

@@ -21,7 +21,9 @@
         // only basic transpilation and does not polyfill features like Promise
         // or Map.  Thus, we target ES2015 since there is a dependency on
         // ArrayBuffer.
-        "target": "ES2015"
+        "target": "ES2015",
+        // Strictness checks.
+        "strictNullChecks": true
     },
     "include": [
         // Tell the compiler where to look for our source files.  This is

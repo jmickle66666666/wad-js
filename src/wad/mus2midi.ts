@@ -128,7 +128,7 @@ export function mus2midi(musinput) {
         0x79
     ];
 
-    var channel_map = [];
+    var channel_map: number[] = [];
 
     // Main DataView for writing to. This is used by writeData();
     var outputDataView;

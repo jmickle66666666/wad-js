@@ -29,6 +29,9 @@ const ui = {
     entry: {
         ui: './src/ui.ts',
     },
+    externals: {
+        jquery: "jQuery",
+    },
     mode: "production",
     module: {
         rules: [{

@@ -18,7 +18,7 @@ export class Endoom {
     charCanvas: HTMLCanvasElement[];
     charContext: CanvasRenderingContext2D[];
     data: EndoomChar[];
-    onLoad: () => void | null;
+    onLoad: (() => void) | null;
 
     constructor() {
         this.ansiColDark = [
@@ -58,11 +58,14 @@ export class Endoom {
     getChar(i, c1, c2) {
         var _can = document.createElement("canvas");
         var _ctx = _can.getContext("2d");
+        if (_ctx === null) {
+            throw new Error("Could not get 2d context");
+        }
         _ctx.drawImage(this.charCanvas[i], 0, 0);
 
         this.swapcolor(_ctx, [0, 0, 0], this.ansiColDark[c1]);
 
-        var _fc = [];
+        var _fc: number[] = [];
         if (c2 >= 8) _fc = this.ansiColLight[c2 - 8];
         else _fc = this.ansiColDark[c2];
 
@@ -136,6 +139,9 @@ export class Endoom {
                 newcan.width = 8;
                 newcan.height = 16;
                 var newctx = newcan.getContext("2d");
+                if (newctx === null) {
+                    throw new Error("Could not get 2d context");
+                }
 
                 var cx = (i % 32) * 8;
                 var cy = Math.floor(i / 32) * 16;

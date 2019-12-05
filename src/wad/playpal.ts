@@ -277,7 +277,7 @@ export class Playpal {
         // 14 palettes to parse
         this.palettes = [];
         for (var i = 0; i < 14; i++) {
-            const palette = [];
+            const palette: string[] = [];
             for (var j = 0; j < 256; j++) {
                 var red = dv.getUint8(i * 768 + j * 3 + 0);
                 var grn = dv.getUint8(i * 768 + j * 3 + 1);
@@ -295,6 +295,9 @@ export class Playpal {
         canvas.width = 16 * scaleSize;
         canvas.height = 16 * scaleSize;
         var context = canvas.getContext("2d");
+        if (context === null) {
+            throw new Error("Could not get 2d context");
+        }
         var imageData = context.createImageData(16, 16);
         //image pixel data is stored in a linear array
         //each pixel is represented by four values:
@@ -303,6 +306,9 @@ export class Playpal {
         //to be 16x16.
         for (var i = 0; i < 1024; i += 4) {
             const col = hexToRgb(this.palettes[0][i / 4]);
+            if (col === null) {
+                continue;
+            }
             imageData.data[i] = col.r;
             imageData.data[i + 1] = col.g;
             imageData.data[i + 2] = col.b;
@@ -311,7 +317,11 @@ export class Playpal {
         var newCanvas = document.createElement("canvas");
         newCanvas.width = imageData.width;
         newCanvas.height = imageData.height;
-        newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+        const ctx = newCanvas.getContext("2d");
+        if (ctx === null) {
+            throw new Error("Could not get 2d context");
+        }
+        ctx.putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);

@@ -35,7 +35,7 @@ export class Graphic {
             }
         }
 
-        var columns = [];
+        var columns: number[] = [];
 
         for (i = 0; i < this.width; i++) {
             columns[i] = dv.getUint32(8 + i * 4, true);
@@ -75,11 +75,17 @@ export class Graphic {
         canvas.width = this.width * scaleSize;
         canvas.height = this.height * scaleSize;
         var context = canvas.getContext("2d");
+        if (context === null) {
+            throw new Error("Could not obtain 2d context");
+        }
         var imageData = context.createImageData(this.width, this.height);
         var size = this.width * this.height;
         for (var i = 0; i < size; i++) {
             if (this.data[i] != -1) {
                 const col = hexToRgb(wad.playpal.palettes[0][this.data[i]]);
+                if (col === null) {
+                    continue;
+                }
                 imageData.data[i * 4 + 0] = col.r;
                 imageData.data[i * 4 + 1] = col.g;
                 imageData.data[i * 4 + 2] = col.b;
@@ -94,7 +100,11 @@ export class Graphic {
         var newCanvas = document.createElement("canvas");
         newCanvas.width = imageData.width;
         newCanvas.height = imageData.height;
-        newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+        const newctx = newCanvas.getContext("2d");
+        if (newctx === null) {
+            throw new Error("Could not obtain 2d context");
+        }
+        newctx.putImageData(imageData, 0, 0);
         context.scale(scaleSize, scaleSize);
         context.imageSmoothingEnabled = false;
         context.drawImage(newCanvas, 0, 0);

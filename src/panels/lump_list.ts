@@ -1,3 +1,5 @@
+import "jquery";
+
 import { Colormap } from "../wad/colormap";
 import * as CONST from "../wad/constants";
 import { Endoom } from "../wad/endoom";
@@ -90,41 +92,51 @@ export function createLumpList(wad, lumpnames) {
                 const playpal = new Playpal();
                 playpal.load(wad.getLump(i));
                 $("#preview").html("");
-                document
-                    .getElementById("preview")
-                    .appendChild(playpal.toCanvas());
+                var preview = document.getElementById("preview");
+                if (preview === null) {
+                    throw new Error("Can't find preview element");
+                }
+                preview.appendChild(playpal.toCanvas());
                 break;
             case CONST.COLORMAP:
                 const colormap = new Colormap();
                 colormap.load(wad.getLump(i));
                 $("#preview").html("");
-                document
-                    .getElementById("preview")
-                    .appendChild(colormap.toCanvas(wad));
+                var preview = document.getElementById("preview");
+                if (preview === null) {
+                    throw new Error("Can't find preview element");
+                }
+                preview.appendChild(colormap.toCanvas(wad));
                 break;
             case CONST.FLAT:
                 const flat = new Flat();
                 flat.load(wad.getLump(i));
                 $("#preview").html("");
-                document
-                    .getElementById("preview")
-                    .appendChild(flat.toCanvas(wad));
+                var preview = document.getElementById("preview");
+                if (preview === null) {
+                    throw new Error("Can't find preview element");
+                }
+                preview.appendChild(flat.toCanvas(wad));
                 break;
             case CONST.GRAPHIC:
                 const graphic = new Graphic();
                 graphic.load(wad.getLump(i));
                 $("#preview").html("");
-                document
-                    .getElementById("preview")
-                    .appendChild(graphic.toCanvas(wad));
+                var preview = document.getElementById("preview");
+                if (preview === null) {
+                    throw new Error("Can't find preview element");
+                }
+                preview.appendChild(graphic.toCanvas(wad));
                 break;
             case CONST.ENDOOM:
                 const endoom = new Endoom();
                 endoom.onLoad = function() {
                     $("#preview").html("");
-                    document
-                        .getElementById("preview")
-                        .appendChild(endoom.toCanvas());
+                    var preview = document.getElementById("preview");
+                    if (preview === null) {
+                        throw new Error("Can't find preview element");
+                    }
+                    preview.appendChild(endoom.toCanvas());
                 };
                 endoom.load(wad.getLump(i));
                 $("#preview").html("");
@@ -142,14 +154,21 @@ export function createLumpList(wad, lumpnames) {
                     window.innerHeight ||
                     document.documentElement.clientHeight ||
                     document.body.clientHeight;
-                document
-                    .getElementById("preview")
-                    .appendChild(
-                        map.toCanvas(
-                            (width - $("#lumpList").width()) * 0.8,
-                            height * 0.8
-                        )
-                    );
+                var preview = document.getElementById("preview");
+                if (preview === null) {
+                    throw new Error("Can't find preview element");
+                }
+                var lumplist = $("#lumpList");
+                if (lumplist == null) {
+                    throw new Error("Can't find lumplist element");
+                }
+                const lumplistWidth = lumplist.width();
+                if (lumplistWidth == null) {
+                    throw new Error("Llumplist has no width");
+                }
+                preview.appendChild(
+                    map.toCanvas((width - lumplistWidth) * 0.8, height * 0.8)
+                );
                 break;
             case CONST.MAPDATA:
                 const mapdata = new MapData();

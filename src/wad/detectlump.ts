@@ -20,8 +20,9 @@ export const detectLumpType = function(index) {
     }
 
     //data-based detection
+    let dv: DataView | null = null;
     if (this.lumps[index].size != 0) {
-        var dv = new DataView(this.data, this.lumps[index].pos);
+        dv = new DataView(this.data, this.lumps[index].pos);
         if (headerCheck(dv, "MThd")) return CONST.MIDI;
         if (headerCheck(dv, "ID3")) return CONST.MP3;
         if (headerCheck(dv, "MUS")) return CONST.MUS;
@@ -85,7 +86,7 @@ export const detectLumpType = function(index) {
         return true;
     }
 
-    if (isDoomGFX(dv, this.lumps[index])) return CONST.GRAPHIC;
+    if (dv && isDoomGFX(dv, this.lumps[index])) return CONST.GRAPHIC;
 
     return "...";
 };
