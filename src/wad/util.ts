@@ -1,6 +1,6 @@
 //utility functions
 
-export function hexToRgb(hex) {
+export function hexToRgb(hex: string) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
         ? {
@@ -11,7 +11,7 @@ export function hexToRgb(hex) {
         : null;
 }
 
-export function readName(dv, pos) {
+export function readName(dv: DataView, pos: number) {
     let output = "";
     for (let j = pos; j < pos + 8; j++) {
         if (dv.getUint8(j) != 0) {

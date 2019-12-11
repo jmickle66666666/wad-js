@@ -7,11 +7,12 @@ Utility for detecting what type a lump is.
 */
 
 import * as CONST from "./constants";
+import { LumpEntry, Wad } from "../wad";
 
-export const detectLumpType = function(index) {
+export const detectLumpType = function(this: Wad, index: number) {
     //TODO: get patches from pnames
 
-    function headerCheck(dataView, header) {
+    function headerCheck(dataView: DataView, header: string) {
         var chrs = header.split("");
         for (var i = 0; i < header.length; i++) {
             if (header.charCodeAt(i) != dataView.getUint8(i)) return false;
@@ -58,7 +59,7 @@ export const detectLumpType = function(index) {
     if (/^D_/.test(name)) return CONST.MUSIC;
 
     // Doom GFX check
-    function isDoomGFX(dv, lump) {
+    function isDoomGFX(dv: DataView, lump: LumpEntry) {
         // first check the dimensions aren't ridiculous
         if (dv.getUint16(0, true) > 4096) return false; // width
         if (dv.getUint16(2, true) > 4096) return false; // height

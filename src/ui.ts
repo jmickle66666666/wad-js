@@ -70,7 +70,7 @@ var updateLoading = function() {
     loading.innerHTML = loadingbar + "]";
 };
 
-export function getIcon(lumpType) {
+export function getIcon(lumpType: string) {
     if (lumpType == CONST.MAP) return '<img src="icons/map.png">';
     if (lumpType == CONST.MAPDATA) return '<img src="icons/mapdata.png">';
     if (lumpType == CONST.TEXT) return '<img src="icons/text.png">';

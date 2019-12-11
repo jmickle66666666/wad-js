@@ -1,6 +1,6 @@
 // Data: Raw data to create preview from
 // return: HTML element containing preview
-export function createAudioPreview(data) {
+export function createAudioPreview(data: ArrayBuffer) {
     // Create parent element
     var element = document.createElement("div");
 

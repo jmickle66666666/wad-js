@@ -47,7 +47,14 @@ export class Endoom {
         this.onLoad = null;
     }
 
-    setTile(_ctx, x, y, i, c1, c2) {
+    setTile(
+        _ctx: CanvasDrawImage,
+        x: number,
+        y: number,
+        i: number,
+        c1: number,
+        c2: number
+    ) {
         var _i = (x % 80) + Math.floor(y / 80);
         this.data[_i].charIndex = i;
         this.data[_i].backColor = c1;
@@ -55,7 +62,7 @@ export class Endoom {
         _ctx.drawImage(this.getChar(i, c1, c2), x * 8, y * 16);
     }
 
-    getChar(i, c1, c2) {
+    getChar(i: number, c1: number, c2: number) {
         var _can = document.createElement("canvas");
         var _ctx = _can.getContext("2d");
         if (_ctx === null) {
@@ -73,7 +80,7 @@ export class Endoom {
         return _can;
     }
 
-    swapcolor(ctex, oc, nc) {
+    swapcolor(ctex: CanvasImageData, oc: number[], nc: number[]) {
         // pull the entire image into an array of pixel data
         var imageData = ctex.getImageData(0, 0, 8, 16);
 
@@ -96,7 +103,7 @@ export class Endoom {
         ctex.putImageData(imageData, 0, 0);
     }
 
-    load(lumpData) {
+    load(lumpData: ArrayBuffer) {
         this.data = [];
 
         if (lumpData != null) {
@@ -163,6 +170,9 @@ export class Endoom {
         canv.width = 8 * 80;
         canv.height = 16 * 25;
         var ctx = canv.getContext("2d");
+        if (ctx === null) {
+            throw new Error("Could not obtain 2d context");
+        }
 
         for (var i = 0; i < 2000; i++) {
             var _c = endoomDat[i].charIndex;
@@ -182,6 +192,9 @@ export class Endoom {
         canv.width = 8 * 80;
         canv.height = 16 * 25;
         var ctx = canv.getContext("2d");
+        if (ctx === null) {
+            throw new Error("Could not obtain 2d context");
+        }
 
         for (var i = 0; i < 2000; i++) {
             var _c = endoomDat[i].charIndex;

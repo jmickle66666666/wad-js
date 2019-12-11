@@ -15,7 +15,7 @@ export class Graphic {
 
         this.data = [];
 
-        function setData(x, y, val) {
+        function setData(x: number, y: number, val: number) {
             console.log(x);
             console.log(y);
             console.log(val);

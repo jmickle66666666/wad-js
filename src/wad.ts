@@ -1,7 +1,7 @@
 import { Playpal } from "./wad/playpal";
 import { detectLumpType } from "./wad/detectlump";
 
-interface LumpEntry {
+export interface LumpEntry {
     pos: number;
     size: number;
     name: string;
@@ -86,10 +86,17 @@ export class Wad {
             }
         };
 
-        var nextChunk = function(e) {
-            offset += e.target.result.byteLength;
+        var nextChunk = function(e: ProgressEvent) {
+            if (e.target === null) {
+                throw new Error("Target is null");
+            }
+            const result = (e.target as typeof FileReader["prototype"]).result;
+            if (!(result instanceof ArrayBuffer)) {
+                throw new Error("Result is not of proper type");
+            }
+            offset += result.byteLength;
 
-            var dataReader = new DataView(e.target.result);
+            var dataReader = new DataView(result);
 
             for (var i = 0; i < dataReader.byteLength / 16; i++) {
                 var p = i * 16;

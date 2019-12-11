@@ -625,7 +625,7 @@ class HexenLinedef {
     }
 }
 
-const DoomThingGroups = {
+const DoomThingGroups: { [key: string]: number[] } = {
     Monsters: [
         68,
         64,
@@ -667,7 +667,7 @@ const DoomThingGroups = {
     Keys: [5, 40, 13, 38, 6, 39]
 };
 
-const DoomThingTable = {
+const DoomThingTable: { [key: string]: number } = {
     zombie: 3004,
     sergeant: 9,
     commando: 65,
@@ -781,7 +781,7 @@ const DoomThingTable = {
     barrel: 2035
 };
 
-const Doom2DefaultMusic = {
+const Doom2DefaultMusic: { [key: string]: string } = {
     MAP01: "D_RUNNIN",
     MAP02: "D_STALKS",
     MAP03: "D_COUNTD",

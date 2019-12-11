@@ -1,7 +1,7 @@
 // Data: Raw data to create preview from
 // return: HTML element containing preview
 
-export function createTextPreview(text) {
+export function createTextPreview(text: string) {
     var textEl = document.createElement("div");
     textEl.id = "textPreview";
     const textnode = document.createTextNode(text);

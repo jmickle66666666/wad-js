@@ -8,6 +8,7 @@ import { Graphic } from "../wad/graphic";
 import { MapData } from "../wad/mapdata";
 import { mus2midi } from "../wad/mus2midi";
 import { Playpal } from "../wad/playpal";
+import { Wad } from "../wad";
 
 import { createAudioPreview } from "./audio";
 import { createImagePreview } from "./image";
@@ -15,7 +16,7 @@ import { createMIDIPreview } from "./midi";
 import { createTextPreview } from "./text";
 import { getIcon } from "../ui";
 
-function makeUL(array) {
+function makeUL(array: string[]) {
     // Create the list element:
     var list = document.createElement("ol");
     list.id = "lumpUL";
@@ -41,9 +42,9 @@ function makeUL(array) {
     return list;
 }
 
-export function createLumpList(wad, lumpnames) {
+export function createLumpList(wad: Wad, lumpnames: string[]) {
     for (var i = 0; i < wad.lumps.length; i++) {
-        lumpnames.push([wad.detectLumpType(i), wad.lumps[i].name]);
+        lumpnames.push(wad.detectLumpType(i), wad.lumps[i].name);
     }
 
     $("#lumpTable").show();
@@ -76,9 +77,11 @@ export function createLumpList(wad, lumpnames) {
                 break;
             case CONST.MUS:
                 $("#preview").html("");
-                $("#preview").append(
-                    createMIDIPreview(mus2midi(wad.getLump(i)))
-                );
+                const midi = mus2midi(wad.getLump(i));
+                if (midi === false) {
+                    throw new Error("Could not convert MUS to MIDI");
+                }
+                $("#preview").append(createMIDIPreview(midi));
                 break;
             case CONST.MIDI:
                 $("#preview").html("");

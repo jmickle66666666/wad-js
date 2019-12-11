@@ -3,7 +3,7 @@
 // Read a MUS file from a lump data (musinput) and output a MIDI blob
 //
 // Returns ArrayBuffer if successful, false otherwise
-export function mus2midi(musinput) {
+export function mus2midi(musinput: ArrayBuffer) {
     // MUS event codes
     var mus_releasekey = 0x00;
     var mus_presskey = 0x10;
@@ -75,8 +75,8 @@ export function mus2midi(musinput) {
         writeData(midiHeaderData);
     }
 
-    var musDataView;
-    var musDataPosition;
+    var musDataView: DataView | null = null;
+    var musDataPosition: number | null = null;
 
     // Constants
     var NUM_CHANNELS = 16;
@@ -108,7 +108,7 @@ export function mus2midi(musinput) {
     var queuedtime = 0;
 
     // Counter for the length of the track
-    var tracksize;
+    var tracksize: number = 0;
 
     var controller_map = [
         0x00,
@@ -137,8 +137,8 @@ export function mus2midi(musinput) {
     // Wrapper function to work like slade's memchunk.write()
     // I'm so lazy
     var position = 0;
-    var dataToWrite = [];
-    function writeData(bytes) {
+    var dataToWrite: number[] = [];
+    function writeData(bytes: number[]) {
         dataToWrite = dataToWrite.concat(bytes);
     }
 
@@ -153,7 +153,7 @@ export function mus2midi(musinput) {
     }
 
     // Write timestamp to a MIDI file.
-    function writeTime(time) {
+    function writeTime(time: number) {
         var buffer = time & 0x7f;
         var writeval;
 
@@ -189,7 +189,7 @@ export function mus2midi(musinput) {
     }
 
     // Write a key press event
-    function writePressKey(channel, key, velocity) {
+    function writePressKey(channel: number, key: number, velocity: number) {
         // Write queued time
         writeTime(queuedtime);
 
@@ -209,7 +209,7 @@ export function mus2midi(musinput) {
     }
 
     // Write a key release event
-    function writeReleaseKey(channel, key) {
+    function writeReleaseKey(channel: number, key: number) {
         // Write queued time
         writeTime(queuedtime);
 
@@ -229,7 +229,7 @@ export function mus2midi(musinput) {
     }
 
     // Write a pitch wheel/bend event
-    function writePitchWheel(channel, wheel) {
+    function writePitchWheel(channel: number, wheel: number) {
         // Write queued time
         writeTime(queuedtime);
 
@@ -246,7 +246,7 @@ export function mus2midi(musinput) {
     }
 
     // Write a patch change event
-    function writeChangePatch(channel, patch) {
+    function writeChangePatch(channel: number, patch: number) {
         // Write queued time
         writeTime(queuedtime);
 
@@ -260,7 +260,11 @@ export function mus2midi(musinput) {
     }
 
     // Write a valued controller change event
-    function writeChangeController_Valued(channel, control, value) {
+    function writeChangeController_Valued(
+        channel: number,
+        control: number,
+        value: number
+    ) {
         // Write queued time
         writeTime(queuedtime);
 
@@ -278,7 +282,7 @@ export function mus2midi(musinput) {
     }
 
     // Write a valueless controller change event
-    function writeChangeController_Valueless(channel, control) {
+    function writeChangeController_Valueless(channel: number, control: number) {
         writeChangeController_Valued(channel, control, 0);
     }
 
@@ -314,7 +318,7 @@ export function mus2midi(musinput) {
     }
 
     // Given a MUS channel number, get the MIDI channel number to use in the outputted file.
-    function getMIDIChannel(mus_channel) {
+    function getMIDIChannel(mus_channel: number) {
         // Find the MIDI channel to use for this MUS channel.
         // MUS channel 15 is the percusssion channel.
 
@@ -332,7 +336,7 @@ export function mus2midi(musinput) {
         }
     }
 
-    function readMusHeader(dataView) {
+    function readMusHeader(dataView: DataView) {
         var output = Object.create(musheader);
 
         for (var i = 0; i < 4; i++) {
@@ -347,7 +351,7 @@ export function mus2midi(musinput) {
         return output;
     }
 
-    function convertMusToMidi(musinput) {
+    function convertMusToMidi(musinput: ArrayBuffer) {
         // master dataview for input mus
         musDataView = new DataView(musinput);
         musDataPosition = 0;
@@ -356,6 +360,12 @@ export function mus2midi(musinput) {
         var startTime = Date.now();
 
         function getMusByte8() {
+            if (musDataView === null) {
+                throw new Error("musDataView is null");
+            }
+            if (musDataPosition === null) {
+                throw new Error("musDataPosition is null");
+            }
             var output = musDataView.getUint8(musDataPosition);
             musDataPosition += 1;
             //console.log(output);

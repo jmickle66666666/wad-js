@@ -23,7 +23,8 @@
         // ArrayBuffer.
         "target": "ES2015",
         // Strictness checks.
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "noImplicitAny": true
     },
     "include": [
         // Tell the compiler where to look for our source files.  This is
