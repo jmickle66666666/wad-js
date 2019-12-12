@@ -24,7 +24,9 @@
         "target": "ES2015",
         // Strictness checks.
         "strictNullChecks": true,
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictPropertyInitialization": true
     },
     "include": [
         // Tell the compiler where to look for our source files.  This is

@@ -8,8 +8,8 @@ export interface LumpEntry {
 }
 
 export class Wad {
-    onProgress: () => void;
-    onLoad: () => void;
+    onProgress: (() => void) | null;
+    onLoad: (() => void) | null;
     ident: string;
     numlumps: number;
     dictpos: number;
@@ -22,8 +22,18 @@ export class Wad {
     chunkReaderBlock: ((x: number, y: number, z: File) => void) | null;
 
     constructor() {
+        this.onProgress = null;
+        this.onLoad = null;
         this.ident = "";
+        this.numlumps = 0;
+        this.dictpos = 0;
+        this.data = new ArrayBuffer(0);
+        this.lumps = [];
+        this.playpal = new Playpal();
+        this.errormsg = "";
+
         this.detectLumpType = detectLumpType;
+        this.chunkReaderBlock = null;
     }
 
     error(msg: string): void {
@@ -72,7 +82,9 @@ export class Wad {
                 self.ident += String.fromCharCode(headerReader.getUint8(i));
             if (self.ident != "IWAD" && self.ident != "PWAD") {
                 self.error("Not a valid WAD file.");
-                self.onLoad();
+                if (self.onLoad !== null) {
+                    self.onLoad();
+                }
             } else {
                 self.numlumps = headerReader.getInt32(4, true);
                 self.dictpos = headerReader.getInt32(8, true);
@@ -118,8 +130,12 @@ export class Wad {
             }
 
             if (offset >= blob.size) {
-                self.onProgress();
-                self.onLoad();
+                if (self.onProgress !== null) {
+                    self.onProgress();
+                }
+                if (self.onLoad !== null) {
+                    self.onLoad();
+                }
                 self.playpal = new Playpal();
                 const playpal = self.getLumpByName("PLAYPAL");
                 if (playpal !== null) {

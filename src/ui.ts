@@ -4,7 +4,7 @@ import * as CONST from "./wad/constants";
 
 var self = this;
 var errormsg: string | null = null;
-var lumpnames = ["a", "b", "c"];
+var lumpnames: string[][] = [];
 var fileInput = document.getElementById("fileInput") as HTMLInputElement;
 var fileDisplayArea = document.getElementById("test");
 var lumpList = null;
@@ -60,6 +60,9 @@ fileInput.addEventListener("change", function(e) {
 var updateLoading = function() {
     progress++;
     var bar = (36 * progress) / ((wad.numlumps * 16) / 128);
+    if (!isFinite(bar)) {
+        bar = 5;
+    }
     var loadingbar = "[";
     for (var i = 0; i < bar; i++) loadingbar += ".";
     for (i = bar; i < 36; i++) loadingbar += "&nbsp;";

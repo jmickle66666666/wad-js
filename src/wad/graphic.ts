@@ -8,6 +8,14 @@ export class Graphic {
     xOffset: number;
     yOffset: number;
 
+    constructor() {
+        this.data = [];
+        this.width = 0;
+        this.height = 0;
+        this.xOffset = 0;
+        this.yOffset = 0;
+    }
+
     load(lumpData: ArrayBuffer): void {
         var i;
         var j;
@@ -15,13 +23,13 @@ export class Graphic {
 
         this.data = [];
 
-        function setData(x: number, y: number, val: number) {
+        const setData = (x: number, y: number, val: number) => {
             console.log(x);
             console.log(y);
             console.log(val);
             console.log(y * this.width + x);
             this.data[y * this.width + x] = val;
-        }
+        };
 
         this.width = dv.getUint16(0, true);
         this.height = dv.getUint16(2, true);

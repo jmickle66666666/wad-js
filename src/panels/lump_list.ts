@@ -16,7 +16,7 @@ import { createMIDIPreview } from "./midi";
 import { createTextPreview } from "./text";
 import { getIcon } from "../ui";
 
-function makeUL(array: string[]) {
+function makeUL(array: string[][]) {
     // Create the list element:
     var list = document.createElement("ol");
     list.id = "lumpUL";
@@ -42,9 +42,9 @@ function makeUL(array: string[]) {
     return list;
 }
 
-export function createLumpList(wad: Wad, lumpnames: string[]) {
+export function createLumpList(wad: Wad, lumpnames: string[][]) {
     for (var i = 0; i < wad.lumps.length; i++) {
-        lumpnames.push(wad.detectLumpType(i), wad.lumps[i].name);
+        lumpnames.push([wad.detectLumpType(i), wad.lumps[i].name]);
     }
 
     $("#lumpTable").show();

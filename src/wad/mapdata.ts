@@ -18,15 +18,15 @@ export class MapData {
     sectors: Sector[];
     reject: null;
     blockmap: null;
-    wad: Wad;
+    wad: Wad | null;
 
-    thingTable: ThingTable;
+    thingTable: ThingTable | null;
 
     // map information
 
     name: string;
     music: string;
-    format: "Doom" | "Hexen" | "UDMF";
+    format: "Doom" | "Hexen" | "UDMF" | null;
 
     //boundaries
 
@@ -36,6 +36,29 @@ export class MapData {
     right: number;
 
     //functions
+
+    constructor() {
+        this.things = [];
+        this.vertexes = [];
+        this.linedefs = [];
+        this.sidedefs = [];
+        this.segs = [];
+        this.ssectors = [];
+        this.nodes = [];
+        this.sectors = [];
+        this.wad = null;
+
+        this.thingTable = null;
+
+        this.name = "";
+        this.music = "";
+        this.format = null;
+
+        this.top = 0;
+        this.left = 0;
+        this.bottom = 0;
+        this.right = 0;
+    }
 
     load(wad: Wad, mapname: string): void {
         const mapLumpIndex = wad.getLumpIndexByName(mapname);
@@ -380,6 +403,10 @@ export class MapData {
         width: number,
         height: number
     ): HTMLCanvasElement | HTMLDivElement {
+        if (this.wad === null) {
+            throw new Error("Cant generate canvas with no WAD loaded");
+        }
+
         // Early-out if it is not a Doom format map.
         if (this.format == "UDMF") {
             var output = document.createElement("div");
@@ -507,11 +534,24 @@ class Thing {
     angle: number;
     type: number;
     flags: number;
+
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.angle = 0;
+        this.type = 0;
+        this.flags = 0;
+    }
 }
 
 class Vertex {
     x: number;
     y: number;
+
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+    }
 }
 
 class Linedef {
@@ -522,6 +562,16 @@ class Linedef {
     tag: number;
     right: number;
     left: number;
+
+    constructor() {
+        this.vx1 = 0;
+        this.vx2 = 0;
+        this.flags = 0;
+        this.action = 0;
+        this.tag = 0;
+        this.right = 0;
+        this.left = 0;
+    }
 
     getVx1(mapdata: MapData): Vertex {
         return mapdata.vertexes[this.vx1];
@@ -539,6 +589,15 @@ class Sidedef {
     lower: string;
     middle: string;
     sector: number;
+
+    constructor() {
+        this.xOffset = 0;
+        this.yOffset = 0;
+        this.upper = "";
+        this.lower = "";
+        this.middle = "";
+        this.sector = 0;
+    }
 }
 
 class Seg {
@@ -548,11 +607,25 @@ class Seg {
     linedef: number;
     direction: number;
     offset: number;
+
+    constructor() {
+        this.vx1 = 0;
+        this.vx2 = 0;
+        this.angle = 0;
+        this.linedef = 0;
+        this.direction = 0;
+        this.offset = 0;
+    }
 }
 
 class Subsector {
     segCount: number;
     first: number;
+
+    constructor() {
+        this.segCount = 0;
+        this.first = 0;
+    }
 }
 
 interface NodeBounds {
@@ -571,6 +644,17 @@ class Node {
     boundsLeft: NodeBounds;
     childRight: number;
     childLeft: number;
+
+    constructor() {
+        this.partitionX = 0;
+        this.partitionY = 0;
+        this.changeX = 0;
+        this.changeY = 0;
+        this.boundsRight = { top: 0, bottom: 0, left: 0, right: 0 };
+        this.boundsLeft = { top: 0, bottom: 0, left: 0, right: 0 };
+        this.childRight = 0;
+        this.childLeft = 0;
+    }
 }
 
 class Sector {
@@ -581,6 +665,16 @@ class Sector {
     light: number;
     type: number;
     tag: number;
+
+    constructor() {
+        this.zFloor = 0;
+        this.zCeil = 0;
+        this.floorFlat = "";
+        this.ceilFlat = "";
+        this.light = 0;
+        this.type = 0;
+        this.tag = 0;
+    }
 }
 
 class Reject {}
@@ -599,6 +693,14 @@ class HexenThing {
     args: number[];
 
     constructor() {
+        this.tid = 0;
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+        this.angle = 0;
+        this.type = 0;
+        this.flags = 0;
+        this.special = 0;
         this.args = [];
     }
 }
@@ -613,7 +715,13 @@ class HexenLinedef {
     left: number;
 
     constructor() {
+        this.vx1 = 0;
+        this.vx2 = 0;
+        this.flags = 0;
+        this.action = 0;
         this.args = [];
+        this.right = 0;
+        this.left = 0;
     }
 
     getVx1(mapdata: MapData): Vertex {

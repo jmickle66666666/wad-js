@@ -4,6 +4,10 @@ import { Wad } from "../wad";
 export class Flat {
     data: number[];
 
+    constructor() {
+        this.data = [];
+    }
+
     load(lumpData: ArrayBuffer): void {
         var dv = new DataView(lumpData);
         this.data = [];

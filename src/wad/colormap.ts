@@ -4,6 +4,10 @@ import { Wad } from "../wad";
 export class Colormap {
     colormaps: number[][];
 
+    constructor() {
+        this.colormaps = [];
+    }
+
     load(lumpData: ArrayBuffer): void {
         var dv = new DataView(lumpData);
         this.colormaps = [];
