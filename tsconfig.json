@@ -17,16 +17,13 @@
         "outDir": "dist",
         // Enable source map generation.
         "sourceMap": true,
+        // Turn on all strictness checks.
+        "strict": true,
         // Target version of JavaScript for generated code.  Note that this is
         // only basic transpilation and does not polyfill features like Promise
         // or Map.  Thus, we target ES2015 since there is a dependency on
         // ArrayBuffer.
-        "target": "ES2015",
-        // Strictness checks.
-        "strictNullChecks": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "strictPropertyInitialization": true
+        "target": "ES2015"
     },
     "include": [
         // Tell the compiler where to look for our source files.  This is
