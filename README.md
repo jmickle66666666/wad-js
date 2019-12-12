@@ -61,7 +61,7 @@ In your HTML, any standard file input such as:
 And create a WAD object, and load the file like this:
 
 ```
-var wad = Object.create(Wad); // Create a new WAD object to load our file into
+var wad = new Wad(); // Create a new WAD object to load our file into
 
 // Create a callback function when loading is complete
 wad.onLoad = function() {
@@ -80,7 +80,7 @@ fileInput.addEventListener('change', function(e) {
 Create a WAD object and load the URL
 
 ```
-var wad = Object.create(Wad); // Create a new WAD object to load our file into
+var wad = new Wad(); // Create a new WAD object to load our file into
 
 // Create a callback function when loading is complete
 wad.onLoad = function() {
