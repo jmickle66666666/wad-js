@@ -1,52 +1,71 @@
-const path = require('path');
+const path = require("path");
 
 const wad = {
-    name: 'wad',
-    devtool: 'source-map',
+    name: "wad",
+    devtool: "source-map",
     entry: {
-        wad: './src/wad.ts',
+        wad: "./src/wad/index.ts"
     },
     mode: "production",
     module: {
-        rules: [{
-            exclude: /node_modules/,
-            test: /\.(j|t)s$/,
-            use: 'ts-loader'
-        }]
+        rules: [
+            {
+                include: [path.resolve(__dirname, "src/wad")],
+                test: /\.(j|t)s$/,
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            configFile: "tsconfig.wad.json"
+                        }
+                    }
+                ]
+            }
+        ]
     },
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: "wad.js",
+        library: "wadJS",
+        path: path.resolve(__dirname, "dist")
     },
     resolve: {
-        extensions: ['.js', '.ts']
+        extensions: [".js", ".ts"]
     }
 };
 
-const ui = {
-    name: 'ui',
-    devtool: 'source-map',
+/* const ui = {
+    name: "ui",
+    devtool: "source-map",
     entry: {
-        ui: './src/ui.ts',
+        ui: "./src/ui/index.ts"
     },
     externals: {
         jquery: "jQuery",
     },
     mode: "production",
     module: {
-        rules: [{
-            exclude: /node_modules/,
-            test: /\.(j|t)s$/,
-            use: 'ts-loader'
-        }]
+        rules: [
+            {
+                include: [path.resolve(__dirname, "src/ui")],
+                test: /\.(j|t)s$/,
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            configFile: "tsconfig.ui.json"
+                        }
+                    }
+                ]
+            }
+        ]
     },
     output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'public/dist'),
+        filename: "ui.js",
+        path: path.resolve(__dirname, "public/dist")
     },
     resolve: {
-        extensions: ['.js', '.ts']
+        extensions: [".js", ".ts"]
     }
-};
+}; */
 
-module.exports = [wad, ui];
+module.exports = [wad];

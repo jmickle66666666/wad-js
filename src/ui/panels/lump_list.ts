@@ -1,14 +1,14 @@
 import "jquery";
 
-import { Colormap } from "../wad/colormap";
-import * as CONST from "../wad/constants";
-import { Endoom } from "../wad/endoom";
-import { Flat } from "../wad/flat";
-import { Graphic } from "../wad/graphic";
-import { MapData } from "../wad/mapdata";
-import { mus2midi } from "../wad/mus2midi";
-import { Playpal } from "../wad/playpal";
-import { Wad } from "../wad";
+import { Colormap } from "wad/colormap";
+import * as CONST from "wad/constants";
+import { Endoom } from "wad/endoom";
+import { Flat } from "wad/flat";
+import { Graphic } from "wad/graphic";
+import { MapData } from "wad/mapdata";
+import { mus2midi } from "wad/mus2midi";
+import { Playpal } from "wad/playpal";
+import wadJS from "wad";
 
 import { createAudioPreview } from "./audio";
 import { createImagePreview } from "./image";

@@ -29,6 +29,6 @@
         // Tell the compiler where to look for our source files.  This is
         // necessary because otherwise our .d.ts files are prefixed with
         // 'src'.
-        "src/**/*"
+        "src/wad/**/*.ts"
     ]
 }

@@ -1,5 +1,5 @@
-import { Playpal } from "./wad/playpal";
-import { detectLumpType } from "./wad/detectlump";
+import { Playpal } from "./playpal";
+import { detectLumpType } from "./detectlump";
 
 export interface LumpEntry {
     pos: number;
