@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         // Necessary in order to properly import CommonJS/AMD/UMD modules as
         // ES6 modules.  This seems to be the recommended value in spite of
         // not being default.

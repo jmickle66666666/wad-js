@@ -1,20 +1,13 @@
 import "jquery";
-
-import { Colormap } from "wad/colormap";
-import * as CONST from "wad/constants";
-import { Endoom } from "wad/endoom";
-import { Flat } from "wad/flat";
-import { Graphic } from "wad/graphic";
-import { MapData } from "wad/mapdata";
-import { mus2midi } from "wad/mus2midi";
-import { Playpal } from "wad/playpal";
 import wadJS from "wad";
 
 import { createAudioPreview } from "./audio";
 import { createImagePreview } from "./image";
 import { createMIDIPreview } from "./midi";
 import { createTextPreview } from "./text";
-import { getIcon } from "../ui";
+import { getIcon } from "../index";
+
+const CONST = wadJS;
 
 function makeUL(array: string[][]) {
     // Create the list element:
@@ -42,7 +35,7 @@ function makeUL(array: string[][]) {
     return list;
 }
 
-export function createLumpList(wad: Wad, lumpnames: string[][]) {
+export function createLumpList(wad: wadJS.Wad, lumpnames: string[][]) {
     for (var i = 0; i < wad.lumps.length; i++) {
         lumpnames.push([wad.detectLumpType(i), wad.lumps[i].name]);
     }
@@ -77,7 +70,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 break;
             case CONST.MUS:
                 $("#preview").html("");
-                const midi = mus2midi(wad.getLump(i));
+                const midi = wadJS.mus2midi(wad.getLump(i));
                 if (midi === false) {
                     throw new Error("Could not convert MUS to MIDI");
                 }
@@ -92,7 +85,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 $("#preview").append(createTextPreview(wad.getLumpAsText(i)));
                 break;
             case CONST.PLAYPAL:
-                const playpal = new Playpal();
+                const playpal = new wadJS.Playpal();
                 playpal.load(wad.getLump(i));
                 $("#preview").html("");
                 var preview = document.getElementById("preview");
@@ -102,7 +95,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 preview.appendChild(playpal.toCanvas());
                 break;
             case CONST.COLORMAP:
-                const colormap = new Colormap();
+                const colormap = new wadJS.Colormap();
                 colormap.load(wad.getLump(i));
                 $("#preview").html("");
                 var preview = document.getElementById("preview");
@@ -112,7 +105,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 preview.appendChild(colormap.toCanvas(wad));
                 break;
             case CONST.FLAT:
-                const flat = new Flat();
+                const flat = new wadJS.Flat();
                 flat.load(wad.getLump(i));
                 $("#preview").html("");
                 var preview = document.getElementById("preview");
@@ -122,7 +115,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 preview.appendChild(flat.toCanvas(wad));
                 break;
             case CONST.GRAPHIC:
-                const graphic = new Graphic();
+                const graphic = new wadJS.Graphic();
                 graphic.load(wad.getLump(i));
                 $("#preview").html("");
                 var preview = document.getElementById("preview");
@@ -132,7 +125,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 preview.appendChild(graphic.toCanvas(wad));
                 break;
             case CONST.ENDOOM:
-                const endoom = new Endoom();
+                const endoom = new wadJS.Endoom();
                 endoom.onLoad = function() {
                     $("#preview").html("");
                     var preview = document.getElementById("preview");
@@ -146,7 +139,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
 
                 break;
             case CONST.MAP:
-                const map = new MapData();
+                const map = new wadJS.MapData();
                 map.load(wad, wad.lumps[i].name);
                 $("#preview").html("");
                 var width =
@@ -174,7 +167,7 @@ export function createLumpList(wad: Wad, lumpnames: string[][]) {
                 );
                 break;
             case CONST.MAPDATA:
-                const mapdata = new MapData();
+                const mapdata = new wadJS.MapData();
                 switch (wad.lumps[i].name) {
                     case "VERTEXES":
                         mapdata.parseVertexes(wad.getLump(i));

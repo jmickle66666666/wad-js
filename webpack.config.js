@@ -26,6 +26,7 @@ const wad = {
     output: {
         filename: "wad.js",
         library: "wadJS",
+        libraryTarget: "umd",
         path: path.resolve(__dirname, "dist")
     },
     resolve: {
@@ -33,7 +34,7 @@ const wad = {
     }
 };
 
-/* const ui = {
+const ui = {
     name: "ui",
     devtool: "source-map",
     entry: {
@@ -41,6 +42,7 @@ const wad = {
     },
     externals: {
         jquery: "jQuery",
+        wad: "wadJS",
     },
     mode: "production",
     module: {
@@ -66,6 +68,6 @@ const wad = {
     resolve: {
         extensions: [".js", ".ts"]
     }
-}; */
+};
 
-module.exports = [wad];
+module.exports = [wad, ui];

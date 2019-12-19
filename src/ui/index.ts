@@ -1,8 +1,9 @@
 import $ from "jquery";
 import wadJS from "wad";
-import * as CONST from "wad/constants";
 
 import { createLumpList } from "./panels/lump_list";
+
+const CONST = wadJS;
 
 var self = this;
 var errormsg: string | null = null;

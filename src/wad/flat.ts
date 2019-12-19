@@ -1,5 +1,5 @@
 import { hexToRgb } from "./util";
-import { Wad } from "../wad";
+import { Wad } from "./wad";
 
 export class Flat {
     data: number[];
