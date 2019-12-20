@@ -5,16 +5,17 @@
     "author": "jmickle66666666",
     "README": "Readme.md",
     "scripts": {
-        "build": "webpack",
-        "build-dev": "webpack --mode=development",
-        "prettier": "prettier --write \"src/**/*.ts\""
+        "build": "tsc --build tsconfig.wad.json",
+        "build-dist": "rollup --config rollup.wad.config.js",
+        "build-ui": "rollup --config rollup.ui.config.js",
+        "prettier": "prettier --write \"src/**/*.ts\" \"*.config.js\" \"tsconfig.*.json\" package.json"
     },
     "devDependencies": {
+        "@rollup/plugin-typescript": "^2.0.1",
         "@types/jquery": "^3.3.31",
         "prettier": "1.19.1",
-        "ts-loader": "^6.2.1",
-        "typescript": "^3.7.2",
-        "webpack": "^4.41.2",
-        "webpack-cli": "^3.3.10"
+        "rollup": "^1.27.13",
+        "tslib": "^1.10.0",
+        "typescript": "^3.7.2"
     }
 }

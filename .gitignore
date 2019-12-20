@@ -47,6 +47,7 @@ webix/
 *.swp
 
 /node_modules/
+/lib/
 /dist/
 /public/dist/
 

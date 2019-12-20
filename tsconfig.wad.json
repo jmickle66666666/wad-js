@@ -7,14 +7,15 @@
         // ES6 modules.  This seems to be the recommended value in spite of
         // not being default.
         "esModuleInterop": true,
+        // Module format used by node.js.
+        "module": "CommonJS",
         // Use node.js module resolution.  In essence, this means that relative
         // imports are resolved relative to the current file, and non-relative
         // imports are searched for in /node_modules.  This seems to be the
         // recommended value in spite of not being default.
         "moduleResolution": "node",
-        // Output directory.  This is mostly to keep VSCode happy, because
-        // webpack handles output directories for us.
-        "outDir": "dist",
+        // Output directory for unbundled library.
+        "outDir": "lib",
         // Enable source map generation.
         "sourceMap": true,
         // Turn on all strictness checks.

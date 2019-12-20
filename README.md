@@ -32,6 +32,8 @@ Current features include:
 
 ## Development
 
+**NOTE: This stuff isn't accurate anymore, working on a better system...**
+
 Simply clone this repository and run:
 
 ```

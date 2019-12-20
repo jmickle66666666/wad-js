@@ -14,7 +14,7 @@
         // webpack handles output directories for us.
         "outDir": "public/dist",
         "paths": {
-            "wad": ["dist"]
+            "wad": ["lib"]
         },
         // Enable source map generation.
         "sourceMap": true,
