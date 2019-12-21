@@ -1,4 +1,4 @@
-const typescript = require("@rollup/plugin-typescript");
+const typescript = require("rollup-plugin-typescript2");
 
 module.exports = {
     input: "src/wad/index.ts",
@@ -17,7 +17,13 @@ module.exports = {
     ],
     plugins: [
         typescript({
-            tsconfig: "tsconfig.wad.json"
+            tsconfig: "src/wad/tsconfig.json",
+            tsconfigOverride: {
+                compilerOptions: {
+                    declaration: false,
+                    module: "ESNext"
+                }
+            }
         })
     ]
 };

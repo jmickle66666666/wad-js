@@ -15,7 +15,7 @@
         // recommended value in spite of not being default.
         "moduleResolution": "node",
         // Output directory for unbundled library.
-        "outDir": "lib",
+        "outDir": "../../lib",
         // Enable source map generation.
         "sourceMap": true,
         // Turn on all strictness checks.
@@ -30,6 +30,6 @@
         // Tell the compiler where to look for our source files.  This is
         // necessary because otherwise our .d.ts files are prefixed with
         // 'src'.
-        "src/wad/**/*.ts"
+        "**/*.ts"
     ]
 }

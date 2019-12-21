@@ -14,7 +14,7 @@
         // webpack handles output directories for us.
         "outDir": "public/dist",
         "paths": {
-            "wad": ["lib"]
+            "wad": ["../../lib"]
         },
         // Enable source map generation.
         "sourceMap": true,
@@ -30,6 +30,6 @@
         // Tell the compiler where to look for our source files.  This is
         // necessary because otherwise our .d.ts files are prefixed with
         // 'src'.
-        "src/ui/**/*.ts"
+        "**/*.ts"
     ]
 }

@@ -5,16 +5,16 @@
     "author": "jmickle66666666",
     "README": "Readme.md",
     "scripts": {
-        "build": "tsc --build tsconfig.wad.json",
+        "build": "tsc --project src/wad/tsconfig.json",
         "build-dist": "rollup --config rollup.wad.config.js",
         "build-ui": "rollup --config rollup.ui.config.js",
-        "prettier": "prettier --write \"src/**/*.ts\" \"*.config.js\" \"tsconfig.*.json\" package.json"
+        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.json\" \"*.config.js\" package.json"
     },
     "devDependencies": {
-        "@rollup/plugin-typescript": "^2.0.1",
         "@types/jquery": "^3.3.31",
         "prettier": "1.19.1",
         "rollup": "^1.27.13",
+        "rollup-plugin-typescript2": "^0.25.3",
         "tslib": "^1.10.0",
         "typescript": "^3.7.3"
     }

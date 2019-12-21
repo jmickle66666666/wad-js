@@ -1,4 +1,4 @@
-const typescript = require("@rollup/plugin-typescript");
+const typescript = require("rollup-plugin-typescript2");
 
 module.exports = {
     external: ["jquery", "wad"],
@@ -16,7 +16,7 @@ module.exports = {
     ],
     plugins: [
         typescript({
-            tsconfig: "tsconfig.ui.json"
+            tsconfig: "src/ui/tsconfig.json"
         })
     ]
 };
