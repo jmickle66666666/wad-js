@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "repository": "https://github.com/jmickle66666666/wad-js",
     "author": "jmickle66666666",
-    "README": "Readme.md",
+    "license": "MIT",
     "scripts": {
         "build": "tsc --project src/wad/tsconfig.json",
         "build-dist": "node src/build.js dist",

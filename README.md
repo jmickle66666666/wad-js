@@ -32,19 +32,31 @@ Current features include:
 
 ## Development
 
-**NOTE: This stuff isn't accurate anymore, working on a better system...**
-
 Simply clone this repository and run:
 
 ```
 $ npm install
-$ npm run build-dev
 ```
 
-You can also generate a minified version of the library using:
+Depending on what you want to build, there are different ways to build it.
+
+The base library, for use with Node.js, is built using:
 
 ```
 $ npm run build
+```
+
+If you want to build a browser-friendly UMD library or a modern module-friendly
+library, run this:
+
+```
+$ npm run build-dist
+```
+
+If you want to build the test application, run this:
+
+```
+$ npm run build-ui
 ```
 
 If you would like to run the test application locally, download [Caddy](https://caddyserver.com/), extract the Caddy executable to the root of your working copy, and run it. The test app will be accessible at `http://localhost:8080`.
