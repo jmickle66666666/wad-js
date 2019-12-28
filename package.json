@@ -6,9 +6,10 @@
     "README": "Readme.md",
     "scripts": {
         "build": "tsc --project src/wad/tsconfig.json",
-        "build-dist": "rollup --config rollup.wad.config.js",
-        "build-ui": "rollup --config rollup.ui.config.js",
-        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.json\" \"*.config.js\" package.json"
+        "build-dist": "node src/build.js dist",
+        "build-ui": "node src/build.js ui",
+        "clean": "node src/build.js clean",
+        "prettier": "prettier --write \"src/**/*.{j,t}s\" \"src/**/*.json\" \"*.config.js\" package.json"
     },
     "devDependencies": {
         "@types/jquery": "^3.3.31",
