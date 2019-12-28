@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        // Necessary to use "paths".
         "baseUrl": ".",
         // Necessary in order to properly import CommonJS/AMD/UMD modules as
         // ES6 modules.  This seems to be the recommended value in spite of
@@ -13,6 +14,7 @@
         // Output directory.  This is mostly to keep VSCode happy, because
         // webpack handles output directories for us.
         "outDir": "public/dist",
+        // The "wad" library is located in-tree.
         "paths": {
             "wad": ["../../lib"]
         },
