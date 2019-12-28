@@ -1,4 +1,4 @@
-import * as CONST from "./constants";
+import { CONST } from "./constants";
 import { readName } from "./util";
 import { Wad } from "./wad";
 

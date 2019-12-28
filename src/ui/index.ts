@@ -1,9 +1,7 @@
 import $ from "jquery";
-import wadJS from "wad";
+import { CONST, Wad } from "wad";
 
 import { createLumpList } from "./panels/lump_list";
-
-const CONST = wadJS;
 
 var self = this;
 var errormsg: string | null = null;
@@ -20,7 +18,7 @@ $("#loading").hide();
 
 var progress = 0;
 
-var wad = new wadJS.Wad();
+var wad = new Wad();
 
 function initWad() {
     if (errors === null) {
@@ -38,7 +36,7 @@ function initWad() {
     //if (lumpList) lumpList.destructor();
     lumpnames = [];
 
-    wad = new wadJS.Wad();
+    wad = new Wad();
     wad.onProgress = updateLoading;
 
     wad.onLoad = wadOnLoad;

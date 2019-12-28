@@ -6,7 +6,7 @@ Utility for detecting what type a lump is.
 
 */
 
-import * as CONST from "./constants";
+import { CONST } from "./constants";
 import { LumpEntry, Wad } from "./wad";
 
 export const detectLumpType = function(this: Wad, index: number) {
