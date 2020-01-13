@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        // Generate .d.ts files so TypeScript can use this library natively
+        // even when compiled to JavaScript.
+        "declaration": true,
+        // Necessary in order to properly import CommonJS/AMD/UMD modules as
+        // ES6 modules.  This seems to be the recommended value in spite of
+        // not being default.
+        "esModuleInterop": true,
+        // Module format used by node.js.
+        "module": "CommonJS",
+        // Use node.js module resolution.  In essence, this means that relative
+        // imports are resolved relative to the current file, and non-relative
+        // imports are searched for in /node_modules.  This seems to be the
+        // recommended value in spite of not being default.
+        "moduleResolution": "node",
+        // Output directory for unbundled library.
+        "outDir": "../../lib",
+        // Enable source map generation.
+        "sourceMap": true,
+        // Turn on all strictness checks.
+        "strict": true,
+        // Target version of JavaScript for generated code.  Note that this is
+        // only basic transpilation and does not polyfill features like Promise
+        // or Map.  Thus, we target ES2015 since there is a dependency on
+        // ArrayBuffer.
+        "target": "ES2015"
+    },
+    "include": [
+        // Tell the compiler where to look for our source files.  This is
+        // necessary because otherwise our .d.ts files are prefixed with
+        // 'src'.
+        "**/*.ts"
+    ]
+}

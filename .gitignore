@@ -46,7 +46,11 @@ webix/
 
 *.swp
 
-node_modules/
-dist/
-dist/*.bundle.js
-dist/*.map
+/node_modules/
+/lib/
+/dist/
+/public/dist/
+
+# Caddy is useful as a test server
+/caddy
+/caddy.exe
